@@ -11,7 +11,7 @@ pandora-kimetsu/
 ├── packages/            les packages nanos world (à copier dans Packages/ du serveur)
 │   ├── wakfu-rp/        le mode de jeu « Kimetsu RP » (l'identifiant historique est gardé, voir plus bas)
 │   ├── wakfu-loading/   écran de chargement
-│   └── nanos-admin, gmod-props-menu, odm-gear, pandora-cases, pandora-store, fx-showcase-menu   addons
+│   └── nanos-admin, gmod-props-menu, fx-showcase-menu   addons
 ├── server/              Config.example.toml (la partie propre) et le lanceur
 ├── scripts/             sync_packages.py : copie dépôt <-> serveur
 ├── tests/simulation/    tests sans le jeu (faux moteur Lua)
