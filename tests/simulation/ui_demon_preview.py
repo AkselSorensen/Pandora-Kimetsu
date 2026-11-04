@@ -84,6 +84,7 @@ window.addEventListener("load", () => {
 	fire("wakfu:init", JSON.stringify(INIT));
 	fire("wakfu:health", JSON.stringify({ hp: 1220, maxHp: 1330 }));
 	if (scene === "camp") { fire("wakfu:state", JSON.stringify(NOCAMP)); fire("wakfu:campOpen", true); click('.camp-card[data-camp="demon"]'); }
+	else if (scene === "welcome") { fire("wakfu:state", JSON.stringify(DEMON)); fire("wakfu:welcomeOpen", true); }
 	else if (scene === "hud-demon") { fire("wakfu:state", JSON.stringify(DEMON)); fire("wakfu:toast", "Villageois dévoré : chair +40, âmes +4 · palier « Chasseur de nuit »"); }
 	else if (scene === "hud-hungry") { fire("wakfu:state", JSON.stringify(DEMON)); fire("wakfu:demon", JSON.stringify(HUNGRY)); }
 	else if (scene === "devour") { fire("wakfu:state", JSON.stringify(DEMON)); fire("wakfu:devourStart", JSON.stringify({ name: "Villageois", seconds: 30, gain: { flesh: 40, souls: 4, heal: 15, xp: 15 } })); }
@@ -188,7 +189,7 @@ shots = [a for a in args if a != "test"] or ["camp", "hud-demon", "hud-hungry", 
 def run(extra, scene):
     url = (OUT / "index.html").as_uri() + "?scene=" + scene
     return subprocess.run([str(EDGE), "--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=1", "--window-size=1920,1080", "--virtual-time-budget=4000",
-                           "--default-background-color=FF1b2430", *extra, url], check=False, capture_output=True, timeout=120)
+                           "--default-background-color=1B2430FF", *extra, url], check=False, capture_output=True, timeout=120)
 
 
 failed = False

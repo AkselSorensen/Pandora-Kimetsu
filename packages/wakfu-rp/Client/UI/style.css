@@ -1177,3 +1177,30 @@ html.demon #spellbar { bottom: 46px; } /* laisse la place à la mention « Palie
 #camp-confirm[data-camp="slayer"] { border-color: #4aa6e4; background: linear-gradient(180deg, #1e6fb0, #0e3a5c); box-shadow: 0 0 30px rgba(47, 143, 208, 0.4); }
 #camp-confirm:disabled { cursor: default; opacity: 0.45; filter: grayscale(0.6); box-shadow: none; }
 #camp-note { display: flex; align-items: center; gap: 9px; font-size: 15px; color: rgba(239, 227, 208, 0.78); }
+
+/* Écran de bienvenue (planche Figma « Tengen — Bienvenue ») : 1em = 1/120 de la largeur, comme dans l'écran de chargement */
+#welcome { position: fixed; inset: 0; z-index: 60; background: #050204 url("img/kukushibo-bg.png") center center / cover no-repeat; color: #f4eee6; font-family: "Montserrat", "Segoe UI", system-ui, sans-serif; font-size: calc(100vw / 120); overflow: hidden; }
+#wl-glow { position: absolute; right: -6em; top: 2em; width: 62em; height: 62em; border-radius: 50%; background: radial-gradient(circle, rgba(150, 10, 30, 0.85) 0%, rgba(110, 6, 22, 0.5) 38%, rgba(0, 0, 0, 0) 68%); filter: blur(2.4em); }
+#wl-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 40% 50%, transparent 40%, rgba(0, 0, 0, 0.7) 100%); }
+#wl-content { position: absolute; left: 14em; top: 50%; width: 52em; transform: translateY(-50%); }
+#welcome h1 { margin: 0; display: flex; flex-direction: column; font-family: "Montserrat", "Segoe UI Black", "Arial Black", sans-serif; font-weight: 900; font-size: 5.1em; line-height: 0.98; letter-spacing: -0.01em; }
+#welcome h1 .w { color: #fff; }
+#welcome h1 .r { color: #cf1f40; text-shadow: 0 0 2.4em rgba(207, 31, 64, 0.35); }
+#wl-tagline { margin: 1em 0 0; font-size: 1.05em; font-style: italic; color: rgba(244, 238, 230, 0.62); }
+#wl-about { margin: 1.6em 0 0; font-size: 0.95em; line-height: 1.55; color: rgba(244, 238, 230, 0.85); max-width: 49em; }
+#wl-card { margin-top: 2.2em; width: 26em; display: flex; flex-direction: column; gap: 0.6em; font-size: 1em; }
+#wl-name { text-align: center; padding: 0.7em; border-radius: 0.5em; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); font-size: 0.85em; font-weight: 700; color: rgba(244, 238, 230, 0.8); }
+.wl-row { display: flex; justify-content: space-between; align-items: center; padding: 0.65em 0.9em; border-radius: 0.5em; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); font-size: 0.85em; }
+.wl-row .k { display: flex; align-items: center; gap: 0.6em; color: #e9c46a; }
+.wl-row .k.blue { color: #4aa3ff; }
+.wl-row .k.green { color: #3ddc84; }
+.wl-row .k svg { width: 1em; height: 1em; fill: currentColor; }
+.wl-row b { font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.wl-btn { cursor: pointer; padding: 0.85em; border-radius: 0.5em; font: inherit; font-size: 0.85em; font-weight: 800; letter-spacing: 0.04em; }
+.wl-btn.go { color: #3ddc84; background: rgba(61, 220, 132, 0.12); border: 1px solid rgba(61, 220, 132, 0.4); }
+.wl-btn.go:hover { background: rgba(61, 220, 132, 0.22); }
+.wl-btn.alt { color: #d68a1c; background: rgba(214, 138, 28, 0.12); border: 1px solid rgba(214, 138, 28, 0.4); }
+.wl-btn.alt:hover { background: rgba(214, 138, 28, 0.22); }
+
+/* Illustration de droite : fichier facultatif, absent du dépôt (img/welcome-art.webp) ; sans lui l'écran reste propre */
+#wl-art { position: absolute; right: 3em; bottom: 0; height: 100%; aspect-ratio: 923 / 1080; background: url("img/welcome-art.webp") right bottom / contain no-repeat; filter: drop-shadow(0 0 2em rgba(150, 10, 30, 0.5)); }

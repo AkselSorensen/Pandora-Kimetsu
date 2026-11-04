@@ -1076,3 +1076,31 @@ Events.Subscribe("wakfu:devourStart", (payload) => {
 });
 
 Events.Subscribe("wakfu:devourStop", stopDevour);
+
+// Écran de bienvenue (planche « Tengen — Bienvenue ») : le nom, le grade, l'argent viennent de l'état du serveur. Le temps de jeu compte la session en cours
+// (il ne sera cumulé qu'avec la sauvegarde des joueurs, tâche B1).
+const welcomeSince = Date.now();
+
+function welcomeFill() {
+	const state = hud.state || {};
+	$("wl-name").textContent = state.name || "Joueur";
+	$("wl-rank").textContent = state.rank && state.rank.name ? state.rank.name : "-";
+	$("wl-money").textContent = String(state.kamas || 0).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ¥";
+	const minutes = Math.floor((Date.now() - welcomeSince) / 60000);
+	$("wl-time").textContent = minutes >= 60 ? Math.floor(minutes / 60) + "h " + (minutes % 60) + "m" : minutes + "m";
+}
+
+Events.Subscribe("wakfu:welcomeOpen", (open) => {
+	$("welcome").classList.toggle("hidden", !open);
+	if (open) welcomeFill();
+});
+
+Events.Subscribe("wakfu:state", () => {
+	if (!$("welcome").classList.contains("hidden")) welcomeFill();
+});
+
+document.addEventListener("click", (event) => {
+	if ($("welcome").classList.contains("hidden")) return;
+	if (event.target.closest("#wl-start")) Events.Call("wakfu:welcomeStart");
+	else if (event.target.closest("#wl-character")) Events.Call("wakfu:welcomeCharacter");
+});

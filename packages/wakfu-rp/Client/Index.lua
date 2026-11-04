@@ -313,6 +313,54 @@ Events.SubscribeRemote("wakfu:openCamp", function()
 	end
 end)
 
+-- Écran de bienvenue à l'arrivée (planche « Tengen — Bienvenue ») : il bloque les touches comme l'écran de camp (campOpen),
+-- puis « Commencer » ou « Sélection de personnage » le ferment ; sans camp choisi, l'écran de choix du camp suit.
+local welcomeOpen = false
+local knownCamp = nil -- dernier camp reçu dans wakfu:state
+
+local function setWelcome(open)
+	welcomeOpen = open
+	campOpen = open
+	if not open then
+		menuClosedAt = os.clock()
+	end
+	Input.SetInputEnabled(not open)
+	hud:SetVisibility(open and WidgetVisibility.Visible or WidgetVisibility.VisibleNotHitTestable)
+	Input.SetMouseEnabled(open)
+	if open then
+		hud:SetFocus()
+	else
+		hud:RemoveFocus()
+	end
+	toHud("wakfu:welcomeOpen", open)
+end
+
+Events.SubscribeRemote("wakfu:openWelcome", function()
+	if not campOpen then
+		setWelcome(true)
+	end
+end)
+
+hud:Subscribe("wakfu:welcomeStart", function()
+	if welcomeOpen then
+		setWelcome(false)
+		if not knownCamp then
+			setCamp(true)
+		end
+	end
+end)
+
+hud:Subscribe("wakfu:welcomeCharacter", function()
+	if welcomeOpen then
+		setWelcome(false)
+		if not knownCamp then
+			setCamp(true) -- le camp se choisit avant tout le reste
+		else
+			setCreator(true)
+		end
+	end
+end)
+
 hud:Subscribe("wakfu:chooseCamp", function(camp)
 	Events.CallRemote("wakfu:chooseCamp", Reliability.Reliable, camp)
 end)
@@ -569,7 +617,8 @@ end)
 -- Réception des réponses du serveur, affichées par le HUD.
 Events.SubscribeRemote("wakfu:state", function(state)
 	toHud("wakfu:state", state)
-	if campOpen and state.camp then -- le serveur a enregistré le camp : l'écran de choix se ferme
+	knownCamp = state.camp
+	if campOpen and not welcomeOpen and state.camp then -- le serveur a enregistré le camp : l'écran de choix se ferme
 		setCamp(false)
 	end
 end)

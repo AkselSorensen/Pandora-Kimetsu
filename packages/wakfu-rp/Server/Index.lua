@@ -510,8 +510,8 @@ Player.Subscribe("Spawn", onPlayerSpawn)
 Player.Subscribe("Ready", function(player)
 	sendState(player)
 	local state = players[player:GetID()]
-	if state and not state.camp then
-		sendRemote(player, "wakfu:openCamp")
+	if state then
+		sendRemote(player, "wakfu:openWelcome") -- l'écran de bienvenue ouvre ensuite le choix du camp s'il n'est pas fait
 	end
 end)
 
