@@ -1,11 +1,11 @@
-"""Simule (sans le jeu) l'ajout des formes lumineuses dans wakfu-rp : plans, interpolation, lecture côté client, outil d'essai."""
+"""Simule (sans le jeu) l'ajout des formes lumineuses dans kimetsu-pandora : plans, interpolation, lecture côté client, outil d'essai."""
 import sys
 
 from lupa import LuaRuntime
 
 from pathlib import Path
 
-REPO_RP = (Path(__file__).resolve().parents[2] / "packages" / "wakfu-rp").as_posix()
+REPO_RP = (Path(__file__).resolve().parents[2] / "packages" / "kimetsu-pandora").as_posix()
 RP = {"depot": REPO_RP}
 
 FREE_MAGIC = ["Area1", "Area2", "Attack1", "Attack2", "Attack_Line", "Aura", "Buff", "Circle1", "Circle2", "Hit1", "Hit2", "Projectile1",
@@ -298,7 +298,7 @@ return out
 
 failed = False
 for label, root in RP.items():
-    print("== wakfu-rp", label)
+    print("== kimetsu-pandora", label)
     lua = LuaRuntime()
     fake = lua.table_from({pack: lua.table_from(names) for pack, names in FAKE.items()})
     fx = lua.table_from({"pack": FX["pack"], "meshes": lua.table_from(FX["meshes"]), "materials": lua.table_from(FX["materials"])})

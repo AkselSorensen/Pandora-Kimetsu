@@ -1,11 +1,11 @@
-"""Les données réelles du jeu, lues dans le Lua de packages/wakfu-rp/Shared et dans scripts/issues.json : les graphiques ne mentent pas."""
+"""Les données réelles du jeu, lues dans le Lua de packages/kimetsu-pandora/Shared et dans scripts/issues.json : les graphiques ne mentent pas."""
 import json
 from pathlib import Path
 
 from lupa import LuaRuntime
 
 ROOT = Path(__file__).resolve().parents[2]
-SHARED = ROOT / "packages" / "wakfu-rp" / "Shared"
+SHARED = ROOT / "packages" / "kimetsu-pandora" / "Shared"
 _lua = LuaRuntime(unpack_returned_tuples=True)
 _type = _lua.eval("function(x) return type(x) end")
 

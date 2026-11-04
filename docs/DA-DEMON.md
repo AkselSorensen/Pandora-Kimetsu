@@ -2,7 +2,7 @@
 
 **L'idée directrice** : le prédateur de la nuit. Noir teinté de sang, lune rouge, laque sombre et ivoire, kanji gravés comme des sceaux, une lueur rouge qui pulse lentement comme un battement de cœur. Menaçant et élégant, jamais gore.
 
-Le côté pourfendeur aura sa propre direction (bleu glacier) plus tard : ce document ne traite que du démon. Le thème est déjà appliqué dans le HUD (`packages/wakfu-rp/Client/UI/style.css`, classe `html.demon`).
+Le côté pourfendeur aura sa propre direction (bleu glacier) plus tard : ce document ne traite que du démon. Le thème est déjà appliqué dans le HUD (`packages/kimetsu-pandora/Client/UI/style.css`, classe `html.demon`).
 
 ## Couleurs
 

@@ -1,9 +1,9 @@
-"""Génère Shared/Animations.lua (liste des animations des packs) pour le visualiseur d'animations de wakfu-rp.
+"""Génère Shared/Animations.lua (liste des animations des packs) pour le visualiseur d'animations de kimetsu-pandora.
 
     python unreal_tools/gen_anim_list.py
 
 Lit [assets.animations] de l'Assets.toml de chaque pack (séquences A_*, montages AM_*) et écrit un fichier Lua dans chaque
-copie du package wakfu-rp. Un pack qui n'est pas (encore) sur le serveur est ignoré, avec un message. À relancer après un
+copie du package kimetsu-pandora. Un pack qui n'est pas (encore) sur le serveur est ignoré, avec un message. À relancer après un
 nouveau cook, une fois les packs envoyés au serveur par le watcher du master.
 """
 import argparse
@@ -14,8 +14,8 @@ STEAM = Path(r"C:\Program Files (x86)\Steam\steamapps\common")
 PACKS = ["aksel-animations", "scythe"]
 ASSETS = STEAM / "nanos-world-server" / "Assets"
 OUTPUTS = [
-    STEAM / "nanos-world-server" / "Packages" / "wakfu-rp" / "Shared" / "Animations.lua",
-    STEAM / "nanos-world-playtest" / "Server" / "Packages" / "wakfu-rp" / "Shared" / "Animations.lua",
+    STEAM / "nanos-world-server" / "Packages" / "kimetsu-pandora" / "Shared" / "Animations.lua",
+    STEAM / "nanos-world-playtest" / "Server" / "Packages" / "kimetsu-pandora" / "Shared" / "Animations.lua",
 ]
 
 
@@ -61,7 +61,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--pack", action="append", help=f"nom d'un pack d'assets (répétable ; défaut : {', '.join(PACKS)})")
     ap.add_argument("--assets", type=Path, default=ASSETS, help="dossier Assets qui contient les packs")
-    ap.add_argument("--out", type=Path, action="append", help="fichier Lua à écrire (répétable ; défaut : les deux wakfu-rp)")
+    ap.add_argument("--out", type=Path, action="append", help="fichier Lua à écrire (répétable ; défaut : les deux kimetsu-pandora)")
     args = ap.parse_args(argv)
 
     packs = []

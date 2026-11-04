@@ -1,4 +1,4 @@
-"""Génère Shared/VfxAssets.lua : la liste des systèmes de particules cuits, pack par pack, pour wakfu-rp.
+"""Génère Shared/VfxAssets.lua : la liste des systèmes de particules cuits, pack par pack, pour kimetsu-pandora.
 
     python unreal_tools/gen_vfx_assets.py
 
@@ -11,8 +11,8 @@ from pathlib import Path
 
 STEAM = Path(r"C:\Program Files (x86)\Steam\steamapps\common")
 TARGETS = [
-    (STEAM / "nanos-world-playtest" / "Server" / "Packages" / "wakfu-rp" / "Shared" / "VfxAssets.lua", STEAM / "nanos-world-playtest" / "Server" / "Assets"),
-    (STEAM / "nanos-world-server" / "Packages" / "wakfu-rp" / "Shared" / "VfxAssets.lua", STEAM / "nanos-world-server" / "Assets"),
+    (STEAM / "nanos-world-playtest" / "Server" / "Packages" / "kimetsu-pandora" / "Shared" / "VfxAssets.lua", STEAM / "nanos-world-playtest" / "Server" / "Assets"),
+    (STEAM / "nanos-world-server" / "Packages" / "kimetsu-pandora" / "Shared" / "VfxAssets.lua", STEAM / "nanos-world-server" / "Assets"),
 ]
 
 

@@ -174,7 +174,7 @@ def tracking_body(issues, numbers, milestones):
     lines = [
         "Toutes les issues du projet, **dans l'ordre de priorité** : à faire de haut en bas. Les numéros suivent cet ordre.",
         "",
-        "- **Dev A** (`dev-a`) : le jeu et l'interface, surtout `packages/wakfu-rp`.",
+        "- **Dev A** (`dev-a`) : le jeu et l'interface, surtout `packages/kimetsu-pandora`.",
         "- **Dev B** (`dev-b`) : le serveur, le contenu et les outils.",
         "- Les deux développeurs peuvent avancer en parallèle : une issue de Dev A n'attend Dev B que si elle l'écrit dans « Dépend de ».",
         "- Cases cochées = fait (GitHub les coche aussi quand l'issue est fermée).",

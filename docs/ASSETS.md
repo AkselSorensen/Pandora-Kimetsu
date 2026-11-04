@@ -22,8 +22,8 @@ Le nom d'un pack nanos vient du dossier de plus haut niveau de `Content/` dans U
 
 ## Ce qui n'est volontairement pas dans le dépôt
 
-- `packages/wakfu-loading/bg.webm` : la vidéo de fond de l'écran de chargement (16 Mo). Dépose la tienne à cet endroit pour activer l'écran.
-- `packages/wakfu-rp/Client/UI/img/reroll/` et `img/logo.png` : des images de l'ancien projet Wakfu, plus utilisées par le code. Elles sont ignorées par `.gitignore` et peuvent être supprimées.
+- `packages/kimetsu-pandora-loading/bg.webm` : la vidéo de fond de l'écran de chargement (16 Mo). Dépose la tienne à cet endroit pour activer l'écran.
+- `packages/kimetsu-pandora/Client/UI/img/reroll/` et `img/logo.png` : des images de l'ancien projet Wakfu, plus utilisées par le code. Elles sont ignorées par `.gitignore` et peuvent être supprimées.
 - Le dossier `askel` (un lot d'effets et de modèles extrait d'un jeu commercial) : il **ne doit pas** être utilisé, voir la règle du projet.
 - `tools/data/` : le cache de téléchargement du convertisseur GMod.
 
@@ -45,7 +45,7 @@ Le nom d'un pack nanos vient du dossier de plus haut niveau de `Content/` dans U
    python tools/unreal_tools/gen_yufu_weapons.py    # YufuWeapons.lua
    ```
    Les chemins des serveurs sont en tête de chaque script.
-7. **Déclarer le pack** : l'ajouter à `assets_requirements` dans `packages/wakfu-rp/Package.toml` (seulement une fois cuit : sinon le mode de jeu ne se charge plus) et à `assets` dans `Config.toml`.
+7. **Déclarer le pack** : l'ajouter à `assets_requirements` dans `packages/kimetsu-pandora/Package.toml` (seulement une fois cuit : sinon le mode de jeu ne se charge plus) et à `assets` dans `Config.toml`.
 
 ## Les scripts Unreal (`tools/unreal_tools/`)
 

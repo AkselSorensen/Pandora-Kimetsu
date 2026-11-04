@@ -1,4 +1,4 @@
-"""Génère Shared/YufuWeapons.lua (armes du pack yufu-arme-test) pour wakfu-rp et pour le menu de props.
+"""Génère Shared/YufuWeapons.lua (armes du pack yufu-arme-test) pour kimetsu-pandora et pour le menu de props.
 
     python unreal_tools/gen_yufu_weapons.py
 
@@ -17,8 +17,8 @@ WEAPONS = Path.home() / "Downloads" / "yufu-arme-test-nanos-grip" / "weapons.jso
 MODELS = Path.home() / "Downloads" / "yufu-arme-test-nanos-grip" / "1-unreal" / "YufuArmeTest" / "Models"
 ASSETS = STEAM / "nanos-world-server" / "Assets"
 OUTPUTS = [
-    STEAM / "nanos-world-server" / "Packages" / "wakfu-rp" / "Shared" / "YufuWeapons.lua",
-    STEAM / "nanos-world-playtest" / "Server" / "Packages" / "wakfu-rp" / "Shared" / "YufuWeapons.lua",
+    STEAM / "nanos-world-server" / "Packages" / "kimetsu-pandora" / "Shared" / "YufuWeapons.lua",
+    STEAM / "nanos-world-playtest" / "Server" / "Packages" / "kimetsu-pandora" / "Shared" / "YufuWeapons.lua",
     STEAM / "nanos-world-playtest" / "Server" / "Packages" / "gmod-props-menu" / "Shared" / "YufuWeapons.lua",
 ]
 
@@ -88,7 +88,7 @@ def main(argv=None):
     ap.add_argument("--weapons", type=Path, default=WEAPONS, help="weapons.json de la conversion")
     ap.add_argument("--assets", type=Path, default=ASSETS, help="dossier Assets qui contient le pack cuit")
     ap.add_argument("--models", type=Path, default=MODELS, help="dossier des glTF de la conversion (SM_<nom>/SM_<nom>.gltf), pour la pointe des lames")
-    ap.add_argument("--out", type=Path, action="append", help="fichier Lua à écrire (répétable ; défaut : wakfu-rp x2 et menu de props)")
+    ap.add_argument("--out", type=Path, action="append", help="fichier Lua à écrire (répétable ; défaut : kimetsu-pandora x2 et menu de props)")
     args = ap.parse_args(argv)
 
     weapons = json.loads(args.weapons.read_text(encoding="utf-8"))

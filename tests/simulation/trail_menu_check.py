@@ -4,7 +4,7 @@ from lupa import LuaRuntime
 
 from pathlib import Path
 
-REPO_RP = (Path(__file__).resolve().parents[2] / "packages" / "wakfu-rp").as_posix()
+REPO_RP = (Path(__file__).resolve().parents[2] / "packages" / "kimetsu-pandora").as_posix()
 RP = {"depot": REPO_RP}
 
 CODE = r'''

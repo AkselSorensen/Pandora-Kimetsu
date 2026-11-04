@@ -18,8 +18,8 @@ REPO = Path(__file__).resolve().parents[1]
 PACKAGES = REPO / "packages"
 SKIP_PARTS = {"__pycache__", ".git", "node_modules", "Saved", "logs"}
 SKIP_SUFFIXES = {".pyc", ".uasset", ".uexp", ".ubulk", ".umap", ".webm", ".mp4", ".log"}
-SKIP_PATHS = ("wakfu-rp/Client/UI/img/reroll", "wakfu-rp/Client/UI/img/logo.png")
-GENERATED = ("wakfu-rp/Shared/VfxAssets.lua", "wakfu-rp/Shared/FxMeshAssets.lua")
+SKIP_PATHS = ("kimetsu-pandora/Client/UI/img/reroll", "kimetsu-pandora/Client/UI/img/logo.png")
+GENERATED = ("kimetsu-pandora/Shared/VfxAssets.lua", "kimetsu-pandora/Shared/FxMeshAssets.lua")
 
 
 def wanted(relative: str, path: Path) -> bool:

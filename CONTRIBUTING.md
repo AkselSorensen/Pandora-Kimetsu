@@ -6,7 +6,7 @@ Merci de travailler sur le projet. Lis d'abord le [README](README.md), puis [doc
 
 Le plan de travail répartit les tâches entre deux développeurs (voir la feuille de route) :
 
-- **Dev A : le jeu et l'interface** (`packages/wakfu-rp`, surtout `Server/`, `Client/` et `Client/UI/`) : camps, démon, combat, HUD.
+- **Dev A : le jeu et l'interface** (`packages/kimetsu-pandora`, surtout `Server/`, `Client/` et `Client/UI/`) : camps, démon, combat, HUD.
 - **Dev B : le serveur, le contenu et les outils** (`tools/`, `scripts/`, `server/`, les packs d'assets, la sauvegarde) : pipeline d'assets, tests, sauvegarde, administration.
 
 Deux personnes ne devraient pas modifier le même fichier en même temps : `Server/Index.lua` et `Client/UI/index.js` sont les points de friction. Annonce-toi avant d'y toucher beaucoup.
@@ -45,7 +45,7 @@ Les messages de commit sont en français, à l'impératif, préfixés par le suj
 - **Logique pure dans `Shared/`** : ce qui se calcule sans le moteur ne doit pas appeler l'API de nanos world. C'est ce qui permet de le tester.
 - **Les réglages vont dans `Shared/Config.lua`**, jamais en dur dans la logique. Un chiffre d'équilibrage doit pouvoir changer sans toucher au code.
 - **Le serveur est autoritaire** : toute demande du client est validée (distance, coût, camp, limite, type). Le client n'envoie que des intentions.
-- **Événements** : préfixe `wakfu:` (identifiant historique conservé). Un nouvel événement est ajouté dans la table de `docs/ARCHITECTURE.md`.
+- **Événements** : préfixe `wakfu:` (préfixe historique conservé). Un nouvel événement est ajouté dans la table de `docs/ARCHITECTURE.md`.
 - **Un appel au moteur dont on n'est pas sûr** s'enveloppe dans `pcall` et se note dans « Jamais vérifié en jeu » de `docs/ARCHITECTURE.md`.
 - **Le HUD** : HTML, CSS et JavaScript simples, sans bibliothèque. Les valeurs viennent du serveur ; le thème démon passe par la classe `html.demon`.
 

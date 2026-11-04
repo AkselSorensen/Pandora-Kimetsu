@@ -1,4 +1,4 @@
-# Partie propre « Kimetsu RP » : le mode de jeu wakfu-rp, aucun addon, et seulement les packs d'assets faits pour le projet.
+# Partie propre « Kimetsu RP » : le mode de jeu kimetsu-pandora, aucun addon, et seulement les packs d'assets faits pour le projet.
 # Copie ce fichier sous le nom Config.toml dans le dossier du serveur nanos world, puis adapte le nom, le port et le nombre de joueurs.
 # Les packs d'assets ne sont pas dans le dépôt : voir docs/ASSETS.md pour les cuire avec Unreal et les déposer dans Assets/.
 
@@ -21,7 +21,7 @@
 
 [game]
     map =                    "default-blank-map"
-    game_mode =              "wakfu-rp"
+    game_mode =              "kimetsu-pandora"
     # Addons à charger en plus du mode de jeu : aucun pour la partie propre. Ceux du dépôt (packages/) :
     # nanos-admin, gmod-props-menu, fx-showcase-menu.
     packages = [
@@ -38,7 +38,7 @@
                             "sword-trail-vfx",
                             "breath-fx",
     ]
-    # "wakfu-loading" active l'écran de chargement (il faut d'abord déposer une vidéo bg.webm dans packages/wakfu-loading).
+    # "kimetsu-pandora-loading" active l'écran de chargement (il faut d'abord déposer une vidéo bg.webm dans packages/kimetsu-pandora-loading).
     loading_screen =         ""
 
 [custom_settings]

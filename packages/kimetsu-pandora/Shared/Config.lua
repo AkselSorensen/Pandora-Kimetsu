@@ -14,7 +14,7 @@ Config.SpawnPoints = {
 Config.RespawnDelay = 5 -- secondes avant réapparition après la mort
 
 -- Les modèles .glb d'Assets/Models ne se chargent pas tels quels : Nanos World n'utilise que des
--- assets Unreal cuits, livrés dans un pack d'assets. Passer à true une fois le pack `wakfu-rp-assets`
+-- assets Unreal cuits, livrés dans un pack d'assets. Passer à true une fois le pack `kimetsu-pandora-assets`
 -- installé dans le dossier Assets/ du serveur et ajouté à assets_requirements dans Package.toml.
 Config.UseCustomModels = false
 
@@ -123,7 +123,7 @@ Config.Vfx = {
 	-- choisit dans un menu (touche menuKey ou bouton de l'inventaire) : « auto » = celle de sa voie (Vfx.Style), « none » = aucune, ou une
 	-- traînée de la banque. defaultTip = distance poignée-pointe (cm) d'une arme sans mesure.
 	weaponTrail = true,
-	menuKey = "J", -- la touche J a été retirée à pandora-cases (son menu reste ouvert par !cases) ; déjà prises : K (eric...-test), F4 (pandora-store et voies), F1 à F10 (wakfu-rp, nanos-admin)
+	menuKey = "J", -- la touche J a été retirée à pandora-cases (son menu reste ouvert par !cases) ; déjà prises : K (eric...-test), F4 (pandora-store et voies), F1 à F10 (kimetsu-pandora, nanos-admin)
 	-- La traînée n'est allumée que pendant un coup (événement Attack du Melee) ; alwaysOn = true la garde allumée en permanence.
 	-- sizes : réglages de taille du menu (defaultSize au départ). scale = échelle du composant Niagara (la largeur du ruban est une constante
 	-- des systèmes du pack : l'échelle peut ne rien y changer) ; tip = part de la distance poignée-pointe où la traînée s'accroche (plus près de

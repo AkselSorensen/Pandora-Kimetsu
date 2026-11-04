@@ -10,7 +10,7 @@ from lupa import LuaRuntime, lua_type
 
 SCRATCH = Path(__file__).resolve().parent / "out"
 SCRATCH.mkdir(exist_ok=True)
-SRC = Path(__file__).resolve().parents[2] / "packages" / "wakfu-rp"
+SRC = Path(__file__).resolve().parents[2] / "packages" / "kimetsu-pandora"
 OUT = SCRATCH / "ui_demon"
 EDGE = next(p for p in (Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"), Path(r"C:\Program Files\Microsoft\Edge\Application\msedge.exe")) if p.exists())
 

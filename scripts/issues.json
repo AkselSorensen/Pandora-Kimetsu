@@ -4,7 +4,7 @@
   {
    "name": "dev-a",
    "color": "1f6feb",
-   "description": "Dev A : le jeu et l'interface (packages/wakfu-rp)"
+   "description": "Dev A : le jeu et l'interface (packages/kimetsu-pandora)"
   },
   {
    "name": "dev-b",
@@ -149,7 +149,7 @@
   {
    "key": "B2",
    "title": "[B2] Une seule source pour les deux serveurs",
-   "body": "> **État actuel** : Ce dépôt est la source unique ; scripts/sync_packages.py aligne les serveurs.\n\n**Pourquoi**\n\nwakfu-rp existe en deux copies (nanos-world-server et nanos-world-playtest\\Server) qui diffèrent par Package.toml, deux lignes de style.css et la section Skins de Config.lua.\n\n**À faire**\n\n- [ ] Sortir les skins dans Shared/Skins.lua, propre à chaque serveur, et harmoniser style.css.\n- [ ] Mettre le code sous git (créer le dépôt s'il n'existe pas) et écrire tools/deploy.py qui copie vers les deux serveurs sans toucher à Package.toml ni à Skins.lua.\n- [ ] Documenter la commande dans le dépôt.\n\n**Terminé quand**\n\nUne seule source ; le déploiement est rejouable ; l'écart entre les serveurs se limite à Skins.lua et Package.toml.\n\n**Fichiers concernés**\n\n`Shared/Config.lua, tools/deploy.py (nouveau)`\n\n---\n*Tâche B2 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "body": "> **État actuel** : Ce dépôt est la source unique ; scripts/sync_packages.py aligne les serveurs.\n\n**Pourquoi**\n\nkimetsu-pandora existe en deux copies (nanos-world-server et nanos-world-playtest\\Server) qui diffèrent par Package.toml, deux lignes de style.css et la section Skins de Config.lua.\n\n**À faire**\n\n- [ ] Sortir les skins dans Shared/Skins.lua, propre à chaque serveur, et harmoniser style.css.\n- [ ] Mettre le code sous git (créer le dépôt s'il n'existe pas) et écrire tools/deploy.py qui copie vers les deux serveurs sans toucher à Package.toml ni à Skins.lua.\n- [ ] Documenter la commande dans le dépôt.\n\n**Terminé quand**\n\nUne seule source ; le déploiement est rejouable ; l'écart entre les serveurs se limite à Skins.lua et Package.toml.\n\n**Fichiers concernés**\n\n`Shared/Config.lua, tools/deploy.py (nouveau)`\n\n---\n*Tâche B2 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
    "labels": [
     "dev-b",
     "P0",
@@ -222,7 +222,7 @@
   {
    "key": "B3",
    "title": "[B3] Outils d'administration sur le serveur dédié",
-   "body": "**Pourquoi**\n\ngmod-props-menu (touche Q, onglet Weapons relié à Wakfu:EquipWeapon) et nanos-admin ne sont chargés que sur le playtest ; le dédié n'a que odm-gear, ui-kit et wakfu-loading.\n\n**À faire**\n\n- [ ] Les installer sur le dédié et vérifier leurs assets_requirements.\n- [ ] Restreindre aux admins avec une liste d'identifiants de compte, exposée à Dev A pour A2.\n- [ ] Appliquer la décision 6 sur les props des joueurs.\n\n**Terminé quand**\n\nUn admin ouvre le menu de props sur le dédié, un joueur ordinaire non.\n\n**Dépend de**\n\nDécision 6.\n\n**Fichiers concernés**\n\n`Config.toml (dédié), packages gmod-props-menu et nanos-admin`\n\n---\n*Tâche B3 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "body": "**Pourquoi**\n\ngmod-props-menu (touche Q, onglet Weapons relié à Wakfu:EquipWeapon) et nanos-admin ne sont chargés que sur le playtest ; le dédié n'a que odm-gear, ui-kit et kimetsu-pandora-loading.\n\n**À faire**\n\n- [ ] Les installer sur le dédié et vérifier leurs assets_requirements.\n- [ ] Restreindre aux admins avec une liste d'identifiants de compte, exposée à Dev A pour A2.\n- [ ] Appliquer la décision 6 sur les props des joueurs.\n\n**Terminé quand**\n\nUn admin ouvre le menu de props sur le dédié, un joueur ordinaire non.\n\n**Dépend de**\n\nDécision 6.\n\n**Fichiers concernés**\n\n`Config.toml (dédié), packages gmod-props-menu et nanos-admin`\n\n---\n*Tâche B3 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
    "labels": [
     "dev-b",
     "P0",
@@ -236,7 +236,7 @@
   {
    "key": "B4",
    "title": "[B4] Contrôle des assets avant chaque lancement",
-   "body": "**Pourquoi**\n\nUn pack manquant empêche wakfu-rp de se charger, et rien ne le détecte avant le démarrage.\n\n**À faire**\n\n- [ ] tools/check_assets.py croise Config.Skins, Config.Weapons.list, Npcs, YufuWeapons.lua, les assets_requirements de Package.toml et l'Assets.toml de chaque pack cuit sur chaque serveur.\n- [ ] Échec avec la liste des meshes manquants ; rejouer gen_yufu_weapons.py après chaque cook.\n- [ ] L'appeler depuis le script de lancement.\n\n**Terminé quand**\n\nSupprimer un mesh du dédié fait échouer le contrôle avec son nom.\n\n**Fichiers concernés**\n\n`tools/check_assets.py (nouveau), unreal_tools/gen_yufu_weapons.py`\n\n---\n*Tâche B4 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "body": "**Pourquoi**\n\nUn pack manquant empêche kimetsu-pandora de se charger, et rien ne le détecte avant le démarrage.\n\n**À faire**\n\n- [ ] tools/check_assets.py croise Config.Skins, Config.Weapons.list, Npcs, YufuWeapons.lua, les assets_requirements de Package.toml et l'Assets.toml de chaque pack cuit sur chaque serveur.\n- [ ] Échec avec la liste des meshes manquants ; rejouer gen_yufu_weapons.py après chaque cook.\n- [ ] L'appeler depuis le script de lancement.\n\n**Terminé quand**\n\nSupprimer un mesh du dédié fait échouer le contrôle avec son nom.\n\n**Fichiers concernés**\n\n`tools/check_assets.py (nouveau), unreal_tools/gen_yufu_weapons.py`\n\n---\n*Tâche B4 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
    "labels": [
     "dev-b",
     "P0",
@@ -393,7 +393,7 @@
   {
    "key": "B14",
    "title": "[B14] Boutique : resets et changements de classe",
-   "body": "**Pourquoi**\n\nLa boutique vend des resets et des changements de classe : c'est ce qui permet à un joueur de retirer ou de choisir sa voie après son choix d'arrivée.\n\n**À faire**\n\n- [ ] Définir les produits avec la décision 10 : un reset donne un nouveau tirage (jeton) ; un changement de classe permet de choisir une voie précise (autre jeton).\n- [ ] Côté pandora-store : un événement serveur (par exemple Wakfu:GrantToken avec le joueur, le type de jeton, la quantité et un identifiant de transaction) ; wakfu-rp valide, crédite state.tokens et sauvegarde (B1).\n- [ ] Un jeton est consommé avant les yens à l'écran de tirage (A13) ; le changement de classe ouvre un choix limité au camp du joueur.\n- [ ] Refuser une transaction déjà traitée et journaliser chaque achat.\n- [ ] Afficher dans la boutique, à côté du reset, les taux effectifs et la pitié (décision 12).\n- [ ] Vendre aussi le statut VIP (A24), le changement d'apparence (A23) et les rerolls cosmétiques du sabre et du Démon (A27) : un événement serveur de plus par produit.\n\n**Terminé quand**\n\nUn achat crédite le bon jeton une seule fois, il survit à la déconnexion, et l'écran de tirage le consomme.\n\n**Dépend de**\n\nB1, A13, B15, décisions 4, 10 et 12.\n\n**Fichiers concernés**\n\n`package pandora-store, Server/Persistence.lua`\n\n---\n*Tâche B14 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "body": "**Pourquoi**\n\nLa boutique vend des resets et des changements de classe : c'est ce qui permet à un joueur de retirer ou de choisir sa voie après son choix d'arrivée.\n\n**À faire**\n\n- [ ] Définir les produits avec la décision 10 : un reset donne un nouveau tirage (jeton) ; un changement de classe permet de choisir une voie précise (autre jeton).\n- [ ] Côté pandora-store : un événement serveur (par exemple Wakfu:GrantToken avec le joueur, le type de jeton, la quantité et un identifiant de transaction) ; kimetsu-pandora valide, crédite state.tokens et sauvegarde (B1).\n- [ ] Un jeton est consommé avant les yens à l'écran de tirage (A13) ; le changement de classe ouvre un choix limité au camp du joueur.\n- [ ] Refuser une transaction déjà traitée et journaliser chaque achat.\n- [ ] Afficher dans la boutique, à côté du reset, les taux effectifs et la pitié (décision 12).\n- [ ] Vendre aussi le statut VIP (A24), le changement d'apparence (A23) et les rerolls cosmétiques du sabre et du Démon (A27) : un événement serveur de plus par produit.\n\n**Terminé quand**\n\nUn achat crédite le bon jeton une seule fois, il survit à la déconnexion, et l'écran de tirage le consomme.\n\n**Dépend de**\n\nB1, A13, B15, décisions 4, 10 et 12.\n\n**Fichiers concernés**\n\n`package pandora-store, Server/Persistence.lua`\n\n---\n*Tâche B14 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
    "labels": [
     "dev-b",
     "P1",
@@ -450,7 +450,7 @@
   {
    "key": "B7",
    "title": "[B7] Boutique et caisses",
-   "body": "**Pourquoi**\n\npandora-store, pandora-cases et voidcases-content ne sont chargés que sur le playtest.\n\n**À faire**\n\n- [ ] La boutique est gardée (elle vend les resets et les changements de classe, voir B14) : relier sa monnaie par un événement, sans que le package écrive dans l'état de wakfu-rp. Les caisses : à décider (décision 4).\n- [ ] Si les caisses sont retirées : vérifier que le playtest démarre sans elles.\n- [ ] Vérifier qu'ils ne chargent rien hors thème.\n\n**Terminé quand**\n\nUn achat en boutique débite la bonne monnaie ; les caisses sont gardées ou retirées proprement.\n\n**Dépend de**\n\nDécision 4. B1 : un achat doit être sauvegardé. B14 pour les produits.\n\n**Fichiers concernés**\n\n`packages pandora-*`\n\n---\n*Tâche B7 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "body": "**Pourquoi**\n\npandora-store, pandora-cases et voidcases-content ne sont chargés que sur le playtest.\n\n**À faire**\n\n- [ ] La boutique est gardée (elle vend les resets et les changements de classe, voir B14) : relier sa monnaie par un événement, sans que le package écrive dans l'état de kimetsu-pandora. Les caisses : à décider (décision 4).\n- [ ] Si les caisses sont retirées : vérifier que le playtest démarre sans elles.\n- [ ] Vérifier qu'ils ne chargent rien hors thème.\n\n**Terminé quand**\n\nUn achat en boutique débite la bonne monnaie ; les caisses sont gardées ou retirées proprement.\n\n**Dépend de**\n\nDécision 4. B1 : un achat doit être sauvegardé. B14 pour les produits.\n\n**Fichiers concernés**\n\n`packages pandora-*`\n\n---\n*Tâche B7 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
    "labels": [
     "dev-b",
     "P1",
@@ -805,7 +805,7 @@
   {
    "key": "B12",
    "title": "[B12] Identité publique du serveur",
-   "body": "**Pourquoi**\n\nConfig.toml du dédié annonce « Wakfu RP Aksel » avec announce = true et une description vide.\n\n**À faire**\n\n- [ ] Choisir le nom (décision 7), écrire la description, mettre à jour l'écran de chargement.\n- [ ] Garder l'identifiant de package wakfu-rp.\n\n**Terminé quand**\n\nLa liste publique affiche le nouveau nom et sa description.\n\n**Dépend de**\n\nDécision 7.\n\n**Fichiers concernés**\n\n`Config.toml (dédié), wakfu-loading`\n\n---\n*Tâche B12 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "body": "**Pourquoi**\n\nConfig.toml du dédié annonce « Wakfu RP Aksel » avec announce = true et une description vide.\n\n**À faire**\n\n- [ ] Choisir le nom (décision 7), écrire la description, mettre à jour l'écran de chargement.\n- [ ] Garder l'identifiant de package kimetsu-pandora.\n\n**Terminé quand**\n\nLa liste publique affiche le nouveau nom et sa description.\n\n**Dépend de**\n\nDécision 7.\n\n**Fichiers concernés**\n\n`Config.toml (dédié), kimetsu-pandora-loading`\n\n---\n*Tâche B12 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
    "labels": [
     "dev-b",
     "P2",
@@ -931,7 +931,7 @@
   {
    "key": "X10",
    "title": "[X10] Fournir la vidéo de chargement ou la remplacer",
-   "body": "**Pourquoi**\n\n`packages/wakfu-loading` attend `bg.webm` (16 Mo), exclue du dépôt : sans elle, l'écran de chargement est vide.\n\n**À faire**\n\n- [ ] Décider d'une vidéo ou d'une image de fond dont les droits sont clairs.\n- [ ] La déposer, ou remplacer la vidéo par un fond CSS.\n- [ ] Documenter dans `docs/ASSETS.md`.\n\n**Terminé quand**\n\nL'écran de chargement s'affiche avec un fond.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "body": "**Pourquoi**\n\n`packages/kimetsu-pandora-loading` attend `bg.webm` (16 Mo), exclue du dépôt : sans elle, l'écran de chargement est vide.\n\n**À faire**\n\n- [ ] Décider d'une vidéo ou d'une image de fond dont les droits sont clairs.\n- [ ] La déposer, ou remplacer la vidéo par un fond CSS.\n- [ ] Documenter dans `docs/ASSETS.md`.\n\n**Terminé quand**\n\nL'écran de chargement s'affiche avec un fond.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
    "labels": [
     "dev-b",
     "P2",

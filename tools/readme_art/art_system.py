@@ -33,7 +33,7 @@ def architecture():
     # le conteneur nanos world
     body.append(plate(10, 150, 980, 540, "#09050A", C["blood"], cut=18, stroke_opacity=0.5))
     body.append(ts.text("NANOS WORLD", 34, 180, 13, C["bright"], tracking=4, bold=0.3))
-    body.append(ts.text("Packages/wakfu-rp : le mode de jeu (l'identifiant historique est gardé)", 34 + ts.width("NANOS WORLD", 13, 4) + 22, 180, 12.5, C["ivory"], opacity=0.6))
+    body.append(ts.text("Packages/kimetsu-pandora : le mode de jeu (l'identifiant historique est gardé)", 34 + ts.width("NANOS WORLD", 13, 4) + 22, 180, 12.5, C["ivory"], opacity=0.6))
     # serveur et client
     body.append(_node(ts, 34, 206, 380, 190, "SERVEUR · Server/Index.lua", ["L'autorité : l'état de chaque joueur, le camp, les techniques, le démon, les cadavres, la forge, les quêtes.", "Il valide chaque demande : distance, coût, camp, limite."], C["blood"], title_size=14))
     body.append(_node(ts, 586, 206, 380, 190, "CLIENT · Client/Index.lua", ["Les touches et les écrans. Il n'envoie que des intentions et affiche ce que le serveur renvoie.", "VfxPlayer.lua joue les effets ; le HUD est une page web (Client/UI)."], C["slayer"], title_size=14))

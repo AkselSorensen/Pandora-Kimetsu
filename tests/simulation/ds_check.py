@@ -5,7 +5,7 @@ from lupa import LuaRuntime
 
 from pathlib import Path
 
-REPO_RP = (Path(__file__).resolve().parents[2] / "packages" / "wakfu-rp").as_posix()
+REPO_RP = (Path(__file__).resolve().parents[2] / "packages" / "kimetsu-pandora").as_posix()
 RP = {"depot": REPO_RP}
 
 PRELUDE = r'''
@@ -426,7 +426,7 @@ return out
 
 failed = False
 for label, root in RP.items():
-    print("== wakfu-rp", label)
+    print("== kimetsu-pandora", label)
     for name, code in (("donnees", DATA), ("serveur", SERVER)):
         try:
             lines = LuaRuntime().eval("function(...) " + code + " end")(root)

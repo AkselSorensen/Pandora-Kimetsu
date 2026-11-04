@@ -6,7 +6,7 @@ Chaque mesh est un ruban : les UV donnent u le long de la forme (0 à 1) et v en
 lumineux M_FX_Glow (unreal_tools/import_fx_meshes.py) s'en sert pour estomper les bords et les pointes. Tout est dessiné par code, sans
 aucune donnée venant d'un autre jeu.
 
-Repère : les formes sont décrites en repère Unreal, en centimètres (avant = +X, droite = +Y, haut = +Z), comme les effets de wakfu-rp les
+Repère : les formes sont décrites en repère Unreal, en centimètres (avant = +X, droite = +Y, haut = +Z), comme les effets de kimetsu-pandora les
 placent devant le lanceur. L'import glTF d'Unreal 5.7 envoie le glTF (x, y, z) sur Unreal (x, z, y) et multiplie les mètres par 100 : on écrit
 donc le glTF (x, z, y) / 100. Ce changement de repère inverse l'orientation des triangles : le matériau est double face.
 """
@@ -126,7 +126,7 @@ def dome(radius, rings=12):
     return mesh
 
 
-# nom -> mesh : voir le docstring pour le repère. Les noms servent d'identifiants dans Unreal (SM_FX_<nom>) et dans wakfu-rp (VfxPlan.lua).
+# nom -> mesh : voir le docstring pour le repère. Les noms servent d'identifiants dans Unreal (SM_FX_<nom>) et dans kimetsu-pandora (VfxPlan.lua).
 SHAPES = {
     "SlashV": lambda: crescent(180, 140, 36),
     "SlashThin": lambda: crescent(240, 160, 12),
