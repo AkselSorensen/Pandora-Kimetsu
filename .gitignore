@@ -40,10 +40,5 @@ graphify-out/
 Thumbs.db
 .DS_Store
 
-# Illustration des écrans de chargement et de bienvenue : personnage existant de la série, à garder hors du dépôt public
-packages/wakfu-rp/Client/UI/img/welcome-art.webp
-packages/wakfu-loading/art.webp
-
-# sauvegardes locales et illustration du personnage (hors du dépôt public)
+# Sauvegardes locales
 *.bak-*
-*kukushibo-bg.png
