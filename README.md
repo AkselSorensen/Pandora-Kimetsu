@@ -9,9 +9,9 @@ Mode de jeu de rôle **Demon Slayer** pour [nanos world](https://nanos.world) (U
 ```
 pandora-kimetsu/
 ├── packages/            les packages nanos world (à copier dans Packages/ du serveur)
-│   ├── wakfu-rp/        le mode de jeu « Kimetsu RP » (l'identifiant historique est gardé, voir plus bas)
-│   ├── wakfu-loading/   écran de chargement
-│   └── nanos-admin, gmod-props-menu, odm-gear, pandora-cases, pandora-store, fx-showcase-menu   addons
+│   ├── kimetsu-pandora/        le mode de jeu « Kimetsu Pandora »
+│   ├── kimetsu-pandora-loading/   écran de chargement
+│   └── nanos-admin, gmod-props-menu, fx-showcase-menu   addons
 ├── server/              Config.example.toml (la partie propre) et le lanceur
 ├── scripts/             sync_packages.py : copie dépôt <-> serveur
 ├── tests/simulation/    tests sans le jeu (faux moteur Lua)
@@ -77,7 +77,7 @@ Trois tests de `tools/tests/test_characters.py` attendent un fichier de référe
 
 ## Conventions à connaître tout de suite
 
-- **L'identifiant `wakfu-rp` et les événements `wakfu:*` sont gardés** : le projet est né d'un mode de jeu Wakfu, converti en Demon Slayer. Le nom affiché est « Kimetsu RP » (`Package.toml`). Les renommer toucherait tous les messages entre client et serveur pour un gain seulement esthétique.
+- **Les événements `wakfu:*` sont gardés** : le projet est né d'un mode de jeu Wakfu, converti en Demon Slayer. Le package s'appelle `kimetsu-pandora` (nom affiché « Kimetsu Pandora »), mais les messages entre client et serveur gardent le préfixe `wakfu:` : les renommer toucherait tous les échanges pour un gain seulement esthétique.
 - **Le serveur décide de tout** : le client n'envoie que des intentions (une touche, un clic) et affiche ce que le serveur renvoie.
 - **La logique de jeu est pure** (dans `Shared/`, sans appel au moteur) pour être testée sans lancer nanos world ; les valeurs de réglage sont dans `Shared/Config.lua`.
 - **Rien d'extrait d'un jeu commercial** ne doit entrer dans le projet, ni dans le dépôt, ni dans les packs d'assets.

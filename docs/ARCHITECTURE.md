@@ -5,18 +5,18 @@
 ```
 Unreal Engine 5.7 (plugin Forge)         nanos world (serveur et clients)
   modèles, animations, effets   ──cuisson──►  Assets/<pack>/            (un dossier par pack, jamais dans le dépôt)
-                                              Packages/wakfu-rp/        le mode de jeu (ce dépôt)
+                                              Packages/kimetsu-pandora/        le mode de jeu (ce dépôt)
                                               Packages/<addons>/        facultatifs (ce dépôt)
 ```
 
-- Le **mode de jeu** `wakfu-rp` fait tout le jeu de rôle : classes, grades, quêtes, PNJ, inventaire, forge, effets, système du démon.
+- Le **mode de jeu** `kimetsu-pandora` fait tout le jeu de rôle : classes, grades, quêtes, PNJ, inventaire, forge, effets, système du démon.
 - Les **addons** sont des packages indépendants que la partie peut charger en plus (administration, menu de props, boutique, caisses, équipement ODM, vitrine d'effets). La partie propre n'en charge aucun.
 - Les **packs d'assets** contiennent les modèles et effets cuits. Le mode de jeu les exige dans son `Package.toml` (`assets_requirements`) : il ne démarre pas s'il en manque un.
 
-## Le mode de jeu `wakfu-rp`
+## Le mode de jeu `kimetsu-pandora`
 
 ```
-packages/wakfu-rp/
+packages/kimetsu-pandora/
 ├── Package.toml            nom affiché, packs d'assets exigés
 ├── Shared/                 chargé par le serveur ET le client : données et logique pure
 │   ├── Config.lua          tous les réglages (armes, effets, démon, cadavres, apparences)

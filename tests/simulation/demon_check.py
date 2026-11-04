@@ -1,11 +1,11 @@
-"""Simule (sans le jeu) le système du démon de wakfu-rp : logique pure, serveur (camp, sang, dévoration, faim, régénération) et client (écran de camp)."""
+"""Simule (sans le jeu) le système du démon de kimetsu-pandora : logique pure, serveur (camp, sang, dévoration, faim, régénération) et client (écran de camp)."""
 import sys
 
 from lupa import LuaRuntime
 
 from pathlib import Path
 
-REPO_RP = (Path(__file__).resolve().parents[2] / "packages" / "wakfu-rp").as_posix()
+REPO_RP = (Path(__file__).resolve().parents[2] / "packages" / "kimetsu-pandora").as_posix()
 RP = {"depot": REPO_RP}
 
 PRELUDE = r'''
@@ -294,7 +294,7 @@ cfg.meals.perRank = 1000 -- la limite de repas est testee plus bas, avec ses pro
 -- 1. Arrivee : aucun camp, l'ecran de choix s'ouvre, rien d'autre ne marche
 local p1 = newPlayer("Tanjiro")
 handlers.PlayerReady(p1)
-check(count("wakfu:openCamp", p1) == 1, "un joueur sans camp voit l'ecran de choix a son arrivee")
+check(count("wakfu:openWelcome", p1) == 1 and count("wakfu:openCamp", p1) == 0, "un joueur voit d abord l ecran de bienvenue (le choix du camp suit cote client)")
 local s = stateOf(p1)
 check(s.camp == nil and s.demon == nil, "pas de camp ni de jauges avant le choix")
 remote["wakfu:chooseClass"](p1, "Foudre"); check(stateOf(p1).class == "Eau", "pas de changement de voie avant le camp")
@@ -703,7 +703,7 @@ return out
 
 failed = False
 for label, root in RP.items():
-    print("== wakfu-rp", label)
+    print("== kimetsu-pandora", label)
     for name, code in (("donnees", DATA), ("serveur", SERVER), ("client", CLIENT)):
         try:
             lines = LuaRuntime().eval("function(...) " + code + " end")(root)

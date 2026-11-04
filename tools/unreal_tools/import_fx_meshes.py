@@ -5,7 +5,7 @@ Unreal : champ Cmd, py "<chemin de ce fichier>" ; le résultat est dans le journ
 Crée :
   /Game/BreathFx/Materials/M_FX_Glow        matériau lumineux (additif, sans éclairage, double face) dont les bords et les pointes s'estompent
                                             d'après les UV ; paramètres Color, Intensity, Fade (1 = visible, 0 = invisible), FadeU, FadeV
-  /Game/BreathFx/Materials/MI_FX_<voie>     une instance par voie de wakfu-rp (couleur) et MI_FX_Blanc
+  /Game/BreathFx/Materials/MI_FX_<voie>     une instance par voie de kimetsu-pandora (couleur) et MI_FX_Blanc
   /Game/BreathFx/Meshes/SM_FX_<forme>       les 12 formes, leur emplacement de matériau 0 sur M_FX_Glow, sans collision
 
 Le dossier /Game/BreathFx doit ensuite être cuit (DefaultGame.ini : +DirectoriesToAlwaysCook=(Path="/Game/BreathFx")). Un pas qui échoue
@@ -25,7 +25,7 @@ SOURCE = os.path.normpath(os.path.join(HERE, "..", "fx_meshes"))
 MESHES = "/Game/%s/Meshes" % FOLDER
 MATERIALS = "/Game/%s/Materials" % FOLDER
 
-# Une instance par voie de wakfu-rp (couleur linéaire r, g, b) ; Blanc sert aux essais.
+# Une instance par voie de kimetsu-pandora (couleur linéaire r, g, b) ; Blanc sert aux essais.
 COLORS = {
     "Eau": (0.10, 0.45, 1.00),
     "Foudre": (1.00, 0.85, 0.10),

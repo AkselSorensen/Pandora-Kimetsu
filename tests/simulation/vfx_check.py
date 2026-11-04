@@ -4,7 +4,7 @@ from lupa import LuaRuntime
 
 from pathlib import Path
 
-REPO_RP = (Path(__file__).resolve().parents[2] / "packages" / "wakfu-rp").as_posix()
+REPO_RP = (Path(__file__).resolve().parents[2] / "packages" / "kimetsu-pandora").as_posix()
 RP = {"depot": REPO_RP}
 
 # Les vrais noms des systemes Niagara trouves dans le projet Unreal (packs Fab et Vefects) ; les noms de packs cuits sont des suppositions.
@@ -220,7 +220,7 @@ return out
 
 failed = False
 for label, root in RP.items():
-    print("== wakfu-rp", label)
+    print("== kimetsu-pandora", label)
     lua = LuaRuntime()
     fake = lua.table_from({pack: lua.table_from(names) for pack, names in FAKE.items()})
     runs = [

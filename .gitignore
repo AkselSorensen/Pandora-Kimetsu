@@ -39,3 +39,6 @@ graphify-out/
 .claude/
 Thumbs.db
 .DS_Store
+
+# Sauvegardes locales
+*.bak-*

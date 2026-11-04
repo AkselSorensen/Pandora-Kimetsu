@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Pandora - Bienvenue</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Écran de bienvenue seul, à ouvrir directement dans un navigateur (planche Figma « Tengen — Bienvenue »).
+     Le même écran est intégré au HUD du jeu (index.html, id="welcome") ; ici les données sont de démonstration.
+     Réglages dans l'adresse : ?nom=Tanjiro&grade=Mizunoto&yens=1500&temps=45 (minutes) -->
+<style>
+:root { font-size: calc(100vw / 120); }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #050204 url("img/kukushibo-bg.png") center center / cover no-repeat; }
+#welcome { position: fixed; inset: 0; color: #f4eee6; font-family: "Montserrat", "Segoe UI", system-ui, sans-serif; font-size: calc(100vw / 120); overflow: hidden; }
+#wl-glow { position: absolute; right: -6em; top: 2em; width: 62em; height: 62em; border-radius: 50%; background: radial-gradient(circle, rgba(150, 10, 30, 0.85) 0%, rgba(110, 6, 22, 0.5) 38%, rgba(0, 0, 0, 0) 68%); filter: blur(2.4em); }
+#wl-art { position: absolute; right: 3em; bottom: 0; height: 100%; aspect-ratio: 923 / 1080; background: url("img/welcome-art.webp") right bottom / contain no-repeat; filter: drop-shadow(0 0 2em rgba(150, 10, 30, 0.5)); }
+#wl-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 40% 50%, transparent 40%, rgba(0, 0, 0, 0.7) 100%); }
+#wl-content { position: absolute; left: 14em; top: 50%; width: 52em; transform: translateY(-50%); }
+h1 { margin: 0; display: flex; flex-direction: column; font-family: "Montserrat", "Segoe UI Black", "Arial Black", sans-serif; font-weight: 900; font-size: 5.1em; line-height: 0.98; letter-spacing: -0.01em; }
+h1 .w { color: #fff; }
+h1 .r { color: #cf1f40; text-shadow: 0 0 2.4em rgba(207, 31, 64, 0.35); }
+#wl-tagline { margin: 1em 0 0; font-size: 1.05em; font-style: italic; color: rgba(244, 238, 230, 0.62); }
+#wl-about { margin: 1.6em 0 0; font-size: 0.95em; line-height: 1.55; color: rgba(244, 238, 230, 0.85); max-width: 49em; }
+#wl-card { margin-top: 2.2em; width: 26em; display: flex; flex-direction: column; gap: 0.6em; }
+#wl-name { text-align: center; padding: 0.7em; border-radius: 0.5em; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); font-size: 0.85em; font-weight: 700; color: rgba(244, 238, 230, 0.8); }
+.wl-row { display: flex; justify-content: space-between; align-items: center; padding: 0.65em 0.9em; border-radius: 0.5em; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); font-size: 0.85em; }
+.wl-row .k { display: flex; align-items: center; gap: 0.6em; color: #e9c46a; }
+.wl-row .k.blue { color: #4aa3ff; }
+.wl-row .k.green { color: #3ddc84; }
+.wl-row .k svg { width: 1em; height: 1em; fill: currentColor; }
+.wl-row b { font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.wl-btn { cursor: pointer; padding: 0.85em; border-radius: 0.5em; font: inherit; font-size: 0.85em; font-weight: 800; letter-spacing: 0.04em; }
+.wl-btn.go { color: #3ddc84; background: rgba(61, 220, 132, 0.12); border: 1px solid rgba(61, 220, 132, 0.4); }
+.wl-btn.go:hover { background: rgba(61, 220, 132, 0.22); }
+.wl-btn.alt { color: #d68a1c; background: rgba(214, 138, 28, 0.12); border: 1px solid rgba(214, 138, 28, 0.4); }
+.wl-btn.alt:hover { background: rgba(214, 138, 28, 0.22); }
+</style>
+</head>
+<body>
+<div id="welcome">
+	<div id="wl-glow"></div>
+	<div id="wl-art"></div>
+	<div id="wl-vignette"></div>
+	<div id="wl-content">
+		<h1><span class="w">BIENVENUE SUR</span><span class="r">PANDORA</span></h1>
+		<p id="wl-tagline">Votre nouveau serveur Demon Slayer préféré.</p>
+		<p id="wl-about">Pandora est un serveur conçu par des joueurs pour des joueurs. Notre objectif est de rendre le roleplay de Demon Slayer encore plus captivant. En avez-vous assez des serveurs qui stagnent depuis 2020 ? Pandora sera bientôt votre serveur préféré !</p>
+		<div id="wl-card">
+			<div id="wl-name">Joueur</div>
+			<div class="wl-row"><span class="k"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 7 7 .6-5.300 4.700 1.600 7.200L12 17.800 5.700 21.500l1.600-7.200L2 9.600 9 9z"/></svg>Grade</span><b id="wl-rank">-</b></div>
+			<div class="wl-row"><span class="k blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v3M17 2v3M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="2"/></svg>Temps de jeu</span><b id="wl-time">0m</b></div>
+			<div class="wl-row"><span class="k green"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v10M9 10h4.500a1.500 1.500 0 0 1 0 3H10" fill="none" stroke="currentColor" stroke-width="2"/></svg>Argent</span><b id="wl-money">0 ¥</b></div>
+			<button id="wl-start" type="button" class="wl-btn go">&#9654; COMMENCER</button>
+			<button id="wl-character" type="button" class="wl-btn alt">SÉLECTION DE PERSONNAGE</button>
+		</div>
+	</div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const q = new URLSearchParams(location.search);
+const minutes = Number(q.get("temps") || 125);
+$("wl-name").textContent = q.get("nom") || "Jean François";
+$("wl-rank").textContent = q.get("grade") || "Mizunoto";
+$("wl-money").textContent = String(q.get("yens") || 192300489).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ¥";
+$("wl-time").textContent = minutes >= 60 ? Math.floor(minutes / 60) + "h " + (minutes % 60) + "m" : minutes + "m";
+// Dans cette page de démonstration, les boutons n'ont pas d'effet : dans le jeu, ils appellent wakfu:welcomeStart et wakfu:welcomeCharacter.
+$("wl-start").addEventListener("click", () => console.log("wakfu:welcomeStart"));
+$("wl-character").addEventListener("click", () => console.log("wakfu:welcomeCharacter"));
+</script>
+</body>
+</html>

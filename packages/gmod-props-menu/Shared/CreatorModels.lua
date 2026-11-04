@@ -1,4 +1,4 @@
--- Modèles proposés dans le créateur de personnage de wakfu-rp (Config.Skins).
+-- Modèles proposés dans le créateur de personnage de kimetsu-pandora (Config.Skins).
 -- Nanos interdit de lire un .lua avec File, donc la liste est recopiée ici : la mettre à jour avec Config.Skins.
 CreatorModels = {
     ["nanos-world::SK_Female"] = true,
