@@ -115,5 +115,5 @@ h1 .r { color: var(--crimson); text-shadow: 0 0 2.4rem rgba(207, 31, 64, 0.35); 
 }
 #file { margin-top: 0.7rem; min-height: 1rem; font-size: 0.7rem; color: rgba(244, 238, 230, 0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Illustration de droite : fichier facultatif, absent du dépôt (art.webp) */
-#art { position: absolute; right: 3rem; bottom: 0; height: 100%; aspect-ratio: 923 / 1080; background: url("art.webp") right bottom / contain no-repeat; filter: drop-shadow(0 0 2rem rgba(150, 10, 30, 0.5)); }
+/* Render Kukushibo au premier plan du fond, chargé directement par l'interface. */
+#art { position: absolute; right: 3rem; bottom: 0; width: 48vw; height: 100%; object-fit: contain; object-position: right bottom; z-index: 2; pointer-events: none; }
