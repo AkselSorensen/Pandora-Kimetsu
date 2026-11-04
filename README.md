@@ -71,6 +71,7 @@ Trois tests de `tools/tests/test_characters.py` attendent un fichier de référe
 | [docs/DEMON-SYSTEM.md](docs/DEMON-SYSTEM.md) | le système du démon : camps, sang, chair, âmes, cadavres, limite de repas |
 | [docs/ASSETS.md](docs/ASSETS.md) | les packs d'assets, leur origine, comment les cuire et les déployer |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | le fil rouge, ce qui est fait, les prochaines fonctionnalités, les 49 tâches |
+| [Issues](https://github.com/AkselSorensen/Pandora-Kimetsu/issues) | tout ce qu'il y a à faire pour deux développeurs, numéroté dans l'ordre de priorité (voir [CONTRIBUTING.md](CONTRIBUTING.md)) |
 | [docs/DA-DEMON.md](docs/DA-DEMON.md) | la direction artistique du côté démon, et le prompt Figma |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | comment contribuer : branches, commits, conventions, vérifications |
 

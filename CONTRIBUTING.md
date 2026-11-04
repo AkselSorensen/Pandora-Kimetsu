@@ -11,9 +11,27 @@ Le plan de travail répartit les tâches entre deux développeurs (voir la feuil
 
 Deux personnes ne devraient pas modifier le même fichier en même temps : `Server/Index.lua` et `Client/UI/index.js` sont les points de friction. Annonce-toi avant d'y toucher beaucoup.
 
+## Les issues
+
+Tout ce qu'il y a à faire est dans les [issues du dépôt](https://github.com/AkselSorensen/Pandora-Kimetsu/issues), **numérotées dans l'ordre de priorité** : la plus basse issue ouverte de ton étiquette est la prochaine à prendre. L'issue « Feuille de route » les liste toutes, de haut en bas, avec des cases à cocher.
+
+| Étiquette | Sens |
+|---|---|
+| `dev-a`, `dev-b` | à qui revient l'issue (voir « Qui fait quoi ») |
+| `P0`, `P1`, `P2` | priorité, et jalon du même nom : fondations, jeu complet, finitions |
+| `taille: S/M/L` | moins d'une journée, quelques jours, une semaine ou plus |
+| `zone: ...` | la partie du jeu concernée |
+| `en cours`, `à vérifier en jeu` | déjà commencé, ou écrit mais jamais vu dans une vraie partie |
+| `décision` | une décision à prendre avant de coder |
+| `dette` | nettoyage d'un travail précédent |
+
+Chaque issue dit **pourquoi**, **ce qu'il faut faire** (cases à cocher), **quand elle est terminée**, de quoi elle **dépend** (avec un lien vers l'issue) et quels fichiers elle touche. Une issue qui dépend d'une autre non terminée peut être préparée, mais pas fermée. Ferme-la depuis la demande de fusion (`Closes #12`).
+
+Les issues viennent de `scripts/issues.json` ; `python scripts/create_issues.py --dry-run` montre ce qui serait créé, et le script, relancé, ne recrée jamais une issue existante.
+
 ## Le flux de travail
 
-1. **Choisis une tâche** dans `docs/ROADMAP.md` et vérifie qu'elle sert le parcours du joueur.
+1. **Choisis une issue** (voir « Les issues » ci-dessous) et vérifie qu'elle sert le parcours du joueur.
 2. **Crée une branche** depuis `main` : `feature/<tâche>-<sujet>` (par exemple `feature/a14-pouvoirs-sanguinaires`) ou `fix/<sujet>`.
 3. **Code** (conventions ci-dessous), **teste** (`python tests/simulation/run_all.py`), **installe sur ton serveur** (`python scripts/sync_packages.py install --server ...`) et essaie en jeu quand c'est possible.
 4. **Mets la documentation à jour** : la section concernée de `docs/`, et le statut de la tâche dans `docs/ROADMAP.md`.

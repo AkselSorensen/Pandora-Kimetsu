@@ -1,0 +1,991 @@
+{
+ "repo": "AkselSorensen/Pandora-Kimetsu",
+ "labels": [
+  {
+   "name": "dev-a",
+   "color": "1f6feb",
+   "description": "Dev A : le jeu et l'interface (packages/wakfu-rp)"
+  },
+  {
+   "name": "dev-b",
+   "color": "8250df",
+   "description": "Dev B : le serveur, le contenu et les outils"
+  },
+  {
+   "name": "P0",
+   "color": "b60205",
+   "description": "À faire d'abord"
+  },
+  {
+   "name": "P1",
+   "color": "d93f0b",
+   "description": "Ensuite"
+  },
+  {
+   "name": "P2",
+   "color": "fbca04",
+   "description": "Quand le reste tient"
+  },
+  {
+   "name": "taille: S",
+   "color": "c2e0c6",
+   "description": "Petite : moins d'une journée"
+  },
+  {
+   "name": "taille: M",
+   "color": "7bc47f",
+   "description": "Moyenne : quelques jours"
+  },
+  {
+   "name": "taille: L",
+   "color": "2e8b57",
+   "description": "Grande : une semaine ou plus"
+  },
+  {
+   "name": "zone: démon",
+   "color": "7a0f1d",
+   "description": "Camp démon : sang, âmes, pouvoirs, soleil"
+  },
+  {
+   "name": "zone: combat",
+   "color": "e99695",
+   "description": "Techniques, sabre, parade, dash"
+  },
+  {
+   "name": "zone: interface",
+   "color": "0e8a16",
+   "description": "HUD et écrans"
+  },
+  {
+   "name": "zone: progression",
+   "color": "5319e7",
+   "description": "Grades, quêtes, chasse, compétences"
+  },
+  {
+   "name": "zone: économie",
+   "color": "f9d0c4",
+   "description": "Objets, forge, craft, boutique, coffres"
+  },
+  {
+   "name": "zone: monde",
+   "color": "006b75",
+   "description": "Carte, maisons, récolte, ambiance"
+  },
+  {
+   "name": "zone: serveur et outils",
+   "color": "bfd4f2",
+   "description": "Sauvegarde, administration, pipeline, tests"
+  },
+  {
+   "name": "en cours",
+   "color": "fef2c0",
+   "description": "Déjà commencé : voir la section « État actuel »"
+  },
+  {
+   "name": "à vérifier en jeu",
+   "color": "ffd8b5",
+   "description": "Écrit et testé par simulation, jamais vu dans une vraie partie"
+  },
+  {
+   "name": "décision",
+   "color": "d4c5f9",
+   "description": "Une décision du projet à prendre avant de coder"
+  },
+  {
+   "name": "dette",
+   "color": "e4e669",
+   "description": "Nettoyage ou reste d'un travail précédent"
+  },
+  {
+   "name": "suivi",
+   "color": "ededed",
+   "description": "Issue de suivi"
+  }
+ ],
+ "milestones": [
+  {
+   "title": "P0 · Fondations",
+   "description": "Ce qui doit exister avant tout le reste : camp, pouvoirs et tirage, sauvegarde, outils d'administration, vérifications en jeu."
+  },
+  {
+   "title": "P1 · Jeu complet",
+   "description": "Les fonctionnalités qui font le jeu : combat, chasse, soleil, maisons, coffres, équipement, carte et ambiance."
+  },
+  {
+   "title": "P2 · Finitions",
+   "description": "Couleurs, illustrations, textes, launcher, identité du serveur : à faire quand le reste tient."
+  }
+ ],
+ "issues": [
+  {
+   "key": "A1",
+   "title": "[A1] Recette en jeu et retouches visuelles",
+   "body": "**Pourquoi**\n\nTout a été vérifié par simulation Lua et par captures de l'interface, jamais dans le vrai jeu.\n\n**À faire**\n\n- [ ] Lancer le playtest avec deux clients et dérouler la liste : apparition, E sur les 5 PNJ, forge, équiper une lame, changer de voie, techniques 1 à 4, XP et grade.\n- [ ] Écran « Changer de voie » : le nom sous chaque carte est noir sur fond sombre (ajouter color: #fff à .rr-face), le badge de classe déborde de la colonne de droite (y afficher le rôle plutôt que le nom complet) et le titre touche l'encart d'information (passer #rr-title à 74px).\n- [ ] Relever toute erreur Lua ou tout asset manquant dans le journal du serveur.\n\n**Terminé quand**\n\nListe complète sans erreur dans le journal, captures avant et après.\n\n**Fichiers concernés**\n\n`Client/UI/style.css, Client/UI/index.js`\n\n---\n*Tâche A1 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P0",
+    "taille: S",
+    "zone: interface"
+   ],
+   "state": "open",
+   "rank": 1,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "X1",
+   "title": "[X1] Premier lancement réel : vérifier tout ce qui n'a jamais été vu en jeu",
+   "body": "**Pourquoi**\n\nTout le code est testé par simulation, jamais dans une vraie partie. Le premier lancement réel doit confirmer les points listés dans `docs/ARCHITECTURE.md`, section « Jamais vérifié en jeu ».\n\n**À faire**\n\n- [ ] Installer les packages sur un serveur (`scripts/sync_packages.py`) avec les packs d'assets, lancer la partie propre.\n- [ ] Posture accroupie du démon qui mange : noms `SetStanceMode` et `StanceMode.Crouching` ; arrêt de l'animation (`StopAnimation`).\n- [ ] Rendu des effets : matériau lumineux, formes (taille, orientation), sens des traînées, taille de la traînée.\n- [ ] Orientation et taille des lames en main (tâche A3).\n- [ ] Touches F1 à F10, J et H : aucune ne doit être prise par le moteur.\n- [ ] Polices du HUD (Shippori Mincho, Rajdhani) : voir l'issue sur les polices.\n- [ ] Noter ce qui diffère de la simulation, corriger, et mettre à jour « Jamais vérifié en jeu ».\n\n**Terminé quand**\n\nUne partie a été jouée de bout en bout (arrivée, choix du camp, techniques, dévoration) et chaque point ci-dessus est confirmé ou corrigé.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-a",
+    "P0",
+    "taille: M",
+    "zone: interface",
+    "à vérifier en jeu"
+   ],
+   "state": "open",
+   "rank": 2,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "B2",
+   "title": "[B2] Une seule source pour les deux serveurs",
+   "body": "> **État actuel** : Ce dépôt est la source unique ; scripts/sync_packages.py aligne les serveurs.\n\n**Pourquoi**\n\nwakfu-rp existe en deux copies (nanos-world-server et nanos-world-playtest\\Server) qui diffèrent par Package.toml, deux lignes de style.css et la section Skins de Config.lua.\n\n**À faire**\n\n- [ ] Sortir les skins dans Shared/Skins.lua, propre à chaque serveur, et harmoniser style.css.\n- [ ] Mettre le code sous git (créer le dépôt s'il n'existe pas) et écrire tools/deploy.py qui copie vers les deux serveurs sans toucher à Package.toml ni à Skins.lua.\n- [ ] Documenter la commande dans le dépôt.\n\n**Terminé quand**\n\nUne seule source ; le déploiement est rejouable ; l'écart entre les serveurs se limite à Skins.lua et Package.toml.\n\n**Fichiers concernés**\n\n`Shared/Config.lua, tools/deploy.py (nouveau)`\n\n---\n*Tâche B2 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P0",
+    "taille: M",
+    "zone: serveur et outils"
+   ],
+   "state": "closed",
+   "rank": 3,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "X2",
+   "title": "[X2] Décision 8 : la liste des pouvoirs sanguinaires et leur rareté",
+   "body": "**Pourquoi**\n\nElle débloque A13 (tirage), A14 (pouvoirs sanguinaires) et A15 (probabilités et pitié). Proposition du plan : Sang explosif, Fils, Tambours, Glace, Rubans, Faucilles de sang.\n\n**À faire**\n\n- [ ] Valider ou changer la liste des pouvoirs (au moins un par rareté et par camp).\n- [ ] Choisir la rareté de chaque souffle et de chaque pouvoir parmi les six niveaux.\n- [ ] Écrire la décision dans `docs/DEMON-SYSTEM.md`.\n\n**Terminé quand**\n\nLa liste et les raretés sont écrites et validées par les deux développeurs.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-a",
+    "P0",
+    "taille: S",
+    "zone: démon",
+    "décision"
+   ],
+   "state": "open",
+   "rank": 4,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "X3",
+   "title": "[X3] Choisir la licence du dépôt",
+   "body": "**Pourquoi**\n\nLe dépôt est public sans licence : par défaut, tous droits réservés, donc personne ne peut légalement réutiliser ni contribuer sans accord explicite.\n\n**À faire**\n\n- [ ] Choisir une licence pour le code (MIT, GPL, propriétaire...) et la raison.\n- [ ] Ajouter le fichier `LICENSE` et la mention dans le README.\n- [ ] Préciser que les assets suivent chacun leur licence (`docs/ASSETS.md`).\n\n**Terminé quand**\n\nUn fichier `LICENSE` est au dépôt et le README le dit.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-b",
+    "P0",
+    "taille: S",
+    "zone: serveur et outils",
+    "décision"
+   ],
+   "state": "open",
+   "rank": 5,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "X4",
+   "title": "[X4] Vérifier les droits des images du HUD et du contenu publié",
+   "body": "**Pourquoi**\n\nLe dépôt est public. Neuf images du HUD (`menu-*.png`, `hp-*.png`, `portrait.png`, `spell-*.png`) viennent d'une maquette dont l'origine n'est pas documentée.\n\n**À faire**\n\n- [ ] Retrouver l'origine de chaque image et sa licence.\n- [ ] Remplacer celles dont les droits sont douteux par des créations originales (voir `docs/DA-DEMON.md`).\n- [ ] Documenter l'origine dans `docs/ASSETS.md`, ou repasser le dépôt en privé en attendant.\n\n**Terminé quand**\n\nChaque image du dépôt a une origine connue et un droit d'usage clair.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-b",
+    "P0",
+    "taille: S",
+    "zone: serveur et outils",
+    "décision"
+   ],
+   "state": "open",
+   "rank": 6,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "B1",
+   "title": "[B1] Sauvegarde des joueurs",
+   "body": "**Pourquoi**\n\nTout vit en mémoire dans players[] (Server/Index.lua) : voie, XP, yens, sac, quêtes, nom et apparence sont perdus à la déconnexion et au redémarrage.\n\n**À faire**\n\n- [ ] Créer Server/Persistence.lua : Load(player) et Save(player, state), clé = identifiant de compte du joueur, numéro de version du format.\n- [ ] Charger à l'arrivée du joueur, sauvegarder à chaque changement important et au départ.\n- [ ] Y mettre les nouveautés du reroll : camp choisi (verrouillé), voie ou pouvoir tiré, raretés déjà obtenues, compteurs de pitié par palier et par camp, jetons de reset et de changement de classe, puis les touches personnalisées, les points et nœuds de l'arbre de compétences, la chair, les âmes et la faim du Démon, la maison et le contenu des coffres (taille variable : à prévoir dans le choix du stockage), le statut VIP avec sa date de fin, l'apparence et la fiche du personnage, l'équipement par palier, les apparences de sabre et de démon obtenues (compteurs de pitié par réserve compris).\n- [ ] Choisir le stockage (décision 5) et prévoir un état par défaut si la lecture échoue.\n\n**Terminé quand**\n\nUn joueur qui se reconnecte, ou après un redémarrage du serveur, retrouve son état ; test avec un joueur factice.\n\n**Dépend de**\n\nDécision 5. A6 en dépend.\n\n**Fichiers concernés**\n\n`Server/Persistence.lua (nouveau)`\n\n---\n*Tâche B1 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P0",
+    "taille: L",
+    "zone: serveur et outils"
+   ],
+   "state": "open",
+   "rank": 7,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "B3",
+   "title": "[B3] Outils d'administration sur le serveur dédié",
+   "body": "**Pourquoi**\n\ngmod-props-menu (touche Q, onglet Weapons relié à Wakfu:EquipWeapon) et nanos-admin ne sont chargés que sur le playtest ; le dédié n'a que odm-gear, ui-kit et wakfu-loading.\n\n**À faire**\n\n- [ ] Les installer sur le dédié et vérifier leurs assets_requirements.\n- [ ] Restreindre aux admins avec une liste d'identifiants de compte, exposée à Dev A pour A2.\n- [ ] Appliquer la décision 6 sur les props des joueurs.\n\n**Terminé quand**\n\nUn admin ouvre le menu de props sur le dédié, un joueur ordinaire non.\n\n**Dépend de**\n\nDécision 6.\n\n**Fichiers concernés**\n\n`Config.toml (dédié), packages gmod-props-menu et nanos-admin`\n\n---\n*Tâche B3 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P0",
+    "taille: M",
+    "zone: serveur et outils"
+   ],
+   "state": "open",
+   "rank": 8,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "B4",
+   "title": "[B4] Contrôle des assets avant chaque lancement",
+   "body": "**Pourquoi**\n\nUn pack manquant empêche wakfu-rp de se charger, et rien ne le détecte avant le démarrage.\n\n**À faire**\n\n- [ ] tools/check_assets.py croise Config.Skins, Config.Weapons.list, Npcs, YufuWeapons.lua, les assets_requirements de Package.toml et l'Assets.toml de chaque pack cuit sur chaque serveur.\n- [ ] Échec avec la liste des meshes manquants ; rejouer gen_yufu_weapons.py après chaque cook.\n- [ ] L'appeler depuis le script de lancement.\n\n**Terminé quand**\n\nSupprimer un mesh du dédié fait échouer le contrôle avec son nom.\n\n**Fichiers concernés**\n\n`tools/check_assets.py (nouveau), unreal_tools/gen_yufu_weapons.py`\n\n---\n*Tâche B4 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P0",
+    "taille: S",
+    "zone: serveur et outils"
+   ],
+   "state": "open",
+   "rank": 9,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "A12",
+   "title": "[A12] Choix du camp à l'arrivée",
+   "body": "> **État actuel** : Écran de choix et verrouillage faits (serveur et client, testés par simulation). Reste : la sauvegarde du choix (B1) et une commande d'administration.\n\n**Pourquoi**\n\nAujourd'hui le joueur arrive avec la voie par défaut (Eau) et peut en changer librement avec F1 à F4, avec le créateur ou chez le maître des respirations. Le choix voulu : Démon ou Pourfendeur, une seule fois par personnage.\n\n**À faire**\n\n- [ ] Écran de première connexion : Pourfendeur ou Démon. Une fois validé, le camp est enregistré dans l'état du joueur (state.camp) et verrouillé.\n- [ ] Retirer la liste des voies du créateur (touche C) : nom, genre, apparence et couleur restent ; la voie vient du tirage.\n- [ ] Après le choix du camp, un premier tirage au sort (voir A13) donne le souffle ou le pouvoir sanguinaire de départ.\n- [ ] Côté serveur, refuser wakfu:create, wakfu:chooseClass et wakfu:classReroll quand ils feraient changer de camp.\n- [ ] Commande d'admin pour réinitialiser le camp d'un joueur (support, et produit de boutique éventuel, voir B14).\n\n**Terminé quand**\n\nUn nouveau joueur choisit son camp une seule fois ; aucune action du client ne permet d'en changer ; un admin peut le réinitialiser.\n\n**Dépend de**\n\nB1 pour que le choix survive à la déconnexion ; A14 pour la structure des camps.\n\n**Fichiers concernés**\n\n`Shared/Classes.lua, Server/Index.lua, Client/ (écran de choix)`\n\n---\n*Tâche A12 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P0",
+    "taille: M",
+    "zone: démon",
+    "en cours"
+   ],
+   "state": "open",
+   "rank": 10,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "A14",
+   "title": "[A14] Pouvoirs sanguinaires du Démon",
+   "body": "**Pourquoi**\n\nLe Démon est aujourd'hui une seule voie à quatre techniques fixes. Le choix voulu : plusieurs pouvoirs sanguinaires tirés au sort, comme les souffles pour les Pourfendeurs.\n\n**À faire**\n\n- [ ] Ajouter la notion de camp dans Classes.lua (champ camp = slayer ou demon) et regrouper les voies par camp.\n- [ ] Remplacer la voie Demon par plusieurs pouvoirs sanguinaires, chacun avec quatre techniques et une rareté parmi les six des souffles, avec au moins un pouvoir par rareté. Proposition à valider (décision 8) : Sang explosif, Fils, Tambours, Glace, Rubans, Faucilles de sang.\n- [ ] Le grade du Démon (échelle des Lunes dans Ranks.lua) se déduit du camp et non plus de la voie.\n- [ ] Mettre à jour le HUD et l'écran de tirage pour lister les pouvoirs du camp du joueur.\n\n**Terminé quand**\n\nUn Démon a un pouvoir sanguinaire parmi au moins six, avec ses quatre techniques ; la simulation de données vérifie camps, raretés et identifiants uniques.\n\n**Dépend de**\n\nDécision 8.\n\n**Fichiers concernés**\n\n`Shared/Classes.lua, Shared/Ranks.lua, Client/UI/`\n\n---\n*Tâche A14 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P0",
+    "taille: L",
+    "zone: démon"
+   ],
+   "state": "open",
+   "rank": 11,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "A15",
+   "title": "[A15] Modèle de probabilités et pitié",
+   "body": "**Pourquoi**\n\nUn tirage avec pitié ne donne pas les taux qu'on y inscrit : la pitié gonfle les raretés élevées (avec 0,9 % de Légendaire en base, la simulation donne 1,34 %). Il faut calculer le modèle, pas le deviner.\n\n**À faire**\n\n- [ ] Module pur Shared/Draw.lua : Draw.Roll(camp, compteurs, rng) renvoie la rareté, la voie et les compteurs mis à jour. Aucun appel moteur, donc testable.\n- [ ] Six raretés, leurs taux de base et les paliers de pitié dans Config.Reroll (proposition dans la section Raretés et pitié), pour plusieurs réserves de tirage indépendantes : la voie, l'apparence du sabre et l'apparence du Démon (A27). Chaque réserve a ses taux, sa pitié et ses compteurs.\n- [ ] Outil de calibrage : à partir des taux à publier, il calcule les taux de base qui donnent ces taux effectifs une fois la pitié appliquée, et sort le tableau publié (taux, tirages moyens, probabilité d'obtenir au moins une rareté en N tirages).\n- [ ] Test de simulation d'au moins un million de tirages : taux observés à moins de 0,05 point des taux publiés, jamais plus de tirages que la pitié ne le permet sans la rareté garantie.\n- [ ] Générateur : amorcer math.random au démarrage du serveur avec une graine imprévisible, jamais à partir d'une valeur du client.\n\n**Terminé quand**\n\nLes taux effectifs mesurés sur un million de tirages collent aux taux publiés, la pitié garantie n'est jamais dépassée, et le tableau des taux se génère par une commande.\n\n**Dépend de**\n\nDécisions 8, 9 et 11.\n\n**Fichiers concernés**\n\n`Shared/Draw.lua (nouveau), Shared/Config.lua, tests/`\n\n---\n*Tâche A15 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P0",
+    "taille: M",
+    "zone: démon"
+   ],
+   "state": "open",
+   "rank": 12,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "A2",
+   "title": "[A2] Couper les raccourcis de test en production",
+   "body": "**Pourquoi**\n\nLes flèches gauche et droite donnent à n'importe quel joueur les 176 lames sans passer par la forge, F1 à F4 changent de voie sans le maître des respirations, F7 ouvre le visualiseur d'animations.\n\n**À faire**\n\n- [ ] Un réglage unique (Config.Dev ou Config.Production) qui désactive Config.WeaponCycle, les touches F1 à F4 et Config.AnimViewer.\n- [ ] Côté serveur, refuser wakfu:weaponCycle, wakfu:chooseClass et Wakfu:EquipWeapon à un joueur qui n'est pas admin : le client seul ne protège rien.\n- [ ] Refuser aussi tout changement de camp côté serveur (voir A12).\n- [ ] Brancher la liste d'admins fournie par B3.\n\n**Terminé quand**\n\nUn joueur normal ne change ni d'arme ni de voie en dehors des PNJ ; un admin le peut.\n\n**Dépend de**\n\nB3 pour la liste d'admins (en attendant, un identifiant en dur dans Config.lua).\n\n**Fichiers concernés**\n\n`Shared/Config.lua, Server/Index.lua, Client/Index.lua`\n\n---\n*Tâche A2 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P0",
+    "taille: S",
+    "zone: serveur et outils"
+   ],
+   "state": "open",
+   "rank": 13,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "A3",
+   "title": "[A3] Orientation et taille des lames en main",
+   "body": "> **État actuel** : L'orientation des lames a été mesurée sur un katana de référence mais jamais vue en partie.\n\n**Pourquoi**\n\nLe côté tranchant a été déduit de la courbure du katana de référence sans être mesuré en jeu, et les lames mesurent de 1,3 à 2,7 m.\n\n**À faire**\n\n- [ ] Équiper un échantillon de chaque groupe (Katana, Claymore, Lance, Divers) : tranchant vers l'avant, poignée dans la paume, lame qui suit l'animation.\n- [ ] Si tout est à l'envers : un roll de 180° global dans Config.Weapons.grip, ou le signe d'EXPORT dans gmod2nanos/grip.py puis reconversion. Jamais arme par arme.\n- [ ] Régler une échelle par groupe avec def.scale dans la boucle yufu de Config.lua.\n\n**Terminé quand**\n\nCaptures des quatre groupes en main et valeurs retenues notées dans Config.lua.\n\n**Fichiers concernés**\n\n`Shared/Config.lua`\n\n---\n*Tâche A3 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P0",
+    "taille: S",
+    "zone: combat",
+    "à vérifier en jeu"
+   ],
+   "state": "open",
+   "rank": 14,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "A13",
+   "title": "[A13] Tirage au sort des souffles et des pouvoirs sanguinaires",
+   "body": "**Pourquoi**\n\nLe reroll actuel est un choix libre et gratuit parmi huit cartes (wakfu:classReroll). Le reroll voulu est un tirage au sort : un souffle pour un Pourfendeur, un pouvoir sanguinaire pour un Démon.\n\n**À faire**\n\n- [ ] Données : une rareté parmi six (commune, peu commune, rare, épique, légendaire, mythique) par souffle et par pouvoir dans Classes.lua ; le prix du tirage dans Config.lua (Config.Reroll). Les taux et la pitié viennent de A15.\n- [ ] Serveur : un événement wakfu:draw remplace wakfu:classReroll pour les joueurs. Le tirage se fait uniquement côté serveur (math.random), dans le camp du joueur, après vérification de la distance au maître des respirations et du paiement (yens ou jeton de reset).\n- [ ] Réponse au client avec le résultat, sa rareté et les compteurs de pitié ; garder un historique des derniers tirages.\n- [ ] L'écran « Changer de voie » devient un écran de tirage : voie actuelle, bouton Tirer, résultat. Il affiche les taux effectifs et la pitié restante par palier (« Épique ou mieux garanti dans 12 tirages »). L'ancien choix libre reste réservé aux admins.\n- [ ] Tests : refus sans yens ni jeton, jamais de voie de l'autre camp, pitié bien forcée au palier. La répartition statistique est testée dans A15.\n\n**Terminé quand**\n\nUn joueur paie, tire et obtient une voie de son camp avec sa rareté ; aucune requête du client ne peut choisir la voie ; les tests de A15 passent.\n\n**Dépend de**\n\nA14 (raretés, camps), A12 (camp), A15 (taux et pitié), décisions 8 et 9.\n\n**Fichiers concernés**\n\n`Shared/Classes.lua, Shared/Config.lua, Server/Index.lua, Client/UI/`\n\n---\n*Tâche A13 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P0",
+    "taille: L",
+    "zone: démon"
+   ],
+   "state": "open",
+   "rank": 15,
+   "milestone": "P0 · Fondations"
+  },
+  {
+   "key": "A6",
+   "title": "[A6] Grades et progression",
+   "body": "**Pourquoi**\n\nL'XP et le grade existent mais rien ne les met en scène.\n\n**À faire**\n\n- [ ] Sources d'XP (quêtes, duels via Config.Xp.kill, entraînement) et seuils de Ranks.lua à équilibrer.\n- [ ] Montée de grade : message, son, grade affiché sous le pseudo (TextRender).\n- [ ] Trancher si l'XP suit le joueur entre Pourfendeur et Démon (décision 3), puis une quête de passage au rang Hashira.\n\n**Terminé quand**\n\nUn joueur de test passe de Mizunoto à Kinoe en parties normales, sans seuil absurde.\n\n**Dépend de**\n\nB1 pour que le grade survive à la déconnexion.\n\n**Fichiers concernés**\n\n`Shared/Ranks.lua, Shared/Quests.lua, Server/Index.lua`\n\n---\n*Tâche A6 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: M",
+    "zone: progression"
+   ],
+   "state": "open",
+   "rank": 16,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B8",
+   "title": "[B8] Tests automatiques",
+   "body": "> **État actuel** : Tests de simulation sans le jeu (tests/simulation) et tests Python (tools/tests). Reste : les lancer à chaque push, tester les maisons et les coffres.\n\n**Pourquoi**\n\nLes vérifications Lua (données, scénario serveur : techniques, XP, quêtes, forge) existent en scripts jetables hors du dépôt, et trois tests Python échouent déjà.\n\n**À faire**\n\n- [ ] Ranger les simulations dans nanosworld\\tests\\lua\\ et les lancer depuis pytest.\n- [ ] Corriger tests/test_characters.py : le fichier tests/data/nanos_mannequin_reference.json est absent.\n- [ ] Une commande, tout vert.\n\n**Terminé quand**\n\npytest passe en entier, simulations Lua comprises.\n\n**Fichiers concernés**\n\n`tests/`\n\n---\n*Tâche B8 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: M",
+    "zone: serveur et outils",
+    "en cours"
+   ],
+   "state": "open",
+   "rank": 17,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B9",
+   "title": "[B9] Robustesse du serveur",
+   "body": "**Pourquoi**\n\nAucun événement distant n'est limité en fréquence, et le serveur crée environ 83 figurants au démarrage.\n\n**À faire**\n\n- [ ] Limiter la fréquence de wakfu:forgeBuy, castIndex, invGive et weaponCycle.\n- [ ] Journaliser les achats de la forge et les gains d'XP ; réduire les logs bavards (« Arme … en main »).\n- [ ] Essai de charge avec vingt clients ou plus.\n\n**Terminé quand**\n\nUn client qui spamme un événement est ignoré sans ralentir les autres ; rapport de charge joint.\n\n**Fichiers concernés**\n\n`Server/, Config.toml`\n\n---\n*Tâche B9 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: M",
+    "zone: serveur et outils"
+   ],
+   "state": "open",
+   "rank": 18,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B10",
+   "title": "[B10] Pipeline de contenu documenté",
+   "body": "> **État actuel** : Le pipeline est décrit dans docs/ASSETS.md.\n\n**Pourquoi**\n\nLe chemin cook, master, déploiement fonctionne mais n'est écrit nulle part.\n\n**À faire**\n\n- [ ] Une page : Forge (Unreal 5.7), nanos-master-watch.bat, gen_yufu_weapons.py, gen_anim_list.py, ajout d'un skin ou d'une arme.\n- [ ] Ajouter les packs Demon Slayer manquants au master et au déploiement.\n\n**Terminé quand**\n\nLe Dev A ajoute seul un skin et une arme en suivant la page.\n\n**Fichiers concernés**\n\n`README du dépôt`\n\n---\n*Tâche B10 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: S",
+    "zone: serveur et outils"
+   ],
+   "state": "closed",
+   "rank": 19,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B14",
+   "title": "[B14] Boutique : resets et changements de classe",
+   "body": "**Pourquoi**\n\nLa boutique vend des resets et des changements de classe : c'est ce qui permet à un joueur de retirer ou de choisir sa voie après son choix d'arrivée.\n\n**À faire**\n\n- [ ] Définir les produits avec la décision 10 : un reset donne un nouveau tirage (jeton) ; un changement de classe permet de choisir une voie précise (autre jeton).\n- [ ] Côté pandora-store : un événement serveur (par exemple Wakfu:GrantToken avec le joueur, le type de jeton, la quantité et un identifiant de transaction) ; wakfu-rp valide, crédite state.tokens et sauvegarde (B1).\n- [ ] Un jeton est consommé avant les yens à l'écran de tirage (A13) ; le changement de classe ouvre un choix limité au camp du joueur.\n- [ ] Refuser une transaction déjà traitée et journaliser chaque achat.\n- [ ] Afficher dans la boutique, à côté du reset, les taux effectifs et la pitié (décision 12).\n- [ ] Vendre aussi le statut VIP (A24), le changement d'apparence (A23) et les rerolls cosmétiques du sabre et du Démon (A27) : un événement serveur de plus par produit.\n\n**Terminé quand**\n\nUn achat crédite le bon jeton une seule fois, il survit à la déconnexion, et l'écran de tirage le consomme.\n\n**Dépend de**\n\nB1, A13, B15, décisions 4, 10 et 12.\n\n**Fichiers concernés**\n\n`package pandora-store, Server/Persistence.lua`\n\n---\n*Tâche B14 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: M",
+    "zone: démon"
+   ],
+   "state": "open",
+   "rank": 20,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B15",
+   "title": "[B15] Journal d'audit des tirages",
+   "body": "**Pourquoi**\n\nPour que les taux affichés soient crédibles, et pour les vérifier sur de vrais joueurs : chaque tirage doit laisser une trace.\n\n**À faire**\n\n- [ ] Journal en ajout seul, une ligne par tirage : joueur, camp, réserve de tirage (voie ou apparence), numéro du tirage, compteurs de pitié avant et après, rareté, résultat obtenu, moyen de paiement (yens ou jeton) et identifiant de transaction.\n- [ ] Débiter, avancer les compteurs et écrire la ligne dans la même opération de sauvegarde, avant d'envoyer le résultat au client : un plantage ne fait perdre ni un tirage ni une pitié.\n- [ ] Rapport hebdomadaire : taux observés sur les tirages réels contre les taux publiés, avec une alerte quand l'écart sort de l'intervalle de confiance.\n- [ ] Les compteurs de pitié sont sauvegardés avec le joueur (B1) et jamais remis à zéro par une reconnexion ou un reset de boutique.\n\n**Terminé quand**\n\nUn tirage se retrouve dans le journal avec ses compteurs ; le rapport sort sur les tirages d'un joueur factice et signale un écart truqué volontairement.\n\n**Dépend de**\n\nB1, A15, A13.\n\n**Fichiers concernés**\n\n`Server/Audit.lua (nouveau), Server/Persistence.lua`\n\n---\n*Tâche B15 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: M",
+    "zone: démon"
+   ],
+   "state": "open",
+   "rank": 21,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B5",
+   "title": "[B5] Trier les addons selon le thème",
+   "body": "> **État actuel** : La partie propre ne charge aucun addon. Reste : trier les addons du dépôt selon le thème (décision à prendre).\n\n**Pourquoi**\n\nLe dédié embarque odm-gear (Attack on Titan, visible dans l'onglet Equipement du menu de props) et hxc-content-pm1 ; le playtest a des packs de titans, Vegeta, Alastor, Gachiakuta, Arknights et Honkai.\n\n**À faire**\n\n- [ ] Appliquer la décision 1 : garder, ranger dans une catégorie « Hors thème » du créateur, ou retirer de Config.toml et de Package.toml.\n- [ ] Mesurer la taille de téléchargement client de chaque pack.\n- [ ] Mettre Config.Skins dans l'ordre : Demon Slayer d'abord.\n\n**Terminé quand**\n\nChaque addon chargé a une raison d'être, la taille du premier téléchargement est notée.\n\n**Dépend de**\n\nDécision 1.\n\n**Fichiers concernés**\n\n`Config.toml, Package.toml, Shared/Skins.lua`\n\n---\n*Tâche B5 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: M",
+    "zone: serveur et outils",
+    "en cours"
+   ],
+   "state": "open",
+   "rank": 22,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B6",
+   "title": "[B6] Carte et ambiance Demon Slayer",
+   "body": "**Pourquoi**\n\nLe dédié lance default-testing-map et le playtest default-blank-map ; le pack d'assets maps est déployé mais son contenu n'a pas été inventorié.\n\n**À faire**\n\n- [ ] Faire l'inventaire des cartes disponibles, choisir ou cuire une carte du thème (domaine, village, forêt).\n- [ ] Repositionner les trois Config.SpawnPoints et les cinq PNJ (Dev A fournit les positions voulues).\n- [ ] Ciel, cycle jour et nuit et éclairage, avec A21 ; renseigner compatible_maps.\n\n**Terminé quand**\n\nLe serveur démarre sur la carte du thème, les PNJ et les points d'apparition sont à leur place.\n\n**Fichiers concernés**\n\n`Config.toml, Package.toml, pack maps`\n\n---\n*Tâche B6 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: L",
+    "zone: monde"
+   ],
+   "state": "open",
+   "rank": 23,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B7",
+   "title": "[B7] Boutique et caisses",
+   "body": "**Pourquoi**\n\npandora-store, pandora-cases et voidcases-content ne sont chargés que sur le playtest.\n\n**À faire**\n\n- [ ] La boutique est gardée (elle vend les resets et les changements de classe, voir B14) : relier sa monnaie par un événement, sans que le package écrive dans l'état de wakfu-rp. Les caisses : à décider (décision 4).\n- [ ] Si les caisses sont retirées : vérifier que le playtest démarre sans elles.\n- [ ] Vérifier qu'ils ne chargent rien hors thème.\n\n**Terminé quand**\n\nUn achat en boutique débite la bonne monnaie ; les caisses sont gardées ou retirées proprement.\n\n**Dépend de**\n\nDécision 4. B1 : un achat doit être sauvegardé. B14 pour les produits.\n\n**Fichiers concernés**\n\n`packages pandora-*`\n\n---\n*Tâche B7 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: M",
+    "zone: économie"
+   ],
+   "state": "open",
+   "rank": 24,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A8",
+   "title": "[A8] PNJ avec de vrais skins",
+   "body": "**Pourquoi**\n\nLes cinq PNJ de service utilisent des mannequins nanos génériques, et la galerie fait apparaître environ 83 figurants au démarrage.\n\n**À faire**\n\n- [ ] Prendre des skins pandora-demonslayer:: déjà cuits sur le dédié (vérifier dans Assets/pandora-demonslayer/Assets.toml).\n- [ ] Armes en main (Config.Weapons.npcs) et orientation vers le point d'apparition.\n- [ ] Désactiver la galerie (Config.Showcase) par défaut ou en limiter le nombre.\n\n**Terminé quand**\n\nChaque PNJ a un skin du thème ; la galerie s'active par un réglage.\n\n**Fichiers concernés**\n\n`Shared/Npcs.lua, Shared/Config.lua`\n\n---\n*Tâche A8 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: S",
+    "zone: progression"
+   ],
+   "state": "open",
+   "rank": 25,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A22",
+   "title": "[A22] Combat au sabre et aux pouvoirs démoniaques",
+   "body": "**Pourquoi**\n\nLe combat se limite aujourd'hui à un coup de Melee (40 dégâts, un coup toutes les 0,8 s, l'une des quatre animations du katana tirée au hasard) et à des techniques instantanées. Il n'y a ni défense, ni enchaînement, ni déplacement de combat.\n\n**À faire**\n\n- [ ] Endurance : une jauge par joueur, consommée par le dash, la parade et les techniques, qui se recharge lentement hors action. À zéro, le joueur est épuisé : plus de dash ni de parade pendant quelques secondes. Barre dans le HUD, valeurs dans Config.Combat.\n- [ ] Dash : une esquive rapide (avant, arrière, côtés) avec un délai, un coût d'endurance et une courte invulnérabilité. Le serveur vérifie la distance parcourue et la fréquence. Vérifier dans la documentation de nanos world comment pousser un Character (impulsion ou déplacement).\n- [ ] Parade : une garde maintenue (clic droit) qui réduit les coups reçus de face ; une parade parfaite, dans une courte fenêtre, annule le coup et étourdit l'attaquant. La garde coûte de l'endurance selon les dégâts parés et se brise à zéro. Vérifier comment intercepter les dégâts reçus (événement TakeDamage du Character).\n- [ ] Combos : une chaîne de trois à quatre coups avec une fenêtre de temps entre chacun, une animation et un multiplicateur de dégâts par coup, et un dernier coup plus fort. La chaîne se casse sur un coup reçu ou une parade. Les animations A_Combo_Attack_01 à 04 passent de l'ordre aléatoire à un ordre fixe.\n- [ ] Pouvoirs démoniaques : le Démon a ses propres enchaînements (griffes, bond, pouvoir sanguinaire en finisseur) et la même endurance, avec les coûts de sang de A5.\n- [ ] Serveur autoritaire : une machine d'états par joueur (repos, attaque, parade, dash, étourdi, épuisé). Le client n'envoie que des intentions, limitées en fréquence ; la logique vit dans Shared/Combat.lua, pure et testable.\n- [ ] Animations : la parade, le dash et l'étourdissement n'existent pas dans les packs actuels ; les trouver ou les produire avec la chaîne de retarget d'Unreal déjà en place (B10).\n\n**Terminé quand**\n\nUn duel au sabre se joue avec un enchaînement de trois coups, une parade normale et parfaite et un dash ; l'endurance se vide et épuise ; un Démon se bat aux griffes avec un bond et un pouvoir ; un client modifié ne peut ni dasher plus loin que permis ni parer en permanence ; la simulation de la machine d'états passe.\n\n**Dépend de**\n\nA4 (techniques) s'appuie sur ce code, donc A22 passe en premier. B9 pour la limitation de fréquence, A3 pour la portée réelle des lames, décision 18.\n\n**Fichiers concernés**\n\n`Shared/Combat.lua, Shared/Config.lua, Server/ (module Combat), Client/, Client/UI/ (barre d'endurance)`\n\n---\n*Tâche A22 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: L",
+    "zone: combat"
+   ],
+   "state": "open",
+   "rank": 26,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A4",
+   "title": "[A4] Techniques de respiration jouables",
+   "body": "> **État actuel** : Effets Niagara, formes lumineuses et traînées en place. Reste : de vraies techniques à projectile, avec leurs animations.\n\n**Pourquoi**\n\nUne technique est aujourd'hui un dégât instantané dans une sphère autour du lanceur (castIndex dans Server/Index.lua), sans animation, sans effet, sans son.\n\n**À faire**\n\n- [ ] Découper Server/Index.lua en modules (Spells, Forge, Inventory) avant d'y ajouter du code.\n- [ ] Une zone par technique (cône, ligne, cercle) décrite dans Classes.lua ; le test d'angle et de portée vit dans Combat.lua, pur et testable.\n- [ ] Une animation par technique : A_Combo_* d'aksel-animations pour les voies au sabre, A_Scythe_* de scythe pour la voie Pierre ; son et particules côté client sur wakfu:cast.\n- [ ] Envoyer la direction visée avec wakfu:castIndex.\n\n**Terminé quand**\n\nLes 32 techniques (8 voies × 4) ont une zone, une animation et un effet ; les tests de Combat passent.\n\n**Dépend de**\n\nA22 (états de combat communs), B9 pour la limitation de fréquence des événements.\n\n**Fichiers concernés**\n\n`Shared/Classes.lua, Shared/Combat.lua, Server/, Client/`\n\n---\n*Tâche A4 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: L",
+    "zone: combat",
+    "en cours"
+   ],
+   "state": "open",
+   "rank": 27,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A16",
+   "title": "[A16] Menu de touches dans l'inventaire",
+   "body": "**Pourquoi**\n\nLes touches sont écrites en dur dans Client/Index.lua : techniques sur 1 à 4 (SPELL_KEYS), interaction sur E, inventaire sur I, créateur sur C. Aucun objet utilisable (onigiri, fiole) n'a de raccourci.\n\n**À faire**\n\n- [ ] Un onglet Touches dans l'écran d'inventaire (touche I), au même endroit que le sac et l'équipement, sans autre menu à ouvrir : la liste des actions (techniques 1 à 4, interagir, inventaire, objets rapides) et, pour chacune, un bouton qui attend la prochaine touche pressée.\n- [ ] Une barre d'objets rapides dans le même écran : glisser un objet utilisable du sac sur un emplacement (le glisser-déposer du sac existe déjà), puis lui donner une touche. L'utilisation passe par wakfu:invUse, donc validée par le serveur (soin, plafond de PV, quantité).\n- [ ] Détecter les conflits (une touche pour deux actions) et proposer d'échanger ; un bouton Rétablir par défaut ; refuser Échap et F10, qui ouvrent le menu.\n- [ ] Sauvegarder les choix par joueur : côté serveur avec la sauvegarde de B1 (le choix suit le joueur d'un PC à l'autre), ou en local si l'API de nanos world le permet (à vérifier).\n- [ ] Afficher les touches choisies sur la barre de techniques et dans l'aide du HUD, qui montre aujourd'hui des touches figées.\n\n**Terminé quand**\n\nDepuis l'écran d'inventaire, un joueur change la touche d'une technique et d'un objet rapide, relance le jeu et retrouve ses choix ; un conflit est signalé ; Échap reste réservé au menu.\n\n**Dépend de**\n\nB1 pour la sauvegarde côté serveur.\n\n**Fichiers concernés**\n\n`Client/Index.lua, Client/UI/ (écran d'inventaire et HUD)`\n\n---\n*Tâche A16 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: M",
+    "zone: interface"
+   ],
+   "state": "open",
+   "rank": 28,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B18",
+   "title": "[B18] Modération et voix de proximité",
+   "body": "**Pourquoi**\n\nUn serveur public sans modération devient vite inutilisable, et la voix en proximité demande aussi des réglages côté serveur.\n\n**À faire**\n\n- [ ] Sanctions : muet, expulsion et bannissement par un admin (nanos-admin, B3), avec une durée et une raison, appliqués côté serveur et journalisés.\n- [ ] Filtre et limites : débit maximal de messages par joueur, longueur maximale, liste de mots interdits modifiable sans redémarrer, signalement d'un message par un joueur vers les admins.\n- [ ] Journaux de chat : conservés pour la modération pendant une durée fixée, accessibles aux seuls admins ; les messages privés ne sont lus qu'après un signalement. À vérifier au regard du RGPD et à annoncer aux joueurs (décision 26).\n- [ ] Voix de proximité : vérifier ce que nanos world propose (voix native, portée, volume selon la distance, muet global ou local) ; régler la portée par canal de camp ; touche pour parler dans le menu de touches (A16).\n- [ ] Outils d'admin : annonce à tout le serveur, observation discrète, lecture des signalements.\n\n**Terminé quand**\n\nUn admin rend muet, expulse et bannit en jeu ; un joueur qui spamme est freiné ; un signalement arrive aux admins ; les journaux se purgent à l'échéance ; la voix de proximité se coupe à la portée réglée.\n\n**Dépend de**\n\nB3 (outils d'admin), A29 (chat), B9 (limitation de fréquence), décision 26.\n\n**Fichiers concernés**\n\n`Server/Moderation.lua (nouveau), Config.toml, package nanos-admin`\n\n---\n*Tâche B18 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: M",
+    "zone: serveur et outils"
+   ],
+   "state": "open",
+   "rank": 29,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A29",
+   "title": "[A29] Communication entre joueurs",
+   "body": "**Pourquoi**\n\nLe HUD n'a pas de fenêtre de chat (seulement des icônes de volume et de micro) et rien ne permet d'écrire à un autre joueur ou à son camp. Pour un serveur de jeu de rôle, c'est un cœur de jeu.\n\n**À faire**\n\n- [ ] Premier jour : vérifier ce que fait le chat natif de nanos world avec le HUD actuel, puis le garder ou le remplacer par un chat dans le HUD.\n- [ ] Canaux : parler (proximité), chuchoter (courte portée), crier (longue portée), hors jeu entre parenthèses, camp (le Corps pour les Pourfendeurs, un canal des Lunes pour les Démons), message privé, staff. Portées et couleurs dans Config.Chat ; le nom affiché est celui de la fiche RP (A23).\n- [ ] Commandes de jeu de rôle : /me, /do et /roll avec un dé ; une bulle de texte au-dessus du personnage pour ce qui est dit à voix haute.\n- [ ] Interface : une fenêtre de chat avec un onglet par canal, un historique défilant, la saisie sur Entrée, estompée quand elle est inactive ; la touche de saisie se règle dans le menu de touches (A16).\n- [ ] Courrier : des lettres portées par un corbeau messager, envoyées à un joueur même hors ligne, stockées avec sa sauvegarde (B1) et remises à sa connexion.\n- [ ] Tous les messages passent par le serveur, qui applique les portées, le nom RP et les droits ; le client n'envoie que le texte et le canal.\n\n**Terminé quand**\n\nDeux joueurs proches se parlent ; un joueur éloigné voit un cri mais pas un murmure ; un Démon et un Pourfendeur n'ont pas le même canal de camp ; une lettre envoyée hors ligne arrive à la connexion ; un client modifié ne peut ni écrire dans un canal interdit ni se faire passer pour un autre.\n\n**Dépend de**\n\nA23 (nom RP), A16 (touche de saisie), B1 (courrier), B18 (modération), décision 26.\n\n**Fichiers concernés**\n\n`Shared/Chat.lua (nouveau), Server/Chat.lua (nouveau), Client/UI/ (chat)`\n\n---\n*Tâche A29 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: M",
+    "zone: interface"
+   ],
+   "state": "open",
+   "rank": 30,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A5",
+   "title": "[A5] Le Démon, de bout en bout",
+   "body": "> **État actuel** : Régénération passive, ressource de sang et paliers faits. Reste : le bonus des lames Nichirin contre les démons, la fin d'un démon et l'équilibrage par des duels.\n\n**Pourquoi**\n\nLe Démon n'a pour l'instant que des chiffres différents des autres voies.\n\n**À faire**\n\n- [ ] Régénération passive hors combat (coupée en plein soleil, voir A21), ressource de sang pour les techniques.\n- [ ] Bonus de dégâts des lames Nichirin contre les démons, et ce qui achève un démon.\n- [ ] Tableau d'équilibrage Pourfendeur contre Démon (PV, dégâts, délais) validé par des duels de test.\n\n**Terminé quand**\n\nUn duel Pourfendeur contre Démon se joue dans les deux sens sans camp gagnant d'avance.\n\n**Dépend de**\n\nA14 (pouvoirs sanguinaires), A18 (puissance par consommation), A21 (soleil).\n\n**Fichiers concernés**\n\n`Shared/Classes.lua, Shared/Config.lua, Server/`\n\n---\n*Tâche A5 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: M",
+    "zone: démon",
+    "en cours"
+   ],
+   "state": "open",
+   "rank": 31,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B16",
+   "title": "[B16] Modèle de maison",
+   "body": "**Pourquoi**\n\nA19 a besoin d'un intérieur et d'un extérieur de maison ; rien de tel n'existe aujourd'hui dans les assets du serveur.\n\n**À faire**\n\n- [ ] Choisir entre assembler la maison avec des meshes statiques de nanos world (murs, sols, meubles) décrits en Lua, ou cuire un intérieur modelé dans Unreal 5.7 dans un pack d'assets.\n- [ ] Livrer au Dev A la liste des meshes avec leurs positions relatives, les collisions, l'éclairage, la porte et les emplacements prévus pour les coffres.\n- [ ] Si un pack est cuit : l'ajouter au master, au déploiement et aux assets_requirements des deux serveurs (B2, B4).\n\n**Terminé quand**\n\nUne maison complète, aux collisions et à l'éclairage corrects, que le Dev A instancie sans retouche, avec la liste des emplacements de coffres.\n\n**Dépend de**\n\nDécision 15 (taille et style de la maison).\n\n**Fichiers concernés**\n\n`pack d'assets ou Shared/Houses.lua (avec A19)`\n\n---\n*Tâche B16 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: M",
+    "zone: monde"
+   ],
+   "state": "open",
+   "rank": 32,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B17",
+   "title": "[B17] Assets de glycine, de récolte et cosmétiques",
+   "body": "**Pourquoi**\n\nA25, A27 et B19 ont besoin de visuels qui n'existent dans aucun des packs actuels.\n\n**À faire**\n\n- [ ] Glycine : fleurs et treilles en meshes statiques (nanos world ou cuits depuis Unreal), particules de pétales et matériaux, à livrer au Dev A avec des tailles de zone conseillées.\n- [ ] Cosmétiques du Démon : vérifier ce que permettent les skins pandora-demonslayer (matériaux, teintes, sockets pour cornes ou marques) et produire des parties modulaires si c'est possible.\n- [ ] Cosmétiques du sabre : classer les 176 modèles par rareté avec le Dev A, contrôler leur taille en main (A3) et produire des teintes ou des effets de lame (aura) simples.\n- [ ] Ressources de récolte : roches, filons de minerai, arbres, herbes et leur version épuisée, plus les outils tenus en main (pioche, hache, faucille), pour B19.\n- [ ] Chaîne d'assets : cuire, ajouter au master et déployer sur les deux serveurs (B2, B4).\n\n**Terminé quand**\n\nLes assets sont cuits, déployés sur les deux serveurs et listés avec leurs identifiants pour A25 et A27.\n\n**Dépend de**\n\nB5 (skins retenus), B10 (pipeline), A3, décisions 22, 23 et 24.\n\n**Fichiers concernés**\n\n`packs d'assets, unreal_tools/`\n\n---\n*Tâche B17 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: M",
+    "zone: monde"
+   ],
+   "state": "open",
+   "rank": 33,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A21",
+   "title": "[A21] Soleil qui brûle les démons",
+   "body": "**Pourquoi**\n\nLe soleil est ce qui tue les démons et ce qui fait des Pourfendeurs des chasseurs de nuit : sans lui, le Démon n'a aucune contrainte de rythme. Il n'y a aujourd'hui ni heure du jour ni exposition.\n\n**À faire**\n\n- [ ] Un cycle jour et nuit piloté par le serveur : durée d'une journée, part de nuit, heure de départ (Config.Sun). Vérifier dans la documentation de nanos world comment régler l'heure du monde et la vitesse du soleil, et envoyer l'heure aux clients pour le HUD.\n- [ ] Shared/Sun.lua (nouveau, pur) : est-ce le jour à telle heure, et quels dégâts de brûlure par seconde selon les PV max et la résistance. Testable sans le moteur.\n- [ ] Exposition : un Démon brûle quand c'est le jour et qu'aucun obstacle ne le sépare du soleil (tracé de rayon vers la direction du soleil, une fois par seconde et par Démon). L'intérieur d'une maison (A19), l'ombre et les tunnels l'abritent.\n- [ ] Brûlure côté serveur : dégâts par seconde en pourcentage des PV max, régénération coupée au soleil, mort par le soleil sans crédit de duel ; fumée, son et teinte d'écran côté client.\n- [ ] Résistances : rang de Lune élevé, puissance de A18, nœud de l'arbre (A17), objet ; toutes réglées dans Config.Sun. Les démons mineurs de A7 brûlent aussi, ce qui explique qu'ils n'apparaissent que la nuit.\n- [ ] Réglage d'admin pour figer l'heure ou déclencher une éclipse lors d'un événement.\n\n**Terminé quand**\n\nUn Démon en plein soleil perd des PV chaque seconde et finit par mourir ; il survit à l'ombre et à l'intérieur ; un Pourfendeur n'est jamais touché ; les valeurs se règlent dans Config.lua ; la simulation de Sun.lua passe ; dix Démons exposés en même temps ne ralentissent pas le serveur.\n\n**Dépend de**\n\nB6 (ciel et éclairage de la carte), A19 (abri), A5, A18 et A17 pour les résistances, décision 17.\n\n**Fichiers concernés**\n\n`Shared/Sun.lua (nouveau), Shared/Config.lua, Server/, Client/`\n\n---\n*Tâche A21 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: M",
+    "zone: démon"
+   ],
+   "state": "open",
+   "rank": 34,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "X5",
+   "title": "[X5] Équilibrage du démon : repas par jour, faim, paliers",
+   "body": "**Pourquoi**\n\nLes chiffres de `Config.Demon` sont des points de départ. Cinq repas par jour au premier grade donnent au mieux 30 âmes, alors que la faim fait retomber la puissance après 240 secondes sans repas.\n\n**À faire**\n\n- [ ] Jouer des duels pourfendeur contre démon et noter qui gagne selon le palier.\n- [ ] Régler les repas par jour, la faim, les gains et les paliers dans `Shared/Config.lua`.\n- [ ] Publier le tableau d'équilibrage dans `docs/DEMON-SYSTEM.md`.\n\n**Terminé quand**\n\nUn duel se joue dans les deux sens sans camp gagnant d'avance.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: M",
+    "zone: démon",
+    "en cours"
+   ],
+   "state": "open",
+   "rank": 35,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "X6",
+   "title": "[X6] Décision : option de refus des cadavres par joueur",
+   "body": "**Pourquoi**\n\nLa décision 14 est révisée : les cadavres de joueurs sont des proies, jamais un joueur vivant, et la victime n'est pas touchée. Faut-il laisser un joueur refuser que son corps soit dévoré ?\n\n**À faire**\n\n- [ ] Décider : pas d'option, option par joueur, ou option de serveur.\n- [ ] Si option : l'ajouter à l'état du joueur et à `leaveCorpse`, avec un test de simulation.\n\n**Terminé quand**\n\nLa règle est écrite dans `docs/DEMON-SYSTEM.md` et appliquée.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: S",
+    "zone: démon",
+    "décision"
+   ],
+   "state": "open",
+   "rank": 36,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A7",
+   "title": "[A7] Chasse aux démons et missions",
+   "body": "**Pourquoi**\n\nLes quêtes se limitent à parler à un PNJ et à gagner deux duels : objective.type = \"kill\" n'accepte que target = \"player\".\n\n**À faire**\n\n- [ ] Démons mineurs (PNJ ennemis avec une arme) qui apparaissent la nuit sur la carte, avec une IA simple : marcher vers le joueur le plus proche, attaquer, mourir.\n- [ ] Étendre Quests.lua : de nouvelles cibles (demon_mineur, demon_lune) et leur récompense en yens et en XP.\n- [ ] Une chaîne de huit à dix quêtes, de la Sélection finale à la première mission, proposées par le Kakushi.\n\n**Terminé quand**\n\nUn nouveau joueur passe de Mizunoto à Mizunoe uniquement par les quêtes et la chasse.\n\n**Dépend de**\n\nA4, B6.\n\n**Fichiers concernés**\n\n`Shared/Quests.lua, Shared/Npcs.lua, Server/`\n\n---\n*Tâche A7 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: L",
+    "zone: progression"
+   ],
+   "state": "open",
+   "rank": 37,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "X7",
+   "title": "[X7] Animation de repas du démon",
+   "body": "**Pourquoi**\n\nAucune animation de repas n'existe dans les packs : le démon s'accroupit seulement. `Config.Demon.devour.animation` accepte l'identifiant d'une animation jouée en boucle.\n\n**À faire**\n\n- [ ] Trouver ou créer une animation de repas (accroupi, penché sur le corps).\n- [ ] L'importer dans Unreal, la cuire dans un pack, la nommer dans `Config.Demon.devour.animation`.\n- [ ] Vérifier qu'elle s'arrête quand le repas est interrompu.\n\n**Terminé quand**\n\nLe démon joue une animation de repas visible des autres joueurs.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: M",
+    "zone: démon"
+   ],
+   "state": "open",
+   "rank": 38,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A18",
+   "title": "[A18] Chair et âmes humaines : la puissance du Démon",
+   "body": "> **État actuel** : Chair, âmes, paliers, faim, dévoration de civils et de cadavres, limite de repas par grade : faits. Reste : sources de la chasse (A7), équilibrage, sauvegarde (B1).\n\n**Pourquoi**\n\nLe Démon ne grandit aujourd'hui que par les grades. Dans l'univers, il devient plus fort en consommant des humains.\n\n**À faire**\n\n- [ ] Deux jauges propres au Démon : la chair humaine (rend des PV et nourrit la régénération) et les âmes humaines (augmentent la puissance de façon durable, par paliers).\n- [ ] Sources : PNJ civils, âmes laissées par les victimes de duels, dépouilles des ennemis de la chasse (A7). Un joueur n'est jamais consommé sans son accord (décision 14).\n- [ ] Effets par palier de puissance : bonus de PV, de dégâts et de régénération, puis une technique du pouvoir sanguinaire débloquée au palier élevé ; un plafond évite l'emballement.\n- [ ] Faim : sans consommation pendant un délai, la puissance retombe d'un palier et la régénération baisse, ce qui donne un rythme de jeu au rôle.\n- [ ] Interface : les deux jauges dans le HUD du Démon, un geste de consommation avec une durée, que le Pourfendeur peut interrompre.\n- [ ] Tous les calculs côté serveur, valeurs dans Config.lua, sauvegarde par B1.\n\n**Terminé quand**\n\nUn Démon qui consomme monte de palier et le ressent en combat ; la faim le fait redescendre ; un Pourfendeur peut interrompre la consommation ; la simulation vérifie les paliers et les plafonds.\n\n**Dépend de**\n\nA14, A5 (Démon), A7 (sources de la chasse), B1, décision 14.\n\n**Fichiers concernés**\n\n`Shared/Config.lua, Shared/Classes.lua, Server/, Client/UI/`\n\n---\n*Tâche A18 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: L",
+    "zone: démon",
+    "en cours"
+   ],
+   "state": "open",
+   "rank": 39,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B19",
+   "title": "[B19] Récolte : minage, bois et autres ressources",
+   "body": "**Pourquoi**\n\nIl n'existe aucune ressource dans le jeu : les yens ne viennent que des quêtes. Rien ne justifie la progression d'équipement de A26 ni le craft de A28. Cette tâche revient au Dev B, libre à partir de la semaine 8 ; l'interface se fait avec le Dev A.\n\n**À faire**\n\n- [ ] Des nœuds de ressource dans le monde (filon de minerai, arbre, herbe de glycine, pêche plus tard), posés par une liste dans Config.Gathering et par une commande d'admin, avec un état plein ou épuisé et un délai de repousse.\n- [ ] Action de récolte : maintenir E devant le nœud, barre de progression dans le HUD, interruptible. Le serveur vérifie la distance, l'outil (pioche, hache, faucille) et le temps écoulé.\n- [ ] Rendement : quantités et raretés tirées côté serveur selon le nœud et le niveau de métier. Les ressources sont des objets de Items.lua (empilables) soumis au poids du sac (30 kg), ce qui fixe une limite naturelle.\n- [ ] Métiers : un niveau par métier (mineur, bûcheron, herboriste) qui monte à l'usage et améliore le rendement ; une branche possible dans l'arbre de compétences (A17).\n- [ ] Anti-abus : limite de récolte par joueur et par heure, un nœud ne sert qu'à un joueur à la fois, journal des gains, pas de récolte en combat.\n- [ ] Outils en main : la pioche et la hache apparaissent pendant la récolte avec leur animation.\n\n**Terminé quand**\n\nUn joueur récolte du minerai et du bois avec le bon outil, voit son sac se remplir, le nœud s'épuise puis repousse ; un client modifié ne récolte ni sans outil ni à distance ; les nœuds posés par un admin survivent au redémarrage ; la simulation du rendement et de l'anti-abus passe.\n\n**Dépend de**\n\nB17 (assets des nœuds et des outils), B1, A22 (états de combat), décision 24.\n\n**Fichiers concernés**\n\n`Shared/Gathering.lua (nouveau), Shared/Items.lua, Shared/Config.lua, Server/`\n\n---\n*Tâche B19 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P1",
+    "taille: L",
+    "zone: monde"
+   ],
+   "state": "open",
+   "rank": 40,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A19",
+   "title": "[A19] Maisons instanciées",
+   "body": "**Pourquoi**\n\nLe monde est partagé : un objet posé dans un lieu est vu de tous. Le choix voulu : tous les joueurs ont la même maison, mais son contenu (coffres, meubles) est propre à chacun.\n\n**À faire**\n\n- [ ] Premier jour : vérifier dans la documentation de nanos world s'il existe des dimensions ou des instances natives. Sinon, décaler chaque intérieur à des coordonnées uniques loin de la carte, comme la plateforme du créateur dans Server/Index.lua. Celle-ci utilise un modulo sur l'identifiant du joueur : au-delà de 50 joueurs, deux d'entre eux peuvent tomber sur le même emplacement.\n- [ ] Shared/Houses.lua (nouveau) : le gabarit de la maison (pièces, meubles fixes, emplacements de coffres, porte d'entrée et de sortie), identique pour tous.\n- [ ] Serveur : à l'entrée, réserver un emplacement libre dans une table d'instances (jamais un modulo), créer l'intérieur à ces coordonnées et y téléporter le joueur ; à la sortie, à la déconnexion et au rechargement du package, détruire l'instance et libérer l'emplacement.\n- [ ] Invités : le propriétaire peut faire entrer un autre joueur dans sa propre instance ; l'invité voit le contenu du propriétaire avec les droits que celui-ci a donnés.\n- [ ] Limites : nombre d'instances simultanées, délai d'inactivité, nettoyage après un plantage.\n\n**Terminé quand**\n\nDeux joueurs entrent dans la même maison et chacun voit son propre contenu ; ce que l'un y pose n'existe pas chez l'autre ; cent entrées et sorties de suite ne laissent ni entité ni emplacement orphelin ; essai avec vingt instances ouvertes.\n\n**Dépend de**\n\nA20 (coffres), B16 (modèle de maison), B6 (position des portes sur la carte), B1 (état de la maison), décision 15.\n\n**Fichiers concernés**\n\n`Shared/Houses.lua (nouveau), Server/Houses.lua (nouveau)`\n\n---\n*Tâche A19 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: L",
+    "zone: monde"
+   ],
+   "state": "open",
+   "rank": 41,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A20",
+   "title": "[A20] Coffres liés à l'inventaire",
+   "body": "**Pourquoi**\n\nL'inventaire (Items.lua : 25 emplacements, 30 kg) est le seul contenant du jeu : le joueur n'a aucun endroit où ranger ses objets.\n\n**À faire**\n\n- [ ] Réutiliser la logique pure d'Items.lua pour un coffre : un inventaire à part, avec ses propres nombre d'emplacements et poids maximum, et une fonction de transfert entre deux inventaires (Items.Transfer).\n- [ ] Dans l'écran d'inventaire (touche I), ouvrir un coffre (E devant lui) affiche une seconde grille à côté du sac ; le glisser-déposer existant déplace les objets d'une grille à l'autre.\n- [ ] Événements wakfu:chestOpen et wakfu:chestMove validés par le serveur : distance au coffre, droits du joueur, places et poids disponibles, objet réellement présent.\n- [ ] Un coffre appartient à un joueur et à une instance de maison : même gabarit pour tous, contenu propre à chacun ; un seul joueur le manipule à la fois.\n- [ ] Aucune duplication ni perte : un transfert retire puis ajoute en une seule opération ; s'il échoue, rien ne bouge ; chaque transfert est journalisé.\n- [ ] Sauvegarde du contenu avec le joueur (B1) à chaque transfert ; la mort du joueur ne vide pas ses coffres.\n\n**Terminé quand**\n\nUn joueur range et reprend des objets entre son sac et son coffre ; le contenu survit à la déconnexion ; une requête truquée (objet absent, coffre éloigné, poids dépassé) est refusée sans rien déplacer ; la simulation ne trouve aucune duplication sur 10 000 transferts aléatoires.\n\n**Dépend de**\n\nB1, décision 16 ; A19 pour les coffres des maisons.\n\n**Fichiers concernés**\n\n`Shared/Items.lua, Server/ (module Inventory de A4), Client/UI/`\n\n---\n*Tâche A20 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: L",
+    "zone: économie"
+   ],
+   "state": "open",
+   "rank": 42,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A17",
+   "title": "[A17] Arbre de compétences",
+   "body": "**Pourquoi**\n\nLes grades ne donnent que des PV : le joueur ne fait aucun choix de progression.\n\n**À faire**\n\n- [ ] Des points de compétence gagnés à chaque montée de grade et par certaines quêtes (source à trancher, décision 13).\n- [ ] Shared/Skills.lua (nouveau) : des nœuds avec un coût, des prérequis et un effet (PV, vitesse, dégâts, délai des techniques, amélioration d'une technique) ; un tronc commun et des branches propres à chaque camp et à chaque voie.\n- [ ] Serveur : un événement wakfu:skillUnlock validé (points, prérequis, camp) ; les effets s'appliquent dans applyStats et dans castIndex.\n- [ ] Panneau de l'arbre (touche K) : nœuds reliés, points restants, aperçu de l'effet, confirmation avant de dépenser.\n- [ ] Remise à zéro de l'arbre : gratuite une fois ou payante (décision 10), jamais décidée par le client seul.\n\n**Terminé quand**\n\nUn joueur dépense ses points et l'effet se voit en jeu (PV, délai, dégâts) ; l'arbre survit à la déconnexion ; le client ne peut débloquer aucun nœud sans les points.\n\n**Dépend de**\n\nB1 (sauvegarde), A6 (les grades donnent les points), décision 13.\n\n**Fichiers concernés**\n\n`Shared/Skills.lua (nouveau), Server/, Client/UI/`\n\n---\n*Tâche A17 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: L",
+    "zone: progression"
+   ],
+   "state": "open",
+   "rank": 43,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A23",
+   "title": "[A23] Créateur de personnage",
+   "body": "**Pourquoi**\n\nLe créateur existe (touche C) : nom de 16 caractères, genre, apparence parmi les skins cuits, six teintes et la voie. Il a été pensé pour des essais : une longue liste de boutons de skins, aucune fiche RP, et la voie va en disparaître avec A12.\n\n**À faire**\n\n- [ ] Parcours de première connexion : camp (A12), puis créateur, puis premier tirage (A13). Ensuite le créateur ne s'ouvre plus que chez le tailleur ou avec un produit de boutique.\n- [ ] Apparence : choisir parmi les skins du camp (Pourfendeur : uniformes et visages ; Démon : peau, yeux, marques, cornes), avec catégories, recherche et aperçu sur la plateforme existante, au lieu d'une liste plate de boutons. Dépend du tri des skins (B5).\n- [ ] Personnalisation réelle : vérifier ce que permettent les meshes cuits (teinte, matériaux, morph targets, parties interchangeables). Si les skins sont figés, le créateur choisit un skin et des couleurs ; sinon prévoir des parties modulaires (cheveux, haori, masque) comme objets cosmétiques.\n- [ ] Fiche RP : prénom, nom de famille, âge, histoire courte et trait de caractère, visibles par les autres joueurs ; règles de nom (longueur, caractères, doublons, mots interdits) validées par le serveur.\n- [ ] Changement d'apparence après la création : un jeton de la boutique (B14), jamais gratuit ; le changement de nom suit la même règle.\n- [ ] Sauvegarde de l'apparence et de la fiche avec le joueur (B1) ; le serveur valide chaque champ, comme wakfu:create le fait déjà.\n\n**Terminé quand**\n\nUn nouveau joueur crée son personnage (camp, apparence, nom, fiche) en moins de deux minutes et le retrouve à la reconnexion ; un nom interdit ou en double est refusé ; l'apparence se change avec un jeton.\n\n**Dépend de**\n\nA12, B1, B5 (tri des skins), B14 (jeton d'apparence), décision 20.\n\n**Fichiers concernés**\n\n`Client/UI/ (créateur), Client/Index.lua, Server/Index.lua, Shared/Config.lua`\n\n---\n*Tâche A23 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: L",
+    "zone: interface"
+   ],
+   "state": "open",
+   "rank": 44,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A25",
+   "title": "[A25] Zones de glycine pour les démons",
+   "body": "**Pourquoi**\n\nDans l'univers, les démons évitent la glycine, qui les affaiblit. Rien ne protège aujourd'hui un lieu contre un Démon : le Domaine n'est qu'un point d'apparition sur la carte.\n\n**À faire**\n\n- [ ] Config.Wisteria : une liste de zones (centre, rayon ou boîte, intensité) placées sur la carte, et une commande d'admin pour en ajouter, déplacer et supprimer sans redémarrer, avec sauvegarde (B1).\n- [ ] Effet sur un Démon dans une zone : ralentissement, poison par seconde, régénération coupée, puis répulsion au bord ; réglable par zone (poison léger autour d'un village, interdiction totale autour du Domaine).\n- [ ] Un module commun aux dangers pour démons avec le soleil (A21) : Shared/Hazards.lua calcule les dégâts de chaque source, applique les résistances (rang, puissance de A18, nœud de A17) et gère le cumul.\n- [ ] Le Kunai de glycine (Items.lua, sans arme en main pour l'instant) et la technique Venin de glycine de la voie Insecte infligent du poison de glycine aux Démons touchés.\n- [ ] Interface : un avertissement pour le Démon qui s'approche d'une zone et un effet à l'écran à l'intérieur ; pour le Pourfendeur, la zone se voit au sol (fleurs, pétales). Une glycine à la porte d'une maison (A19) peut la protéger.\n- [ ] Serveur : le test d'appartenance à une zone se fait une fois par seconde et par Démon, pas à chaque image.\n\n**Terminé quand**\n\nUn Démon entre dans une zone de glycine et subit les effets réglés ; un Pourfendeur n'en subit aucun ; l'admin place une zone en jeu et elle survit au redémarrage ; les valeurs se règlent dans Config.lua ; la simulation de Hazards.lua passe.\n\n**Dépend de**\n\nA21 (module commun des dangers), B6 (carte), B17 (assets de glycine), A5, B1, décision 23.\n\n**Fichiers concernés**\n\n`Shared/Hazards.lua (nouveau), Shared/Config.lua, Server/, Client/`\n\n---\n*Tâche A25 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: M",
+    "zone: démon"
+   ],
+   "state": "open",
+   "rank": 45,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A26",
+   "title": "[A26] Équipement par paliers T1 à T4",
+   "body": "**Pourquoi**\n\nLes objets ont une rareté (commune à épique) et des bonus en pourcentage fixes. Les 176 lames se partagent quatre profils (Katana +12 %, Claymore +16 %, Lance +14 %, Divers +10 %) quel que soit leur modèle, et la forge les vend toutes à 100 yens. Aucune progression d'équipement n'existe.\n\n**À faire**\n\n- [ ] Un champ tier (T1 à T4, extensible) sur chaque objet d'équipement, distinct de la rareté : le palier donne la puissance, la rareté donne le prestige. Formule des bonus par palier, par emplacement et par rareté dans Config.Gear.\n- [ ] Exigence : un palier demande un grade minimum (Ranks.lua), refusé côté serveur à l'équipement ; l'infobulle de l'inventaire montre le palier, sa couleur et l'exigence.\n- [ ] Obtention : T1 acheté ou donné au départ ; T2 et plus par butin (A7) ou par amélioration chez le forgeron (palier N vers N+1 contre des yens et des matériaux), jamais en vente libre. La forge actuelle ne vend plus que des lames T1.\n- [ ] Lames : les 176 modèles deviennent des apparences et non des profils de puissance ; la puissance vient du palier et du type (Katana, Claymore, Lance…), et l'apparence peut changer sans changer les bonus (A27).\n- [ ] Bonus d'ensemble facultatifs (par exemple trois pièces du même palier) et plafond de cumul pour éviter l'emballement.\n- [ ] Tableau d'équilibrage : des valeurs par palier validées par des duels (temps pour tuer, A22), et une simulation de Items.GearStats sur des équipements complets de chaque palier.\n\n**Terminé quand**\n\nUn équipement complet T1 et un équipement complet T4 donnent l'écart de puissance voulu, mesuré ; un joueur sous le grade requis ne peut pas équiper un T3 ; l'amélioration d'un objet fonctionne et se sauvegarde ; la forge ne vend que du T1 ; les tests de GearStats passent.\n\n**Dépend de**\n\nA6 (grades), A7 (butin), A22 (temps pour tuer), B1, décision 21.\n\n**Fichiers concernés**\n\n`Shared/Items.lua, Shared/Config.lua, Shared/Ranks.lua, Server/Index.lua, Client/UI/`\n\n---\n*Tâche A26 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: L",
+    "zone: économie"
+   ],
+   "state": "open",
+   "rank": 46,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A27",
+   "title": "[A27] Reroll cosmétique du sabre et du démon",
+   "body": "**Pourquoi**\n\nAujourd'hui l'identifiant d'une lame est aussi celui de son modèle (yufu_<nom>), et le Démon n'a aucune apparence propre : on ne peut ni changer l'apparence d'un sabre sans changer ses bonus, ni personnaliser un Démon.\n\n**À faire**\n\n- [ ] Séparer l'apparence de la puissance : une arme porte un type et un palier (A26) et un champ apparence qui désigne le modèle. Les 176 lames deviennent 176 apparences, rangées par rareté selon leur dessin.\n- [ ] Deux réserves de tirage de plus dans le moteur de A15 : l'apparence du sabre (modèle, teinte Nichirin de A9) et l'apparence du Démon (marques, cornes, couleur des yeux, couleur du sang et de l'aura des techniques). Chaque réserve a ses taux, sa pitié et ses compteurs, séparés de ceux des voies.\n- [ ] Le même écran de tirage que A13 avec un sélecteur de réserve ; les apparences obtenues vont dans une collection du joueur, qui équipe celle qu'il veut sans rien perdre.\n- [ ] Pour le Démon, les apparences passent par des matériaux, des teintes et des effets de particules (le mesh du skin reste le même) ; à valider avec B17 selon ce que les skins permettent.\n- [ ] Prix : un jeton de reroll cosmétique vendu en boutique, ou des yens (décision 22), y compris le sort des doublons.\n\n**Terminé quand**\n\nUn joueur tire une apparence de sabre ou de démon, la voit en jeu, change d'apparence sans changer de puissance et la retrouve à la reconnexion ; les taux et la pitié de chaque réserve sont affichés et testés comme ceux des voies.\n\n**Dépend de**\n\nA15 (moteur de tirage), A26 (apparence séparée de la puissance), A13 (écran), A9 (teinte Nichirin), B17 (assets), B14 (jetons), B15 (audit), B1.\n\n**Fichiers concernés**\n\n`Shared/Items.lua, Shared/Draw.lua, Shared/Config.lua, Server/, Client/UI/`\n\n---\n*Tâche A27 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: L",
+    "zone: démon"
+   ],
+   "state": "open",
+   "rank": 47,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "A28",
+   "title": "[A28] Craft de sabres avec des plans",
+   "body": "**Pourquoi**\n\nLes lames s'achètent aujourd'hui 100 yens à la forge, sans aucune fabrication. Le choix voulu : les fabriquer à partir de plans.\n\n**À faire**\n\n- [ ] Les plans : un plan donne une recette (type de lame, palier de A26, matériaux et quantités de B19, yens, temps de forge). Format des recettes dans Shared/Recipes.lua (nouveau).\n- [ ] Poste de forge : le forgeron actuel devient un poste de craft. L'écran de la forge liste les plans connus, montre en rouge les matériaux manquants et lance la fabrication, qui prend du temps ; une fabrication en cours survit à la déconnexion et se termine au retour du joueur.\n- [ ] Obtention des plans : butin de la chasse (A7), récompenses de quêtes, achat des plans de base chez le forgeron. Un plan est à usage unique ou permanent selon la décision 25.\n- [ ] Résultat : une lame du type et du palier du plan. Sa qualité peut être tirée au hasard, avec les mêmes règles d'affichage des taux et de pitié que A15 (à confirmer, décision 25) ; son apparence vient de A27, pas du plan.\n- [ ] Serveur : consommation atomique des matériaux et des yens, journal de chaque fabrication.\n- [ ] Remplacer l'achat direct des 176 lames par ce circuit ; seules les lames T1 de départ restent achetables (A26).\n\n**Terminé quand**\n\nUn joueur trouve un plan, rassemble les matériaux, fabrique une lame du bon type et du bon palier, et la retrouve dans son sac ; il ne peut rien fabriquer sans plan ni matériaux ; une fabrication en cours survit à la déconnexion ; les tests des recettes et de la qualité passent.\n\n**Dépend de**\n\nB19 (matériaux), A26 (paliers), A27 (apparence), A15 (tirage de qualité), A7 (butin), B1, décision 25.\n\n**Fichiers concernés**\n\n`Shared/Recipes.lua (nouveau), Shared/Items.lua, Server/, Client/UI/ (écran de forge)`\n\n---\n*Tâche A28 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P1",
+    "taille: L",
+    "zone: économie"
+   ],
+   "state": "open",
+   "rank": 48,
+   "milestone": "P1 · Jeu complet"
+  },
+  {
+   "key": "B12",
+   "title": "[B12] Identité publique du serveur",
+   "body": "**Pourquoi**\n\nConfig.toml du dédié annonce « Wakfu RP Aksel » avec announce = true et une description vide.\n\n**À faire**\n\n- [ ] Choisir le nom (décision 7), écrire la description, mettre à jour l'écran de chargement.\n- [ ] Garder l'identifiant de package wakfu-rp.\n\n**Terminé quand**\n\nLa liste publique affiche le nouveau nom et sa description.\n\n**Dépend de**\n\nDécision 7.\n\n**Fichiers concernés**\n\n`Config.toml (dédié), wakfu-loading`\n\n---\n*Tâche B12 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P2",
+    "taille: S",
+    "zone: serveur et outils"
+   ],
+   "state": "open",
+   "rank": 49,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "B13",
+   "title": "[B13] Sauvegardes et lancement fiable",
+   "body": "**Pourquoi**\n\nLe lancement passe par Lancer-Wakfu-RP.bat sans redémarrage automatique ni sauvegarde.\n\n**À faire**\n\n- [ ] Sauvegardes régulières de Config.toml, des sauvegardes joueurs et des Assets.toml.\n- [ ] Redémarrage automatique après un plantage, rotation des logs.\n\n**Terminé quand**\n\nTuer le processus du serveur le relance, et la dernière sauvegarde est restaurable.\n\n**Fichiers concernés**\n\n`Lancer-Wakfu-RP.bat`\n\n---\n*Tâche B13 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P2",
+    "taille: M",
+    "zone: serveur et outils"
+   ],
+   "state": "open",
+   "rank": 50,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "B11",
+   "title": "[B11] Armes à feu et autres addons GMod",
+   "body": "**Pourquoi**\n\ngmod2nanos/grip.py refuse les modèles à feu (attachement muzzle) ; seules les épées sont prises en charge.\n\n**À faire**\n\n- [ ] Prise à deux mains et HandlingMode pour les armes avec muzzle.\n- [ ] Convertir d'autres addons GMod du Workshop selon les besoins du Dev A.\n\n**Terminé quand**\n\nUne arme à feu convertie se tient correctement en main en jeu.\n\n**Fichiers concernés**\n\n`gmod2nanos/grip.py, tests/`\n\n---\n*Tâche B11 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P2",
+    "taille: L",
+    "zone: serveur et outils"
+   ],
+   "state": "open",
+   "rank": 51,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "A24",
+   "title": "[A24] Emplacements supplémentaires pour les VIP",
+   "body": "**Pourquoi**\n\nLe sac a 25 emplacements et 30 kg pour tout le monde (Items.SlotCount et Items.MaxWeight, des constantes globales). La tuile Premium du menu pause affiche aujourd'hui un texte figé (« Actif (29j 12h) »).\n\n**À faire**\n\n- [ ] Capacité par joueur : Items.NewInventory reçoit un nombre d'emplacements et un poids maximum au lieu de constantes globales ; Items.Add, Swap et Equip, le serveur et le HUD (hud.slotCount) les lisent dans l'inventaire du joueur.\n- [ ] Config.Vip : emplacements en plus, poids en plus, durée ; les mêmes réglages pour la capacité des coffres si c'est décidé (décision 19).\n- [ ] Statut VIP côté serveur : state.vipUntil (date de fin), crédité par un événement de la boutique (B14), jamais par le client, et recalculé à chaque connexion et à l'expiration.\n- [ ] Écran d'inventaire : les emplacements VIP apparaissent verrouillés (cadenas, marque VIP) pour un joueur ordinaire ; la tuile Premium du menu pause affiche le vrai statut et le temps restant.\n- [ ] Expiration sans perte : quand le VIP se termine, les objets des emplacements en trop restent visibles et récupérables, mais plus rien ne peut y être ajouté tant que le joueur ne les a pas déplacés. Aucun objet n'est jamais supprimé.\n- [ ] Tests : capacité par joueur, ajout refusé au-delà, expiration avec le sac plein, deux joueurs de capacités différentes qui s'échangent des objets.\n\n**Terminé quand**\n\nUn joueur VIP voit et utilise ses emplacements en plus, un joueur ordinaire les voit verrouillés ; à l'expiration aucun objet n'est perdu ; la tuile Premium affiche le vrai statut ; les tests de capacité passent.\n\n**Dépend de**\n\nA20 (même logique de capacité pour les coffres), B1 (date de fin du VIP), B14 (vente du statut), décision 19.\n\n**Fichiers concernés**\n\n`Shared/Items.lua, Server/Index.lua, Client/UI/ (inventaire et menu pause), Shared/Config.lua`\n\n---\n*Tâche A24 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P2",
+    "taille: M",
+    "zone: économie"
+   ],
+   "state": "open",
+   "rank": 52,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "B20",
+   "title": "[B20] Launcher du jeu",
+   "body": "**Pourquoi**\n\nPour rejoindre le serveur, un joueur lance nanos world lui-même et cherche le serveur dans la liste ; les packs d'assets se téléchargent à la première connexion sans information (leur taille est à mesurer dans B5).\n\n**À faire**\n\n- [ ] Premier jour : vérifier comment nanos world se lance sur un serveur donné (adresse, port, argument de ligne de commande ou lien Steam) et si le jeu télécharge lui-même les assets à la connexion.\n- [ ] Un lanceur Windows simple : état du serveur (en ligne, joueurs connectés, ping), actualités et notes de mise à jour, bouton Jouer qui ouvre nanos world connecté au serveur. Les informations viennent d'un petit fichier publié (JSON), pas d'un serveur de plus.\n- [ ] Préchargement des packs d'assets avec une barre de progression, vérification d'intégrité et reprise après une coupure, si le jeu le permet ; sinon afficher seulement la taille du premier téléchargement.\n- [ ] Mises à jour du lanceur signées, et exécutable signé pour ne pas être bloqué par les antivirus ; aucun code téléchargé n'est exécuté sans vérification de sa signature.\n- [ ] Habillage Demon Slayer (logo Kimetsu, fond, fenêtre d'actualités) en français, avec les liens vers le Discord et le règlement.\n- [ ] Facultatif : liaison de compte (Discord) pour une liste blanche ou des rôles (décision 27).\n\n**Terminé quand**\n\nUn joueur télécharge le lanceur, voit l'état du serveur, clique sur Jouer et arrive sur le serveur sans le chercher dans la liste ; le lanceur se met à jour seul et n'est pas bloqué par un antivirus courant.\n\n**Dépend de**\n\nB5 (taille des assets), B12 (nom public du serveur), B10 (pipeline), décision 27.\n\n**Fichiers concernés**\n\n`launcher/ (nouveau dossier), page d'actualités`\n\n---\n*Tâche B20 du plan de travail · Dev B (serveur, contenu, outils) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-b",
+    "P2",
+    "taille: L",
+    "zone: serveur et outils"
+   ],
+   "state": "open",
+   "rank": 53,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "X8",
+   "title": "[X8] Fournir les polices du HUD",
+   "body": "**Pourquoi**\n\nShippori Mincho et Rajdhani sont nommées dans le CSS mais aucun fichier de police n'est livré : le jeu retombe sur une police du système.\n\n**À faire**\n\n- [ ] Choisir une licence compatible (ces polices sont libres sur Google Fonts).\n- [ ] Ajouter les fichiers dans `Client/UI/fonts/` et les déclarer avec `@font-face`.\n- [ ] Vérifier le rendu en jeu.\n\n**Terminé quand**\n\nLe HUD s'affiche avec les mêmes polices chez tous les joueurs.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-a",
+    "P2",
+    "taille: S",
+    "zone: interface"
+   ],
+   "state": "open",
+   "rank": 54,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "A9",
+   "title": "[A9] Couleur Nichirin par voie",
+   "body": "**Pourquoi**\n\nUne lame Nichirin prend la couleur de son porteur : Eau bleue, Flamme orange, Foudre jaune.\n\n**À faire**\n\n- [ ] Teinter le Melee avec SetMaterialColorParameter ; le nom du paramètre de matériau des meshes yufu cuits n'est pas connu, il faut le relever.\n- [ ] Repli sans erreur quand le paramètre n'existe pas.\n\n**Terminé quand**\n\nLa lame en main change de couleur avec la voie sans erreur dans le journal.\n\n**Fichiers concernés**\n\n`Server/Index.lua`\n\n---\n*Tâche A9 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P2",
+    "taille: M",
+    "zone: combat"
+   ],
+   "state": "open",
+   "rank": 55,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "X9",
+   "title": "[X9] Anneau au sol autour de la proie",
+   "body": "**Pourquoi**\n\nLa maquette montre un anneau qui se remplit autour de la proie pendant le repas. C'est un effet dans le monde, pas du HUD.\n\n**À faire**\n\n- [ ] Créer une entité locale (forme `Ring` de `breath-fx`) sous la proie, côté client.\n- [ ] La remplir en suivant la durée du repas ; la détruire à l'arrêt.\n\n**Terminé quand**\n\nUn anneau suit le repas pour le démon et les joueurs proches.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-a",
+    "P2",
+    "taille: S",
+    "zone: démon"
+   ],
+   "state": "open",
+   "rank": 56,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "A10",
+   "title": "[A10] Illustrations et icônes",
+   "body": "**Pourquoi**\n\nLes cartes de voie affichent un kanji faute d'illustration, et la barre de techniques alterne deux icônes génériques.\n\n**À faire**\n\n- [ ] Illustrations dans Client/UI/img/reroll/<voie>.png si des images sont fournies (les anciens PNG Wakfu ne servent plus).\n- [ ] Une icône par technique (SPELL_ICONS dans index.js).\n- [ ] Aperçu de la lame dans la forge, avec une SceneCapture comme pour le portrait.\n\n**Terminé quand**\n\nPlus aucune carte ni technique sans image propre.\n\n**Fichiers concernés**\n\n`Client/UI/`\n\n---\n*Tâche A10 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P2",
+    "taille: M",
+    "zone: interface"
+   ],
+   "state": "open",
+   "rank": 57,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "X10",
+   "title": "[X10] Fournir la vidéo de chargement ou la remplacer",
+   "body": "**Pourquoi**\n\n`packages/wakfu-loading` attend `bg.webm` (16 Mo), exclue du dépôt : sans elle, l'écran de chargement est vide.\n\n**À faire**\n\n- [ ] Décider d'une vidéo ou d'une image de fond dont les droits sont clairs.\n- [ ] La déposer, ou remplacer la vidéo par un fond CSS.\n- [ ] Documenter dans `docs/ASSETS.md`.\n\n**Terminé quand**\n\nL'écran de chargement s'affiche avec un fond.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-b",
+    "P2",
+    "taille: S",
+    "zone: serveur et outils",
+    "dette"
+   ],
+   "state": "open",
+   "rank": 58,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "A11",
+   "title": "[A11] Relecture des textes",
+   "body": "**Pourquoi**\n\nLes textes ont été écrits d'un trait.\n\n**À faire**\n\n- [ ] Relire dialogues, quêtes, objets et astuces de l'écran de chargement.\n- [ ] Noms de lames tirés des fichiers (par exemple « Typ Yoru Sold ») : renommer ceux qui le méritent.\n- [ ] Cohérence yens, XP et termes japonais.\n\n**Terminé quand**\n\nRelecture faite par une personne qui n'a pas écrit les textes.\n\n**Fichiers concernés**\n\n`Shared/Items.lua, Shared/Quests.lua, Shared/Npcs.lua`\n\n---\n*Tâche A11 du plan de travail · Dev A (jeu et interface) · voir `docs/ROADMAP.md` et `CONTRIBUTING.md`.*",
+   "labels": [
+    "dev-a",
+    "P2",
+    "taille: S",
+    "zone: interface"
+   ],
+   "state": "open",
+   "rank": 59,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "X11",
+   "title": "[X11] Retirer les restes de l'ancien projet Wakfu",
+   "body": "**Pourquoi**\n\nLes dossiers de serveur gardent des images de classes Wakfu (`img/reroll/`, `logo.png`) et le package de test « Eric », non utilisés.\n\n**À faire**\n\n- [ ] Supprimer `Client/UI/img/reroll/` et `logo.png` des serveurs.\n- [ ] Retirer le package `eric-player-model-npcs-friendly-and-hostile-test` des serveurs.\n- [ ] Vérifier que rien ne les référence.\n\n**Terminé quand**\n\nPlus aucun contenu Wakfu ni package de test inconnu dans les serveurs.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-b",
+    "P2",
+    "taille: S",
+    "zone: serveur et outils",
+    "dette"
+   ],
+   "state": "open",
+   "rank": 60,
+   "milestone": "P2 · Finitions"
+  },
+  {
+   "key": "X12",
+   "title": "[X12] Fournir le fichier de référence des tests de personnages",
+   "body": "**Pourquoi**\n\nTrois tests de `tools/tests/test_characters.py` échouent : ils attendent `tests/data/nanos_mannequin_reference.json`, absent du dépôt.\n\n**À faire**\n\n- [ ] Régénérer le fichier à partir du mannequin de nanos world (voir le test).\n- [ ] Ou rendre les tests optionnels s'il manque (`skip`).\n- [ ] Vérifier `cd tools && python -m pytest`.\n\n**Terminé quand**\n\n`python -m pytest` passe entièrement dans `tools/`.\n\n---\n*Issue ajoutée en dehors du plan de travail initial · voir `docs/ROADMAP.md`.*",
+   "labels": [
+    "dev-b",
+    "P2",
+    "taille: S",
+    "zone: serveur et outils",
+    "dette"
+   ],
+   "state": "open",
+   "rank": 61,
+   "milestone": "P2 · Finitions"
+  }
+ ]
+}
