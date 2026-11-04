@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="animations.css">
+	<script src="animations.js"></script>
+</head>
+<body>
+	<div id="viewer" class="hidden">
+		<header>
+			<h1>Visualiseur d'animations</h1>
+			<span id="pack"></span>
+			<button id="close" title="Fermer (Échap ou la touche d'ouverture)">&#10005;</button>
+		</header>
+
+		<section class="controls">
+			<label>Slot
+				<select id="slot">
+					<option value="UpperBody">Haut du corps</option>
+					<option value="FullBody">Corps entier</option>
+					<option value="Head">Tête</option>
+				</select>
+			</label>
+			<label><input type="checkbox" id="loop"> Boucle</label>
+			<label class="rate">Vitesse
+				<input type="range" id="rate" min="0.25" max="2" step="0.05" value="1">
+				<output id="rate-out">1.00&times;</output>
+			</label>
+			<button id="stop">Stop</button>
+		</section>
+		<div id="now">Rien ne joue</div>
+
+		<section class="filters">
+			<div id="packs"></div>
+			<input id="search" type="search" placeholder="Rechercher : combo, dodge, hit..." autocomplete="off">
+			<div id="kinds">
+				<button data-kind="A" class="on">Séquences (A_)</button>
+				<button data-kind="AM">Montages (AM_)</button>
+			</div>
+			<div id="chips"></div>
+		</section>
+
+		<ul id="list"></ul>
+		<div id="count"></div>
+
+		<section class="free">
+			<input id="free" placeholder="Chemin libre : pack::NomAnimation" autocomplete="off">
+			<button id="free-play">Jouer</button>
+		</section>
+
+		<section class="picked">
+			<h2>À me donner</h2>
+			<textarea id="picked" readonly spellcheck="false"></textarea>
+			<p>Les choix sont aussi écrits dans le journal du serveur (« Animation retenue »).</p>
+		</section>
+
+		<footer>&uarr;&darr; choisir et jouer &middot; Entrée rejouer &middot; S retenir &middot; B bug &middot; Échap fermer</footer>
+	</div>
+</body>
+</html>

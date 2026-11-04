@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="style.css">
+	<script src="index.js"></script>
+</head>
+<body>
+	<!-- Thème du démon : voile de sang sur les bords de l'écran (plus fort pendant la dévoration) et filets rouges -->
+	<div id="demon-fx" class="hidden"><i class="fx-line top"></i><i class="fx-line bottom"></i></div>
+	<div id="logo"><b>KIMETSU</b><span>ROLE PLAY</span></div>
+	<!-- Personnage : bloc 463 x 148 px, coordonnées de la maquette Figma -->
+	<div id="player">
+		<img id="portrait" src="img/portrait.png" alt="">
+		<div id="portrait-live" class="empty"><img id="portrait-img" alt=""></div>
+		<div id="level">
+			<svg viewBox="0 0 36 36" width="36" height="36">
+				<circle class="ring" cx="18" cy="18" r="16.5"/>
+				<circle class="arc" cx="18" cy="18" r="16.5" stroke-dasharray="51.8 51.9" transform="rotate(253 18 18)"/>
+			</svg>
+			<span id="level-value">1</span>
+		</div>
+		<div id="name"><span id="player-name"></span> <span id="class-name"></span><span id="rank-name"></span></div>
+
+		<div id="hp-clip"><img src="img/hp-red.png" alt=""></div>
+		<div id="hp-text">100/100</div>
+		<svg id="hp-heart" viewBox="0 0 24 22" width="18" height="16"><path d="M12 21 C 4 14.5 1 10.5 1 7 C 1 3.8 3.6 1.5 6.8 1.5 C 9 1.5 11 2.7 12 4.6 C 13 2.7 15 1.5 17.2 1.5 C 20.4 1.5 23 3.8 23 7 C 23 10.5 20 14.5 12 21 Z"/></svg>
+
+		<div id="en-track"></div>
+		<div id="en-clip"><img src="img/hp-blue.png" alt=""></div>
+
+		<svg class="vol dim" viewBox="0 0 24 24" width="20" height="20" style="left: 130px"><path d="M3 9 h4 l5 -4.5 v15 l-5 -4.5 h-4 z"/><path class="wave" d="M15.5 9.5 a3.5 3.5 0 0 1 0 5"/></svg>
+		<svg class="vol dim" viewBox="0 0 24 24" width="22" height="20" style="left: 162px"><path d="M3 9 h4 l5 -4.5 v15 l-5 -4.5 h-4 z"/><path class="wave" d="M15.5 9.5 a3.5 3.5 0 0 1 0 5"/><path class="wave" d="M18 7 a6.5 6.5 0 0 1 0 10"/></svg>
+		<svg class="vol" viewBox="0 0 28 24" width="26" height="20" style="left: 199px"><path d="M3 9 h4 l5 -4.5 v15 l-5 -4.5 h-4 z"/><path class="wave" d="M15.5 9.5 a3.5 3.5 0 0 1 0 5"/><path class="wave" d="M18 7 a6.5 6.5 0 0 1 0 10"/><path class="wave" d="M20.5 4.5 a9.5 9.5 0 0 1 0 15"/></svg>
+
+		<div id="en-text">100%</div>
+		<svg id="en-icon" viewBox="0 0 24 24" width="18" height="18"><path fill-rule="evenodd" d="M12 2 a10 10 0 1 0 0 20 a10 10 0 0 0 0 -20 Z M15 7 a6 6 0 1 1 0 12 a6 6 0 0 1 0 -12 Z"/></svg>
+
+		<svg id="mic" viewBox="0 0 17 22" width="17" height="22"><rect x="4.5" y="0.5" width="8" height="13" rx="4"/><path class="stroke" d="M1.5 9.5 a7 7 0 0 0 14 0"/><path class="stroke" d="M8.5 16.5 v4"/></svg>
+
+		<div id="meta"><span id="kamas"><i class="coin"></i><b id="kamas-value">0</b> yens</span> <span id="stats"></span></div>
+	</div>
+
+	<!-- Démon : sang, chair et âmes (visible seulement pour un démon) -->
+	<div id="demon" class="hidden">
+		<div id="demon-tier"><b id="demon-tier-name"></b><small id="demon-tier-count"></small></div>
+		<div class="dgauge" id="dg-blood"><span class="dlabel">Sang</span><div class="dbar"><i></i></div><b class="dval"></b></div>
+		<div class="dgauge" id="dg-flesh"><span class="dlabel">Chair</span><div class="dbar"><i></i><u class="dghost"></u></div><b class="dval"></b></div>
+		<div class="dgauge" id="dg-souls"><span class="dlabel">Âmes</span><div class="dbar"><i></i><u class="dghost"></u></div><b class="dval"></b></div>
+		<div id="demon-meals"><span>Repas du jour</span><b id="demon-meals-count"></b></div>
+		<div id="demon-hint"></div>
+	</div>
+
+	<!-- Geste de dévoration : barre qui se remplit pendant que le démon tient sa proie -->
+	<div id="devour" class="hidden">
+		<div id="devour-gain"></div>
+		<div id="devour-head"><span id="devour-name"></span><span id="devour-time"></span></div>
+		<div id="devour-bar"><i></i></div>
+		<div id="devour-hint">Un coup reçu, une technique ou un pas de trop interrompt le repas.</div>
+	</div>
+
+	<!-- Quêtes -->
+	<div id="quests" class="panel">
+		<div class="panel-title">Quêtes</div>
+		<div id="quest-list"><div class="empty">Parle au Kakushi (E)</div></div>
+		<div id="next-tier" class="hidden">
+			<div class="panel-title">Prochain palier</div>
+			<div id="next-tier-row"><span id="next-tier-name"></span><span id="next-tier-count"></span></div>
+			<div id="next-tier-bar"><i></i></div>
+		</div>
+	</div>
+
+	<!-- Messages ponctuels -->
+	<div id="toasts"></div>
+
+	<!-- Dialogue PNJ -->
+	<div id="dialog" class="panel hidden">
+		<div id="dialog-name"></div>
+		<div id="dialog-text"></div>
+		<div id="dialog-actions"></div>
+	</div>
+
+	<!-- Barre de sorts -->
+	<div id="spellbar"></div>
+
+	<!-- Aide touches -->
+	<div id="help">
+		<span><kbd>F1</kbd>–<kbd>F4</kbd> classe</span>
+		<span><kbd>E</kbd> parler</span>
+		<span><kbd>C</kbd> créateur</span>
+		<span><kbd>F5</kbd> accepter</span>
+		<span><kbd>1</kbd>–<kbd>4</kbd> techniques</span>
+		<span><kbd>F6</kbd> entraînement</span>
+		<span><kbd id="help-trail-key">J</kbd> traînée</span>
+		<span id="help-demon" class="hidden"><kbd id="help-demon-key">H</kbd> dévorer</span>
+	</div>
+
+	<!-- KO -->
+	<div id="ko" class="hidden"><div>K.O.</div><small>Réapparition au Domaine…</small></div>
+
+	<!-- Menu pause (Échap) -->
+	<div id="menu" class="hidden">
+		<div id="menu-grid">
+			<button class="tile" id="tile-resume" data-action="resume">
+				<span class="tile-art"></span>
+				<span class="tile-text">
+					<span class="tile-title"><svg viewBox="0 0 16 18" width="16" height="18"><path d="M1 1 L15 9 L1 17 Z" fill="#fff"/></svg>REPRENDRE</span>
+					<span class="tile-sub">Reprenez là où vous vous êtes arrêté…</span>
+				</span>
+			</button>
+			<button class="tile" id="tile-settings" data-action="settings">
+				<span class="tile-art"></span>
+				<span class="tile-text">
+					<span class="tile-title"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="#f2c20f" fill-rule="evenodd" d="M10 1h4l.7 3 2.2 1.2 2.9-1.1 2 3.5-2.3 2 .1 2.5 2.3 2-2 3.5-2.9-1-2.2 1.3-.7 3h-4l-.7-3-2.2-1.3-2.9 1-2-3.5 2.3-2-.1-2.5-2.3-2 2-3.5 2.9 1.1L9.3 4zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/></svg>PARAMETRES</span>
+					<span class="tile-sub">Un soucis de configuration…</span>
+				</span>
+			</button>
+			<button class="tile" id="tile-shop" data-action="shop">
+				<span class="tile-art"></span>
+				<span class="tile-text">
+					<span class="tile-title"><svg viewBox="0 0 24 22" width="22" height="20"><path fill="#e0344b" d="M1 1h4l1 3h17l-2.5 9H8L4.5 3H1zM9 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm10 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>BOUTIQUE</span>
+					<span class="tile-sub">Améliorez votre expérience de jeu dès maintenant !</span>
+				</span>
+			</button>
+			<button class="tile" id="tile-discord" data-action="discord">
+				<span class="tile-art"></span>
+				<span class="tile-text">
+					<span class="tile-title"><svg viewBox="0 0 24 18" width="24" height="18"><path fill="#6a73f0" d="M20 1.5A19 19 0 0 0 15.3 0l-.6 1.2a17 17 0 0 0-5.4 0L8.7 0A19 19 0 0 0 4 1.5C1 6 .2 10.400 .6 14.800A19 19 0 0 0 6.400 17.700l1.200-2a12 12 0 0 1-1.900-.9l.5-.4a13.500 13.500 0 0 0 11.600 0l.5.400c-.6.400-1.200.7-1.900.9l1.200 2a19 19 0 0 0 5.800-2.900C24 9.700 22.600 5.400 20 1.500zM8 12c-1.100 0-2-1-2-2.300s.9-2.300 2-2.300 2 1 2 2.300S9.100 12 8 12zm8 0c-1.100 0-2-1-2-2.300s.9-2.300 2-2.300 2 1 2 2.300-.9 2.300-2 2.300z"/></svg>DISCORD</span>
+					<span class="tile-sub">Rejoignez notre communauté…</span>
+				</span>
+			</button>
+			<button class="tile" id="tile-premium" data-action="premium">
+				<span class="tile-art"></span>
+				<span class="tile-text top">
+					<span class="tile-title"><svg viewBox="0 0 24 23" width="24" height="23"><path fill="#f2c20f" d="M12 0l3.100 7.600 8.200.6-6.300 5.300 2 8-7-4.400-7 4.400 2-8L.700 8.200l8.200-.6z"/></svg>PREMIUM</span>
+					<span class="tile-sub">Votre status premium :</span>
+					<span class="tile-sub gold">Actif (29j 12h)</span>
+				</span>
+				<span class="tile-text bottom">
+					<span class="tile-sub">Prolongez votre abonnement dans la boutique…</span>
+				</span>
+			</button>
+			<div id="bottom-bar">
+				<img src="img/menu-bottom.png" alt="">
+				<button id="quit-button" data-action="disconnect" aria-label="Se déconnecter"></button>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Inventaire (touche I) : le personnage 3D reste visible à droite, au centre libre du voile -->
+	<div id="inventory" class="hidden">
+		<div id="inv-stage">
+			<div id="inv-kamas"><i class="coin"></i><span id="inv-kamas-value">0</span></div>
+			<div id="inv-title">Votre sac à dos</div>
+			<div id="inv-weight"><b id="inv-weight-value">0</b> / <span id="inv-weight-max">30</span> KG</div>
+			<label id="inv-search"><svg viewBox="0 0 24 24" width="20" height="20"><circle cx="10" cy="10" r="6.500" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15 15l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="inv-search-input" type="text" placeholder="Rechercher..." autocomplete="off" spellcheck="false"></label>
+			<button id="inv-filter" type="button"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M2 3h20l-8 9.500V21l-4-2v-6.500z"/></svg><span id="inv-filter-label">Filtrer par:</span></button>
+			<div id="inv-grid"></div>
+			<div id="inv-equip-left" class="inv-equip"></div>
+			<div id="inv-equip-right" class="inv-equip"></div>
+			<button id="inv-auction" type="button"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2l10 9h-3v10h-5v-6h-4v6H5V11H2z"/></svg>Accéder à l'hôtel de vente</button>
+			<button id="inv-trail" type="button"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 18c6-1 9-5 11-11l2 1-2 5 6-3 1 2c-4 3-9 5-18 6z" fill="currentColor"/></svg>Traînée de l'arme</button>
+			<button id="inv-close" type="button"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 4l16 16M20 4L4 20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>Fermer</button>
+			<div id="inv-drop"><span>Lâcher pour <b>jeter</b></span><svg viewBox="0 0 40 24" width="44" height="26"><path fill="currentColor" d="M2 6l10 2 10-4 12 6c3 1.500 3 5-1 5l-12 2-8-2-6 3z"/></svg></div>
+			<div id="inv-menu" class="hidden"></div>
+			<div id="inv-tip" class="hidden"></div>
+		</div>
+	</div>
+
+	<!-- Choix du camp (première connexion) : obligatoire, sans bouton Fermer -->
+	<div id="camp" class="hidden">
+		<div id="camp-moon"></div>
+		<svg id="camp-hills" aria-hidden="true" viewBox="0 0 1440 300" preserveAspectRatio="none"><path d="M0 300 L0 170 L120 110 L230 160 L380 80 L540 170 L690 120 L850 180 L1010 100 L1160 170 L1300 120 L1440 180 L1440 300 Z" fill="#160810"/><path d="M0 300 L0 230 L100 196 L200 232 L330 184 L460 236 L600 200 L740 242 L880 204 L1030 244 L1170 208 L1310 246 L1440 214 L1440 300 Z" fill="#0b0407"/></svg>
+		<div id="camp-box">
+			<h2>Choisis ton camp</h2>
+			<p id="camp-sub">Ce choix est définitif pour ce personnage : tu pourras changer de voie, jamais de camp.</p>
+			<div id="camp-cards"></div>
+			<button id="camp-confirm" type="button" disabled>Choisis un camp</button>
+			<div id="camp-note"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>Un changement de camp pourra s'acheter en boutique.</div>
+		</div>
+	</div>
+
+	<!-- Reroll de classe (touche R) : maquette 1536 x 1024, mise à l'échelle par index.js (--rr-scale) -->
+	<div id="reroll" class="hidden">
+		<div id="rr-stage">
+			<button id="rr-close" type="button"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 4l16 16M20 4L4 20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>Fermer</button>
+			<div id="rr-orn"><span class="line"></span><svg viewBox="0 0 40 40" width="44" height="44"><path d="M20 2c7 6 10 12 7 18-2 4-6 5-8 2-3-3-1-8 3-8-6-1-10 4-9 10 1 8 10 11 17 6C36 24 34 10 20 2z" fill="#18b8ee"/></svg><span class="line r"></span></div>
+			<div id="rr-title">Changer de voie</div>
+			<div id="rr-sub">Choisissez une autre voie de votre camp et vivez votre aventure autrement.<br><span>Votre personnage, son histoire et son équipement sont conservés.</span></div>
+			<div id="rr-info"><svg viewBox="0 0 24 24" width="30" height="30"><circle cx="12" cy="12" r="10.500" fill="none" stroke="#18b8ee" stroke-width="1.500"/><path d="M12 11v6M12 7.500v.5" stroke="#18b8ee" stroke-width="2" stroke-linecap="round"/></svg><span>Changer de voie vous permet de garder votre personnage (nom, apparence, grade, histoire RP) tout en changeant de style de combat.</span></div>
+			<div id="rr-cards"></div>
+			<div id="rr-detail">
+				<div id="rr-art"></div>
+				<div id="rr-head"><span id="rr-emblem"></span><span><b id="rr-name"></b><small id="rr-title2"></small></span></div>
+				<p id="rr-blurb"></p>
+				<div id="rr-tags"></div>
+				<div id="rr-skills-title">Compétences principales</div>
+				<div id="rr-skills"></div>
+				<div id="rr-play-title">Aperçu du gameplay</div>
+				<div id="rr-bars"></div>
+			</div>
+			<div id="rr-side">
+				<div class="rr-label" id="rr-lbl-cur">Votre personnage actuel</div>
+				<div class="rr-who" id="rr-who-cur"><div class="rr-portrait" id="rr-cur-portrait"></div><div><b id="rr-cur-name"></b><small id="rr-cur-level"></small><span class="rr-chip" id="rr-cur-class"></span></div></div>
+				<svg id="rr-chevron" viewBox="0 0 24 24" width="30" height="30"><path d="M5 5l7 7 7-7M5 12l7 7 7-7" fill="none" stroke="#18b8ee" stroke-width="2.500" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				<div class="rr-label" id="rr-lbl-new">Nouvelle voie</div>
+				<div class="rr-who" id="rr-who-new"><div class="rr-portrait" id="rr-new-portrait"></div><div><b id="rr-new-name"></b><small id="rr-new-level"></small><span class="rr-chip" id="rr-new-class"></span></div></div>
+				<div id="rr-warn"><svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="11" fill="#f2b90f"/><path d="M12 6v8M12 17v1.500" stroke="#10181c" stroke-width="2.500" stroke-linecap="round"/></svg><span>Votre grade et votre équipement sont conservés.</span></div>
+				<button id="rr-confirm" type="button">Confirmer le changement</button>
+			</div>
+			<div id="rr-steps"></div>
+		</div>
+	</div>
+
+	<!-- Traînée de l'arme (touche J ou bouton de l'inventaire) : choisir l'effet qui suit la pointe des lames tenues -->
+	<div id="trail" class="hidden">
+		<div id="trail-box">
+			<div id="trail-head">
+				<h2>Traînée de l'arme</h2>
+				<span id="trail-current"></span>
+				<button id="trail-close" type="button"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 4l16 16M20 4L4 20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>Fermer</button>
+			</div>
+			<div id="trail-sub">La traînée apparaît à chaque coup, sur la pointe de la lame que tu tiens, pour toutes tes armes. Un clic l'applique tout de suite et un aperçu se joue devant toi. Choisis aussi sa taille.</div>
+			<div id="trail-sizes"></div>
+			<div id="trail-tabs"></div>
+			<div id="trail-list"></div>
+		</div>
+	</div>
+
+	<!-- Forge des lames Nichirin (PNJ forgeron) : choisir une lame, elle entre dans le sac contre des yens -->
+	<div id="forge" class="hidden">
+		<div id="forge-box">
+			<div id="forge-head">
+				<h2>Forge des lames Nichirin</h2>
+				<span id="forge-yens"></span>
+				<button id="forge-close" type="button"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 4l16 16M20 4L4 20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>Fermer</button>
+			</div>
+			<div id="forge-sub"></div>
+			<div id="forge-tools">
+				<div id="forge-tabs"></div>
+				<input id="forge-search" type="text" placeholder="Rechercher une lame..." autocomplete="off" spellcheck="false">
+			</div>
+			<div id="forge-list"></div>
+		</div>
+	</div>
+
+	<!-- Créateur de personnage (touche C) : le joueur reste visible au centre -->
+	<div id="creator" class="hidden">
+		<div id="creator-title">CRÉATION DU PERSONNAGE</div>
+		<div id="creator-left" class="panel-col">
+			<div class="col-label">VOIE</div>
+			<div id="class-list"></div>
+		</div>
+		<div id="creator-right" class="panel-col">
+			<div class="col-label">NOM</div>
+			<input id="nick-input" type="text" maxlength="16" autocomplete="off" spellcheck="false">
+			<div class="col-label">GENRE</div>
+			<div id="gender-list"></div>
+			<div class="col-label" id="skin-label">APPARENCE</div>
+			<div id="skin-list"></div>
+			<div class="col-label">COULEUR PRINCIPALE</div>
+			<div id="color-list"></div>
+		</div>
+		<div id="creator-bottom">
+			<button id="creator-back" type="button">Retour</button>
+			<button id="creator-ok" type="button">VALIDER</button>
+		</div>
+	</div>
+</body>
+</html>

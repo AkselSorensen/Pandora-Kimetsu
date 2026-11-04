@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin menu</title>
+<style>
+  :root { --glass: rgba(14,17,24,.94); --panel: rgba(255,255,255,.05); --hover: rgba(255,255,255,.11); --line: rgba(255,255,255,.09);
+          --accent: #f0b429; --soft: rgba(240,180,41,.16); --text: #eef0f6; --muted: #8d95aa; --red: #e5484d; --green: #3dd68c; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; font-family: "Segoe UI", system-ui, sans-serif; color: var(--text); }
+  button, input, select { font: inherit; color: inherit; }
+  .window { position: absolute; inset: 7vh 8vw; max-width: 1180px; max-height: 720px; margin: auto; display: grid; grid-template-rows: auto 1fr;
+            background: var(--glass); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 24px 80px rgba(0,0,0,.6); backdrop-filter: blur(14px); overflow: hidden; }
+  header { display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  .brand { font-weight: 700; letter-spacing: .04em; } .brand b { color: var(--accent); }
+  .tabs { display: flex; gap: 4px; flex: 1; }
+  .tab { background: transparent; border: 0; padding: 8px 16px; border-radius: 8px; cursor: pointer; color: var(--muted); font-weight: 600; font-size: 14px; }
+  .tab:hover { background: var(--hover); color: var(--text); } .tab.active { background: var(--soft); color: var(--accent); }
+  .me { color: var(--muted); font-size: 12.5px; } .me b { color: var(--accent); }
+  .x { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; width: 34px; height: 34px; cursor: pointer; }
+  .x:hover { background: var(--hover); }
+  main { overflow-y: auto; padding: 16px; }
+  .bar { display: flex; gap: 10px; margin-bottom: 14px; }
+  .bar input { flex: 1; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 9px 12px; outline: none; }
+  .bar input:focus { border-color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; color: var(--muted); font-size: 11px; letter-spacing: .1em; font-weight: 600; padding: 6px 10px; }
+  td { padding: 8px 10px; border-top: 1px solid var(--line); vertical-align: middle; }
+  tr:hover td { background: rgba(255,255,255,.03); }
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--panel); border: 1px solid var(--line); margin-right: 4px; }
+  .badge.superadmin { color: #ff8a8e; border-color: #5a2a2d; } .badge.admin { color: #ffb86b; border-color: #5a4326; } .badge.operator { color: #7ee0a8; border-color: #25503a; }
+  .on { color: var(--accent); }
+  .actions { display: flex; flex-wrap: wrap; gap: 5px; }
+  .b { background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 4px 10px; cursor: pointer; font-size: 12.5px; }
+  .b:hover { background: var(--hover); } .b.danger:hover { border-color: var(--red); color: #ff8a8e; } .b.active { border-color: var(--accent); color: var(--accent); }
+  .split { display: grid; grid-template-columns: 220px 1fr; gap: 16px; }
+  .rolelist { display: grid; gap: 6px; align-content: start; }
+  .role { text-align: left; background: var(--panel); border: 1px solid transparent; border-radius: 9px; padding: 9px 12px; cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
+  .role:hover { background: var(--hover); } .role.active { border-color: var(--accent); background: var(--soft); }
+  .role small { color: var(--muted); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+  .detail { display: grid; gap: 12px; align-content: start; }
+  .fields { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+  .fields label { color: var(--muted); font-size: 12px; display: grid; gap: 4px; }
+  .fields input, .fields select { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; outline: none; width: 150px; }
+  .perms { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; }
+  .perm { display: flex; gap: 10px; align-items: flex-start; background: var(--panel); border-radius: 9px; padding: 8px 10px; cursor: pointer; font-size: 13px; }
+  .perm:hover { background: var(--hover); } .perm.locked { opacity: .55; cursor: default; }
+  .perm input { margin-top: 3px; accent-color: var(--accent); } .perm small { display: block; color: var(--muted); font-size: 11.5px; }
+  .empty { color: var(--muted); text-align: center; padding: 50px 0; }
+  .dialog { position: absolute; inset: 0; display: none; place-items: center; background: rgba(0,0,0,.5); }
+  .dialog.open { display: grid; }
+  .box { width: 360px; background: #151923; border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 10px; }
+  .box h3 { margin: 0 0 4px; } .box label { color: var(--muted); font-size: 12px; display: grid; gap: 4px; }
+  .box input, .box select { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; outline: none; }
+  .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+  .primary { background: var(--accent); color: #11141c; border-color: var(--accent); font-weight: 700; }
+  .toast { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: #151923; border: 1px solid var(--accent); color: var(--accent); padding: 8px 16px; border-radius: 9px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  ::-webkit-scrollbar { width: 9px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 6px; }
+  .tab { white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="window">
+  <header>
+    <div class="brand"><span data-t="brand"></span> <b>ADMIN</b></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="me" id="me"></div>
+    <select id="lang" class="x" style="width:auto;padding:0 6px"></select>
+    <button class="x" id="close">✕</button>
+  </header>
+  <main id="view"></main>
+
+  <div class="dialog" id="dialog"><div class="box" id="box"></div></div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+  const TEXTS = {
+    en: { brand: "NANOS", players: "Players", bans: "Bans", announce: "Announce", search: "Search a player…", name: "PLAYER", group: "GROUP", hp: "HP", status: "STATUS", actions: "ACTIONS",
+      kick: "Kick", ban: "Ban", mute: "Mute", unmute: "Unmute", freeze: "Freeze", unfreeze: "Unfreeze", god: "God", ungod: "Ungod", slay: "Slay", goto: "Goto", bring: "Bring", sethp: "HP", setgroup: "Group",
+      muted: "muted", frozen: "frozen", godm: "god", you: "you", noplayers: "No players", nobans: "No active bans", unban: "Unban", reason: "Reason (optional)", duration: "Duration (30m, 2h, 1d, 0 = permanent)",
+      cancel: "Cancel", confirm: "Confirm", message: "Message to everyone", send: "Send", sent: "Done", amount: "Health amount", banby: "by", left: "left", permanent: "permanent", logged: "Signed in as", roles: "Roles", newrole: "+ New role", rolename: "Role name", level: "Level", color: "Color", delrole: "Delete role", perms: "PERMISSIONS", builtin: "built-in", rolehelp: "A role can only target players of a lower level. Changes apply immediately.", created: "Role created", lockedsa: "Superadmin always has every permission.", hint: "Actions need the right rank. You can also use !commands in the chat.", warn: "Warn", warns: "warns", journal: "Journal", reports: "Reports", filter: "Filter by player…", nolog: "Nothing in the journal", noreports: "No reports", reportfrom: "from", closer: "Close", open_: "open", closed_: "closed", proplimit: "Prop limit (-1 = default)", limitnote: "Props and models permissions decide what the role can do in the props menu.", warnreason: "Reason", time: "TIME", who: "WHO", what: "ACTION", },
+    fr: { brand: "NANOS", players: "Joueurs", bans: "Bans", announce: "Annonce", search: "Chercher un joueur…", name: "JOUEUR", group: "GROUPE", hp: "PV", status: "ÉTAT", actions: "ACTIONS",
+      kick: "Expulser", ban: "Bannir", mute: "Muet", unmute: "Parole", freeze: "Geler", unfreeze: "Dégeler", god: "God", ungod: "Ungod", slay: "Tuer", goto: "Aller", bring: "Amener", sethp: "PV", setgroup: "Groupe",
+      muted: "muet", frozen: "gelé", godm: "god", you: "toi", noplayers: "Aucun joueur", nobans: "Aucun ban actif", unban: "Débannir", reason: "Raison (facultatif)", duration: "Durée (30m, 2h, 1d, 0 = définitif)",
+      cancel: "Annuler", confirm: "Valider", message: "Message pour tout le monde", send: "Envoyer", sent: "Fait", amount: "Points de vie", banby: "par", left: "reste", permanent: "définitif", logged: "Connecté en", roles: "Rôles", newrole: "+ Nouveau rôle", rolename: "Nom du rôle", level: "Niveau", color: "Couleur", delrole: "Supprimer le rôle", perms: "PERMISSIONS", builtin: "de base", rolehelp: "Un rôle ne peut viser que les joueurs de niveau inférieur. Les changements sont immédiats.", created: "Rôle créé", lockedsa: "Le superadmin a toujours toutes les permissions.", hint: "Les actions demandent le bon grade. Tu peux aussi utiliser les !commandes dans le chat.", warn: "Avertir", warns: "avert.", journal: "Journal", reports: "Signalements", filter: "Filtrer par joueur…", nolog: "Journal vide", noreports: "Aucun signalement", reportfrom: "de", closer: "Clore", open_: "ouvert", closed_: "clos", proplimit: "Limite de props (-1 = défaut)", limitnote: "Les permissions props et models décident de ce que le rôle peut faire dans le menu props.", warnreason: "Raison", time: "HEURE", who: "QUI", what: "ACTION", }
+  };
+  const LANGS = { en: "English", fr: "Français" };
+  const LANG_KEY = "nanos-admin-language";
+  let lang = "en", saved = null;
+  try { saved = localStorage.getItem(LANG_KEY); } catch (e) {}
+  const t = k => (TEXTS[lang] && TEXTS[lang][k]) || TEXTS.en[k] || k;
+
+  let data = { log: [], reports: [], players: [], bans: [], can: {}, groups: [], roles: [], commands: [], rank: 0, group: "" };
+  let selectedRole = null;
+  const COLORS = { white: "#e6e9f2", gray: "#8d95aa", green: "#3dd68c", orange: "#ffb86b", red: "#ff6b6f", yellow: "#ffd666", cyan: "#4fd1e8", blue: "#6ea8ff", purple: "#b68cff" };
+  const colorOf = c => COLORS[c] || COLORS.white;
+  let tab = "players", query = "", logQuery = "";
+  const $ = id => document.getElementById(id);
+  const can = a => !!(data.can && data.can[a]);
+
+  function toast(text) { const e = $("toast"); e.textContent = text; e.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("show"), 1600); }
+  function run(line) { Events.Call("Do", line); }
+  const q = s => '"' + String(s).replace(/"/g, "'") + '"';
+  function fmt(sec) { if (!sec) return t("permanent"); if (sec >= 86400) return (sec / 86400).toFixed(1) + " d"; if (sec >= 3600) return (sec / 3600).toFixed(1) + " h"; return Math.ceil(sec / 60) + " min"; }
+
+  function dialog(title, fields, onOk) {
+    const box = $("box"); box.innerHTML = "";
+    const h = document.createElement("h3"); h.textContent = title; box.appendChild(h);
+    const inputs = fields.map(f => {
+      const l = document.createElement("label"); l.textContent = f.label;
+      let i;
+      if (f.options) { i = document.createElement("select"); f.options.forEach(o => { const op = document.createElement("option"); op.value = op.textContent = o; i.appendChild(op); }); }
+      else { i = document.createElement("input"); i.value = f.value || ""; }
+      l.appendChild(i); box.appendChild(l); return i;
+    });
+    const row = document.createElement("div"); row.className = "row";
+    const c = document.createElement("button"); c.className = "b"; c.textContent = t("cancel"); c.onclick = () => $("dialog").classList.remove("open");
+    const ok = document.createElement("button"); ok.className = "b primary"; ok.textContent = t("confirm");
+    ok.onclick = () => { $("dialog").classList.remove("open"); onOk(inputs.map(i => i.value.trim())); };
+    row.appendChild(c); row.appendChild(ok); box.appendChild(row);
+    $("dialog").classList.add("open"); if (inputs[0]) inputs[0].focus();
+  }
+
+  function btn(label, action, onclick, extra) {
+    if (!can(action)) return null;
+    const b = document.createElement("button"); b.className = "b " + (extra || ""); b.textContent = label; b.onclick = onclick; return b;
+  }
+
+  function renderPlayers(root) {
+    const bar = document.createElement("div"); bar.className = "bar";
+    const s = document.createElement("input"); s.placeholder = t("search"); s.value = query; s.oninput = e => { query = e.target.value; renderRows(); };
+    bar.appendChild(s); root.appendChild(bar);
+    const table = document.createElement("table");
+    table.innerHTML = "<thead><tr><th>" + t("name") + "</th><th>" + t("group") + "</th><th>" + t("hp") + "</th><th>" + t("status") + "</th><th>" + t("actions") + "</th></tr></thead><tbody></tbody>";
+    root.appendChild(table);
+    function renderRows() {
+      const body = table.querySelector("tbody"); body.innerHTML = "";
+      const list = data.players.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+      if (!list.length) { body.innerHTML = '<tr><td colspan="5" class="empty">' + t("noplayers") + "</td></tr>"; return; }
+      list.forEach(p => {
+        const tr = document.createElement("tr");
+        const name = document.createElement("td"); name.textContent = p.name + (p.me ? "  (" + t("you") + ")" : ""); tr.appendChild(name);
+        const g = document.createElement("td"); const role = data.roles.find(r => r.name === p.group);
+        g.innerHTML = '<span class="badge"></span>'; g.firstChild.textContent = p.group; g.firstChild.style.color = colorOf(role ? role.color : ({ superadmin: "red", admin: "orange", operator: "green" })[p.group]); tr.appendChild(g);
+        const hp = document.createElement("td"); hp.textContent = p.hp == null ? "–" : p.hp; tr.appendChild(hp);
+        const st = document.createElement("td"); st.className = "on";
+        st.textContent = [p.warns > 0 && (p.warns + " " + t("warns")), p.muted && t("muted"), p.frozen && t("frozen"), p.god && t("godm")].filter(Boolean).join(" · "); tr.appendChild(st);
+        const ac = document.createElement("td"); const wrap = document.createElement("div"); wrap.className = "actions";
+        const id = "#" + p.id;
+        [
+          btn(t("kick"), "kick", () => dialog(t("kick") + " " + p.name, [{ label: t("reason") }], v => run("kick " + id + " " + q(v[0]))), "danger"),
+          btn(t("ban"), "ban", () => dialog(t("ban") + " " + p.name, [{ label: t("duration"), value: "1d" }, { label: t("reason") }], v => run("ban " + id + " " + (v[0] || "0") + " " + q(v[1]))), "danger"),
+          btn(t("warn"), "warn", () => dialog(t("warn") + " " + p.name, [{ label: t("warnreason") }], v => run("warn " + id + " " + q(v[0])))),
+          btn(p.muted ? t("unmute") : t("mute"), "mute", () => run((p.muted ? "unmute " : "mute ") + id), p.muted ? "active" : ""),
+          btn(p.frozen ? t("unfreeze") : t("freeze"), "freeze", () => run((p.frozen ? "unfreeze " : "freeze ") + id), p.frozen ? "active" : ""),
+          btn(p.god ? t("ungod") : t("god"), "god", () => run((p.god ? "ungod " : "god ") + id), p.god ? "active" : ""),
+          btn(t("slay"), "slay", () => run("slay " + id), "danger"),
+          btn(t("goto"), "goto", () => { run("goto " + id); Events.Call("Close"); }),
+          btn(t("bring"), "bring", () => run("bring " + id)),
+          btn(t("sethp"), "hp", () => dialog(t("sethp") + " " + p.name, [{ label: t("amount"), value: "100" }], v => run("hp " + id + " " + (v[0] || "100")))),
+          btn(t("setgroup"), "setgroup", () => dialog(t("setgroup") + " " + p.name, [{ label: t("group"), options: data.groups.filter(g => data.group === "superadmin" || g.rank < data.rank).map(g => g.name) }], v => run("setgroup " + id + " " + v[0]))),
+        ].forEach(b => b && wrap.appendChild(b));
+        ac.appendChild(wrap); tr.appendChild(ac); body.appendChild(tr);
+      });
+    }
+    renderRows();
+  }
+
+  function renderBans(root) {
+    if (!data.bans.length) { root.innerHTML = '<div class="empty">' + t("nobans") + "</div>"; return; }
+    const table = document.createElement("table");
+    table.innerHTML = "<thead><tr><th>" + t("name") + "</th><th>ID</th><th></th><th></th></tr></thead><tbody></tbody>";
+    data.bans.forEach(b => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = "<td></td><td></td><td></td><td></td>";
+      tr.children[0].textContent = b.name || "?"; tr.children[1].textContent = b.id;
+      tr.children[2].textContent = (b.left ? fmt(b.left) + " " + t("left") : t("permanent")) + " · " + t("banby") + " " + (b.by || "?") + (b.reason ? " · " + b.reason : "");
+      const u = btn(t("unban"), "unban", () => run("unban " + q(b.id)));
+      if (u) tr.children[3].appendChild(u);
+      table.querySelector("tbody").appendChild(tr);
+    });
+    root.appendChild(table);
+  }
+
+  function renderRoles(root) {
+    if (!data.roles.length) { root.innerHTML = '<div class="empty">–</div>'; return; }
+    if (!selectedRole || !data.roles.find(r => r.name === selectedRole)) selectedRole = data.roles[0].name;
+    const role = data.roles.find(r => r.name === selectedRole);
+    const wrap = document.createElement("div"); wrap.className = "split";
+    const list = document.createElement("div"); list.className = "rolelist";
+    data.roles.forEach(r => {
+      const b = document.createElement("button"); b.className = "role" + (r.name === selectedRole ? " active" : "");
+      b.innerHTML = '<span><i class="dot"></i><span class="n"></span></span><small></small>';
+      b.querySelector(".dot").style.background = colorOf(r.color); b.querySelector(".n").textContent = r.name; b.querySelector("small").textContent = r.rank;
+      b.onclick = () => { selectedRole = r.name; render(); };
+      list.appendChild(b);
+    });
+    const add = document.createElement("button"); add.className = "b primary"; add.style.marginTop = "6px"; add.textContent = t("newrole");
+    add.onclick = () => dialog(t("newrole"), [{ label: t("rolename") }, { label: t("level") + " (1-99)", value: "5" }], v => {
+      const name = v[0].toLowerCase().replace(/[^a-z0-9_-]/g, "");
+      if (!name) return; selectedRole = name; run("role create " + name + " " + (v[1] || "1")); toast(t("created"));
+    });
+    list.appendChild(add);
+
+    const detail = document.createElement("div"); detail.className = "detail";
+    const fields = document.createElement("div"); fields.className = "fields";
+    const lvl = document.createElement("label"); lvl.textContent = t("level");
+    const li = document.createElement("input"); li.type = "number"; li.min = 1; li.max = 99; li.value = role.rank; li.disabled = role.builtin;
+    li.onchange = () => run("role rank " + role.name + " " + li.value); lvl.appendChild(li); fields.appendChild(lvl);
+    const col = document.createElement("label"); col.textContent = t("color");
+    const cs = document.createElement("select"); Object.keys(COLORS).forEach(c => { const o = document.createElement("option"); o.value = o.textContent = c; cs.appendChild(o); });
+    cs.value = role.color; cs.onchange = () => run("role color " + role.name + " " + cs.value); col.appendChild(cs); fields.appendChild(col);
+    const lim = document.createElement("label"); lim.textContent = t("proplimit");
+    const lin = document.createElement("input"); lin.type = "number"; lin.min = -1; lin.value = role.limit; lin.onchange = () => run("role limit " + role.name + " " + (Number(lin.value) < 0 ? "default" : lin.value));
+    lim.appendChild(lin); fields.appendChild(lim);
+    if (!role.builtin) {
+      const del = document.createElement("button"); del.className = "b danger"; del.textContent = t("delrole");
+      del.onclick = () => { run("role delete " + role.name); selectedRole = null; }; fields.appendChild(del);
+    } else { const bi = document.createElement("span"); bi.className = "badge"; bi.textContent = t("builtin"); fields.appendChild(bi); }
+    detail.appendChild(fields);
+    const help = document.createElement("div"); help.className = "me"; help.textContent = role.name === "superadmin" ? t("lockedsa") : t("rolehelp") + " " + t("limitnote"); detail.appendChild(help);
+    const title = document.createElement("div"); title.className = "me"; title.style.letterSpacing = ".1em"; title.textContent = t("perms"); detail.appendChild(title);
+    const grid = document.createElement("div"); grid.className = "perms";
+    data.commands.forEach(c => {
+      const lab = document.createElement("label"); lab.className = "perm" + (role.name === "superadmin" ? " locked" : "");
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!role.perms[c.name]; cb.disabled = role.name === "superadmin";
+      cb.onchange = () => run("role set " + role.name + " " + c.name + " " + (cb.checked ? "on" : "off"));
+      const txt = document.createElement("span"); txt.innerHTML = "<b></b><small></small>";
+      txt.querySelector("b").textContent = "!" + c.name; txt.querySelector("small").textContent = c.help;
+      lab.appendChild(cb); lab.appendChild(txt); grid.appendChild(lab);
+    });
+    detail.appendChild(grid);
+    wrap.appendChild(list); wrap.appendChild(detail); root.appendChild(wrap);
+  }
+
+  function renderLog(root) {
+    const bar = document.createElement("div"); bar.className = "bar";
+    const f = document.createElement("input"); f.placeholder = t("filter"); f.value = logQuery; f.oninput = e => { logQuery = e.target.value; rows(); };
+    bar.appendChild(f); root.appendChild(bar);
+    const table = document.createElement("table");
+    table.innerHTML = "<thead><tr><th>" + t("time") + "</th><th>" + t("who") + "</th><th>" + t("what") + "</th></tr></thead><tbody></tbody>";
+    root.appendChild(table);
+    function rows() {
+      const body = table.querySelector("tbody"); body.innerHTML = "";
+      const k = logQuery.toLowerCase();
+      const list = data.log.filter(e => !k || e.who.toLowerCase().includes(k) || String(e.id).includes(k) || e.msg.toLowerCase().includes(k));
+      if (!list.length) { body.innerHTML = '<tr><td colspan="3" class="empty">' + t("nolog") + "</td></tr>"; return; }
+      list.forEach(e => {
+        const tr = document.createElement("tr"); tr.innerHTML = "<td></td><td></td><td></td>";
+        const d = new Date(e.t * 1000);
+        tr.children[0].textContent = String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+        tr.children[1].textContent = e.who; tr.children[1].title = e.id; tr.children[2].textContent = e.msg;
+        body.appendChild(tr);
+      });
+    }
+    rows();
+  }
+
+  function renderReports(root) {
+    if (!data.reports.length) { root.innerHTML = '<div class="empty">' + t("noreports") + "</div>"; return; }
+    const table = document.createElement("table");
+    table.innerHTML = "<tbody></tbody>"; root.appendChild(table);
+    data.reports.forEach(r => {
+      const tr = document.createElement("tr"); tr.innerHTML = "<td></td><td></td><td></td>";
+      tr.children[0].textContent = "#" + r.n + " · " + (r.open ? t("open_") : t("closed_"));
+      tr.children[1].textContent = r.from + " → " + r.target + " : " + r.reason;
+      const c = r.open && btn(t("closer"), "closereport", () => run("closereport " + r.n));
+      if (c) tr.children[2].appendChild(c);
+      table.querySelector("tbody").appendChild(tr);
+    });
+  }
+
+  function renderAnnounce(root) {
+    if (!can("announce")) { root.innerHTML = '<div class="empty">–</div>'; return; }
+    const bar = document.createElement("div"); bar.className = "bar";
+    const i = document.createElement("input"); i.placeholder = t("message");
+    const b = document.createElement("button"); b.className = "b primary"; b.textContent = t("send");
+    b.onclick = () => { if (i.value.trim()) { run("announce " + i.value.trim()); i.value = ""; toast(t("sent")); } };
+    i.onkeydown = e => { if (e.key === "Enter") b.onclick(); };
+    bar.appendChild(i); bar.appendChild(b); root.appendChild(bar);
+  }
+
+  function render() {
+    const tabs = $("tabs"); tabs.innerHTML = "";
+    [["players", t("players")], ["bans", t("bans") + (data.bans.length ? " · " + data.bans.length : "")], ["announce", t("announce")]].concat(can("log") ? [["log", t("journal")]] : []).concat(can("reports") ? [["reports", t("reports") + (data.reports.filter(r => r.open).length ? " · " + data.reports.filter(r => r.open).length : "")]] : []).concat(can("role") ? [["roles", t("roles")]] : []).forEach(([id, label]) => {
+      const b = document.createElement("button"); b.className = "tab" + (tab === id ? " active" : ""); b.textContent = label; b.onclick = () => { tab = id; render(); }; tabs.appendChild(b);
+    });
+    document.querySelector("[data-t]").textContent = t("brand");
+    $("me").innerHTML = t("logged") + " <b>" + (data.group || "–") + "</b>";
+    const view = $("view"); view.innerHTML = "";
+    if (tab === "players") renderPlayers(view); else if (tab === "bans") renderBans(view); else if (tab === "roles") renderRoles(view); else if (tab === "log") renderLog(view); else if (tab === "reports") renderReports(view); else renderAnnounce(view);
+  }
+
+  Object.keys(LANGS).forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = LANGS[c]; $("lang").appendChild(o); });
+  function setLang(c, remember) { lang = TEXTS[c] ? c : "en"; $("lang").value = lang; if (remember) { try { localStorage.setItem(LANG_KEY, lang); } catch (e) {} } render(); }
+  $("lang").onchange = e => setLang(e.target.value, true);
+  $("close").onclick = () => Events.Call("Close");
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { if ($("dialog").classList.contains("open")) $("dialog").classList.remove("open"); else Events.Call("Close"); } });
+
+  Events.Subscribe("Language", code => { if (!saved) setLang(String(code).slice(0, 2).toLowerCase(), false); });
+  Events.Subscribe("Data", json => {
+    try { data = JSON.parse(json); } catch (e) { return; }
+    // do not rebuild the player list while the search box has focus
+    if (document.activeElement && document.activeElement.tagName === "INPUT" && $("dialog").classList.contains("open") === false && tab === "players") {
+      const v = document.activeElement.value; render(); const s = document.querySelector(".bar input"); if (s) { s.focus(); s.value = v; query = v; }
+    } else render();
+  });
+  if (saved) setLang(saved, false); else render();
+</script>
+</body>
+</html>

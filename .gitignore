@@ -1,0 +1,41 @@
+# Assets cuits et gros binaires : JAMAIS dans le dépôt (voir docs/ASSETS.md)
+Assets/
+*.uasset
+*.uexp
+*.ubulk
+*.umap
+*.webm
+*.mp4
+*.mov
+
+# Config réelle d'un serveur (peut contenir un token, un mot de passe, une IP) : seul server/Config.example.toml est versionné
+Config.toml
+!server/Config.example.toml
+
+# Contenu extrait d'un jeu commercial ou sous licence non vérifiée : interdit dans ce projet
+askel/
+img/reroll/
+
+# Fichiers générés, caches, journaux
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+node_modules/
+logs/
+.logs/
+*.log
+tests/simulation/out/
+tools/data/
+tools/graphify-out/
+graphify-out/
+
+# Sauvegardes locales et fichiers d'éditeur
+*.bak
+*.bak_*
+*.avant-*
+.vscode/
+.idea/
+.claude/
+Thumbs.db
+.DS_Store

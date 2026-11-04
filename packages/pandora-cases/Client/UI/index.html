@@ -1,0 +1,773 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Pandora Cases</title>
+<style>
+  :root { --win: #1b1b1b; --top: #161616; --side: #141414; --panel: #222; --field: #2f2f2f; --text: #ececec; --muted: #9a9a9a; --gold: #c9912f; --green: #39d353; --red: #e0453c; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: transparent; font-family: "Segoe UI", Roboto, Arial, sans-serif; color: var(--text); overflow: hidden; user-select: none; }
+  button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; }
+  input, select { font: inherit; color: var(--text); background: var(--field); border: 1px solid transparent; border-radius: 5px; padding: 8px 10px; outline: none; }
+  input:focus, select:focus { border-color: rgba(255,255,255,.25); }
+  select option { background: #222; }
+  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+  .window { position: absolute; left: 50%; top: 50%; width: min(1400px, 76vw); height: min(800px, 76vh); transform: translate(-50%, -50%); background: var(--win); display: grid; grid-template-columns: 100px 1fr; grid-template-rows: 50px 1fr; box-shadow: 0 20px 70px rgba(0,0,0,.7); }
+  .titlebar { grid-column: 1 / 3; background: var(--top); display: flex; align-items: center; justify-content: center; position: relative; }
+  .titlebar h1 { margin: 0; font-size: 28px; font-weight: 400; letter-spacing: .02em; }
+  .wallet { position: absolute; left: 16px; font-weight: 700; color: #7ee787; background: rgba(57,211,83,.1); padding: 6px 12px; border-radius: 6px; font-size: 16px; }
+  .tools { position: absolute; right: 12px; display: flex; gap: 8px; align-items: center; }
+  .tools select { padding: 4px 6px; background: #222; font-size: 12px; }
+  .x { width: 34px; height: 34px; font-size: 20px; color: #ddd; border-radius: 5px; }
+  .x:hover { background: rgba(255,255,255,.08); }
+  nav { background: var(--side); display: flex; flex-direction: column; }
+  nav button { height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #cfcfcf; font-size: 15px; letter-spacing: .02em; }
+  nav button svg { width: 38px; height: 38px; fill: #d9d9d9; }
+  nav button:hover { background: rgba(255,255,255,.04); }
+  nav button.active { background: var(--gold); color: #fff; } nav button.active svg { fill: #fff; }
+  nav .spacer { flex: 1; }
+  main { overflow: auto; padding: 22px 26px; position: relative; }
+  .head { background: var(--panel); border-radius: 6px; text-align: center; padding: 9px; font-weight: 800; font-size: 22px; letter-spacing: .02em; margin-bottom: 18px; }
+  .panel { background: var(--panel); border-radius: 6px; padding: 14px; }
+  .panel > h3 { margin: 0 0 12px; font-size: 18px; font-weight: 600; letter-spacing: .02em; display: flex; gap: 10px; align-items: center; }
+  .section-title { margin: 18px 0 10px; font-size: 18px; font-weight: 600; letter-spacing: .03em; }
+  .filters { background: var(--panel); border-radius: 6px; padding: 10px 14px; display: flex; gap: 14px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .search { position: relative; } .search input { padding-left: 32px; width: 260px; } .search svg { position: absolute; left: 9px; top: 10px; width: 17px; fill: #bbb; }
+  .filters select { background: transparent; font-size: 17px; min-width: 150px; }
+  .grow { flex: 1; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 14px; }
+  .empty { color: var(--muted); padding: 50px; text-align: center; font-size: 16px; grid-column: 1 / -1; }
+  .muted { color: var(--muted); }
+
+  /* cards */
+  .card { position: relative; background: #2b2b2b; border-radius: 4px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; transition: transform .12s, box-shadow .12s; min-height: 230px; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.45); }
+  .card.sel { outline: 3px solid var(--gold); outline-offset: -3px; }
+  .card .ch { text-align: center; color: #fff; font-size: 18px; padding: 5px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+  .card .art { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; min-height: 140px; overflow: hidden; }
+  .card .art .bg { position: absolute; inset: 0; opacity: .85; }
+  .card .art .bg:after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, rgba(255,255,255,.06) 0 40px, rgba(0,0,0,.04) 40px 90px); }
+  .card .art svg.pic, .card .art img { position: relative; z-index: 1; width: 62%; max-height: 80%; filter: drop-shadow(0 8px 10px rgba(0,0,0,.35)); }
+  .card .tl { position: absolute; left: 10px; top: 10px; z-index: 2; display: flex; gap: 5px; flex-direction: column; align-items: flex-start; }
+  .tag { font-size: 12px; padding: 3px 8px; border-radius: 5px; background: rgba(25,25,40,.65); color: #8fb4ff; }
+  .tag.seller { color: #7ee787; } .tag.eq { color: #ffd27a; } .tag.q { width: 20px; height: 20px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,.6); font-weight: 800; }
+  .keyb { position: absolute; right: 10px; top: 10px; z-index: 2; background: rgba(0,0,0,.55); border-radius: 5px; padding: 4px 7px; display: flex; } .keyb svg { width: 26px; height: 14px; fill: #fff; }
+  .count { position: absolute; right: 10px; top: 10px; z-index: 2; background: rgba(0,0,0,.6); border-radius: 5px; padding: 2px 8px; font-weight: 700; font-size: 14px; }
+  .pricep { position: absolute; right: 10px; bottom: 8px; z-index: 2; background: rgba(40,140,60,.4); color: #fff; font-size: 18px; padding: 2px 6px; border-radius: 5px; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+  .lockp { position: absolute; inset: 0; z-index: 3; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; text-align: center; padding: 10px; }
+  .card .rr { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,.28); padding: 7px 18px; font-size: 13px; letter-spacing: .03em; }
+  .pill { background: #1d1d1d; padding: 3px 14px; border-radius: 7px; font-size: 16px; }
+  .card .cb { height: 8px; }
+  .card.small { min-height: 0; } .card.small .ch { font-size: 13px; padding: 3px 6px; } .card.small .art { min-height: 90px; } .card.small .rr { padding: 4px 8px; justify-content: center; } .card.small .pill { font-size: 13px; } .card.small .rr span:first-child { display: none; } .card.small .cb { height: 5px; } .card.small .pricep { font-size: 13px; } .card.small .tl { left: 6px; top: 6px; }
+  .chance { position: absolute; left: 6px; bottom: 6px; z-index: 2; background: rgba(0,0,0,.55); color: #7ee787; font-size: 12px; padding: 2px 6px; border-radius: 4px; }
+  .newcard { border: 2px dashed #444; border-radius: 4px; min-height: 230px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 18px; cursor: pointer; }
+  .newcard:hover { border-color: var(--gold); color: #fff; }
+
+  /* home */
+  .home { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 16px; min-height: calc(100% - 64px); }
+  .home .panel { display: flex; flex-direction: column; }
+  .home .col { display: flex; flex-direction: column; gap: 14px; flex: 1; }
+  .home .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1; }
+  .home .col .card { flex: 1; }
+
+  /* buttons */
+  .ob { border: 2px solid var(--green); border-radius: 18px; padding: 6px 22px; font-size: 18px; letter-spacing: .03em; background: #121212; white-space: nowrap; }
+  .ob:hover { background: rgba(57,211,83,.12); }
+  .ob.red { border-color: var(--red); } .ob.red:hover { background: rgba(224,69,60,.12); }
+  .ob.gold { border-color: var(--gold); } .ob.gold:hover { background: rgba(201,145,47,.15); }
+  .ob.grey { border-color: #555; color: #888; }
+  .ob.small { font-size: 14px; padding: 4px 14px; }
+  .ob.on { background: var(--green); color: #0b1a0e; }
+  .sw { width: 108px; height: 36px; border-radius: 18px; background: var(--red); position: relative; transition: background .15s; flex: none; }
+  .sw:after { content: ""; position: absolute; top: 4px; left: 6px; width: 28px; height: 28px; border-radius: 50%; background: #fff; transition: left .15s; }
+  .sw.on { background: var(--green); } .sw.on:after { left: 74px; }
+
+  /* settings */
+  .tabs { display: flex; background: var(--top); margin: -22px -26px 22px; position: sticky; top: -22px; z-index: 5; }
+  .tabs button { padding: 9px 20px; font-size: 22px; color: #cfcfcf; letter-spacing: .02em; }
+  .tabs button.active { background: var(--gold); color: #fff; }
+  .opts { display: grid; grid-template-columns: 250px 1fr; gap: 18px; min-height: calc(100% - 70px); }
+  .opts .list { background: var(--panel); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 4px; align-self: start; min-height: 100%; }
+  .opts .list button { text-align: left; padding: 6px 10px; font-size: 20px; border-radius: 6px; }
+  .opts .list button.active { background: var(--gold); }
+  .opt { display: flex; align-items: center; gap: 20px; padding: 10px 6px; }
+  .opt .txt { flex: 1; } .opt b { font-size: 19px; display: block; } .opt span { color: #cfcfcf; font-size: 15px; }
+  .opt input, .opt select { width: 230px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 14px; }
+  .chip { min-width: 270px; display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; border-radius: 4px; font-size: 17px; color: #fff; cursor: pointer; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+
+  /* modal */
+  .modal { position: absolute; inset: 0; background: rgba(0,0,0,.55); display: none; align-items: center; justify-content: center; z-index: 20; }
+  .modal.open { display: flex; }
+  .dlg { background: #141414; min-width: 420px; max-width: 94%; max-height: 94%; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+  .dlg .dh { display: flex; align-items: center; justify-content: center; position: relative; padding: 8px 50px; font-size: 26px; background: #181818; }
+  .dlg .dh .x { position: absolute; right: 8px; }
+  .dlg .db { padding: 18px 22px; overflow: auto; }
+  .dlg .df { display: flex; justify-content: center; gap: 30px; padding: 4px 22px 20px; } .dlg .df:empty { display: none; }
+  .subtabs { display: flex; background: #181818; } .subtabs button { padding: 7px 14px; font-size: 20px; color: #cfcfcf; } .subtabs button.active { background: var(--gold); color: #fff; }
+  .form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 30px; align-content: start; }
+  .form label { display: flex; flex-direction: column; gap: 7px; font-size: 16px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+  .form label.wide { grid-column: 1 / 3; }
+  .split { display: flex; gap: 22px; align-items: flex-start; }
+  .preview { background: var(--panel); padding: 14px 18px; width: 290px; flex: none; } .preview h4 { text-align: center; margin: 0 0 10px; font-size: 20px; color: #ddd; letter-spacing: .03em; }
+  .colorpick { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; } .swatch { width: 26px; height: 26px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; } .swatch.on { border-color: #fff; }
+  .contents { display: grid; grid-auto-rows: max-content; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; width: 640px; max-height: 420px; overflow: auto; padding: 3px; align-content: start; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 16px; }
+  .qty { display: flex; align-items: center; gap: 12px; justify-content: center; margin-top: 16px; font-size: 18px; } .qty button { width: 32px; height: 32px; background: var(--field); border-radius: 5px; font-size: 18px; }
+
+  /* trading */
+  .players { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .prow { background: var(--panel); border-radius: 6px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; font-size: 18px; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #c9912f, #6b3f9a); display: flex; align-items: center; justify-content: center; font-weight: 800; flex: none; }
+  .trade { display: grid; grid-template-columns: 1.2fr 1fr 300px; gap: 16px; height: calc(100% - 64px); }
+  .trade .panel { display: flex; flex-direction: column; min-height: 0; }
+  .offer { overflow: auto; display: grid; grid-auto-rows: max-content; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 8px; align-content: start; margin: 8px 0; min-height: 60px; flex: 1; }
+  .offer.mine { flex: none; max-height: 40%; background: rgba(201,145,47,.08); border-radius: 5px; padding: 6px; }
+  .tstate { padding: 3px 10px; border-radius: 5px; font-size: 13px; background: #333; font-weight: 600; } .tstate.ok { background: var(--green); color: #08200d; }
+  .tcred { display: flex; gap: 10px; align-items: center; } .tcred input { width: 140px; }
+  .bigprice { font-size: 20px; color: #7ee787; }
+  .chat { flex: 1; overflow: auto; background: #1a1a1a; border-radius: 5px; padding: 8px; font-size: 14px; display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
+  .chat b { color: var(--gold); }
+  .request { position: absolute; left: 50%; top: 60px; transform: translateX(-50%); z-index: 15; background: #101010; border: 2px solid var(--gold); padding: 12px 18px; border-radius: 8px; display: none; gap: 14px; align-items: center; font-size: 17px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+  .request.show { display: flex; }
+
+  .toast { position: absolute; right: 20px; top: 62px; z-index: 40; background: #101010; border-left: 4px solid var(--gold); padding: 10px 16px; font-size: 15px; opacity: 0; transform: translateY(-6px); transition: .2s; pointer-events: none; max-width: 380px; }
+  .toast.show { opacity: 1; transform: none; } .toast.ok { border-color: var(--green); } .toast.error { border-color: var(--red); }
+
+  /* unboxing */
+  #unbox { position: absolute; inset: 0; z-index: 30; display: none; flex-direction: column; align-items: center; justify-content: center; background: #121212; }
+  #unbox.open { display: flex; }
+  #unbox .title { font-size: 26px; margin-bottom: 26px; letter-spacing: .04em; }
+  #reels { width: 88%; display: flex; flex-direction: column; gap: 8px; }
+  .reel { position: relative; width: 100%; height: 230px; overflow: hidden; background: #0d0d0d; }
+  .reels-many .reel { height: 112px; } .reels-many .strip { top: 7px; } .reels-many .strip .card { height: 98px; } .reels-many .strip .card .art { min-height: 0; } .reels-many .strip .card svg.pic { max-height: 70%; }
+  #rlist { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; } #rlist .card { width: 180px; } #rlist .card .art { min-height: 130px; } #rlist .card.best { outline: 3px solid var(--gold); outline-offset: -3px; }
+  .strip { position: absolute; top: 14px; left: 0; display: flex; gap: 10px; will-change: transform; }
+  .strip .card { width: 170px; height: 200px; flex: none; cursor: default; } .strip .card:hover { transform: none; box-shadow: none; }
+  .marker { position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: var(--gold); z-index: 3; box-shadow: 0 0 12px var(--gold); }
+  .reel:before, .reel:after { content: ""; position: absolute; top: 0; bottom: 0; width: 14%; z-index: 2; pointer-events: none; }
+  .reel:before { left: 0; background: linear-gradient(90deg, #0d0d0d, transparent); } .reel:after { right: 0; background: linear-gradient(-90deg, #0d0d0d, transparent); }
+  #reveal { margin-top: 26px; text-align: center; display: none; } #reveal.show { display: block; animation: pop .35s; } @keyframes pop { from { opacity: 0; transform: scale(.9); } }
+  #rname { font-size: 34px; font-weight: 700; } #rrar { font-size: 16px; letter-spacing: .25em; margin: 6px 0 18px; }
+</style></head>
+<body>
+<div class="window">
+  <div class="titlebar"><div class="wallet" id="credits">0</div><h1>PANDORA CASES</h1>
+    <div class="tools"><select id="lang"><option value="en">EN</option><option value="fr">FR</option></select><button class="x" id="close">✕</button></div></div>
+  <nav id="nav"></nav>
+  <main id="main"></main>
+  <div class="request" id="request"><span id="reqtext"></span><button class="ob small" id="reqyes"></button><button class="ob small red" id="reqno"></button></div>
+  <div class="modal" id="modal"><div class="dlg"><div class="dh"><span id="mtitle"></span><button class="x" id="mclose">✕</button></div><div id="mtabs"></div><div class="db" id="mbody"></div><div class="df" id="mfoot"></div></div></div>
+  <div id="unbox"><div class="title" id="utitle"></div><div id="reels"></div>
+    <div id="reveal"><div id="rlist"></div><div id="rname"></div><div id="rrar"></div><button class="ob" id="rok"></button></div></div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+const TEXTS = {
+  en: { home: "HOME", shop: "SHOP", market: "MARKET", inventory: "INVENTORY", trading: "TRADING", settings: "SETTINGS", featured: "FEATURED ITEMS", popular: "POPULAR CASES", best: "BEST SELLERS", special: "SPECIAL ITEMS", marketplace: "MARKETPLACE", rarity: "RARITY", search: "Search by name...", itemfilter: "Item Filter", rarityfilter: "Rarity Filter", cases: "CASES", keys: "KEYS", items: "ITEMS", case: "Case", key: "Key", weapon: "Weapon", model: "Model", credits: "Credits", sellitem: "+ SELL ITEM", buy: "BUY", open: "OPEN", use: "USE", equip: "EQUIP", unequip: "UNEQUIP", activate: "GIVE ON SPAWN", deactivate: "STOP ON SPAWN", sell: "SELL", list: "SELL ON MARKET", gift: "GIFT", del: "DELETE", save: "SAVE", cancel: "CANCEL", confirm: "CONFIRM", take: "TAKE BACK", perma: "PERMA", equipped: "EQUIPPED", active: "ACTIVE", hidden: "NOT IN SHOP", requires: "Requires", contents: "Contents", price: "Price", nothing: "Nothing here yet.", emptyinv: "Your inventory is empty. Buy a case in the shop!", emptymarket: "Nothing on the market yet.", availablein: "Available in", limit: "Limit", limitreached: "Limit reached", pickitem: "Choose an item to sell", player: "Player", noplayers: "No other player online.", tradewith: "TRADE", trading_: "already trading", wants: "wants to trade with you", accept: "ACCEPT", decline: "DECLINE", youroffer: "YOUR OFFER", theiroffer: "OFFER OF", ready: "READY", notready: "NOT READY", cancelt: "CANCEL TRADE", chat: "Chat", say: "Write a message...", yourinv: "Your inventory (click to add)", clickremove: "Click an item to take it back", edit: "EDIT ITEMS", options: "OPTIONS", inventories: "INVENTORIES", general: "General", unboxing: "Unboxing", announcing: "Announcing", tradingopt: "Trading", marketopt: "Marketplace", rarities: "Rarities", details: "ITEM DETAILS", limitations: "LIMITATIONS", itemsTab: "ITEMS", preview: "ITEM PREVIEW", editing: "EDITING", creating: "CREATING", name: "Name", type: "Type", asset: "Asset (pack::SK_Name)", mesh: "3D model (pack::SM_Name)", amount: "Credits given", sellv: "Sell value", shopsell: "Sell in shop", requireskey: "Requires key", cooldown: "Purchase cooldown", plimit: "Purchase limit (0 = none)", mystery: "Is mystery item?", dropchance: "Drop chance", winchance: "win chance", add: "+ ADD", createrarity: "CREATE RARITY", color: "Color", weight: "Default weight", none: "None", hour: "1 hour", day: "1 day", week: "1 week", cmd: "Menu command", cmdd: "The command for opening the menu in chat.", key_: "Menu keybind", keyd: "Set in Shared/Config.lua (MenuKey).", start: "Starting credits", startd: "Credits a new player receives.", playr: "Playtime reward", playrd: "Credits given to everyone at each interval (0 = off).", playm: "Playtime interval (minutes)", playmd: "How often the playtime reward is given.", crate: "Crate in the world", crated: "Show the 3D crate in front of the player while opening.", annf: "Announce from rarity", annfd: "Unboxings of this rarity or better are announced in the chat.", tren: "Enable trading", trend: "Players can trade items and credits live.", mken: "Enable the marketplace", mkend: "Players can sell items to each other.", fee: "Market fee (0 to 0.9)", feed: "Part of each sale kept by the server.", maxl: "Max listings", maxld: "Listings per player.", featuredhelp: "Click items to put them in the SPECIAL ITEMS row of the home page.", giveitem: "GIVE", givecred: "GIVE CREDITS", choose: "No player online.", isperma: "Perma (given on every spawn)", shopprice: "Shop price", continue_: "CONTINUE", opening: "OPENING", free: "FREE", fee_: "market fee" },
+  fr: { home: "ACCUEIL", shop: "BOUTIQUE", market: "MARCHÉ", inventory: "INVENTAIRE", trading: "ÉCHANGE", settings: "RÉGLAGES", featured: "À LA UNE", popular: "CAISSES POPULAIRES", best: "MEILLEURES VENTES", special: "OBJETS SPÉCIAUX", marketplace: "MARCHÉ", rarity: "RARETÉ", search: "Rechercher par nom...", itemfilter: "Type", rarityfilter: "Rareté", cases: "CAISSES", keys: "CLÉS", items: "OBJETS", case: "Caisse", key: "Clé", weapon: "Arme", model: "Modèle", credits: "Crédits", sellitem: "+ VENDRE", buy: "ACHETER", open: "OUVRIR", use: "UTILISER", equip: "ÉQUIPER", unequip: "RETIRER", activate: "DONNER AU SPAWN", deactivate: "ARRÊTER AU SPAWN", sell: "VENDRE", list: "METTRE AU MARCHÉ", gift: "OFFRIR", del: "SUPPRIMER", save: "ENREGISTRER", cancel: "ANNULER", confirm: "VALIDER", take: "RETIRER", perma: "PERMA", equipped: "ÉQUIPÉ", active: "ACTIF", hidden: "PAS EN BOUTIQUE", requires: "Clé requise :", contents: "Contenu", price: "Prix", nothing: "Rien pour l'instant.", emptyinv: "Ton inventaire est vide. Achète une caisse dans la boutique !", emptymarket: "Rien sur le marché pour l'instant.", availablein: "Disponible dans", limit: "Limite", limitreached: "Limite atteinte", pickitem: "Choisis un objet à vendre", player: "Joueur", noplayers: "Aucun autre joueur en ligne.", tradewith: "ÉCHANGER", trading_: "déjà en échange", wants: "veut échanger avec toi", accept: "ACCEPTER", decline: "REFUSER", youroffer: "TON OFFRE", theiroffer: "OFFRE DE", ready: "PRÊT", notready: "PAS PRÊT", cancelt: "ANNULER L'ÉCHANGE", chat: "Discussion", say: "Écris un message...", yourinv: "Ton inventaire (clique pour ajouter)", clickremove: "Clique sur un objet pour le reprendre", edit: "OBJETS", options: "OPTIONS", inventories: "INVENTAIRES", general: "Général", unboxing: "Ouverture", announcing: "Annonces", tradingopt: "Échange", marketopt: "Marché", rarities: "Raretés", details: "DÉTAILS", limitations: "LIMITES", itemsTab: "OBJETS", preview: "APERÇU", editing: "ÉDITION", creating: "CRÉATION", name: "Nom", type: "Type", asset: "Asset (pack::SK_Nom)", mesh: "Modèle 3D (pack::SM_Nom)", amount: "Crédits donnés", sellv: "Prix de revente", shopsell: "Vendre en boutique", requireskey: "Clé requise", cooldown: "Délai entre achats", plimit: "Limite d'achat (0 = aucune)", mystery: "Objet mystère ?", dropchance: "Chance de drop", winchance: "de chance", add: "+ AJOUTER", createrarity: "CRÉER UNE RARETÉ", color: "Couleur", weight: "Poids par défaut", none: "Aucun", hour: "1 heure", day: "1 jour", week: "1 semaine", cmd: "Commande du menu", cmdd: "La commande qui ouvre le menu dans le chat.", key_: "Touche du menu", keyd: "Dans Shared/Config.lua (MenuKey).", start: "Crédits de départ", startd: "Crédits donnés à un nouveau joueur.", playr: "Récompense de temps de jeu", playrd: "Crédits donnés à tous à chaque intervalle (0 = off).", playm: "Intervalle (minutes)", playmd: "Tous les combien la récompense tombe.", crate: "Caisse dans le monde", crated: "Affiche la caisse 3D devant le joueur pendant l'ouverture.", annf: "Annoncer à partir de", annfd: "Les drops de cette rareté ou mieux sont annoncés dans le chat.", tren: "Activer l'échange", trend: "Les joueurs peuvent échanger objets et crédits en direct.", mken: "Activer le marché", mkend: "Les joueurs peuvent se vendre des objets.", fee: "Taxe du marché (0 à 0.9)", feed: "Part de chaque vente gardée par le serveur.", maxl: "Annonces max", maxld: "Annonces par joueur.", featuredhelp: "Clique sur des objets pour les mettre dans OBJETS SPÉCIAUX de l'accueil.", giveitem: "DONNER", givecred: "DONNER DES CRÉDITS", choose: "Aucun joueur en ligne.", isperma: "Perma (redonné à chaque spawn)", shopprice: "Prix en boutique", continue_: "CONTINUER", opening: "OUVERTURE", free: "GRATUIT", fee_: "de taxe" }
+};
+let lang = "en", saved = false;
+try { const l = localStorage.getItem("pandora-cases-language"); if (l) { lang = l; saved = true; } } catch (e) {}
+const t = k => (TEXTS[lang] && TEXTS[lang][k]) || TEXTS.en[k] || k;
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+const obj = v => (v && !Array.isArray(v)) ? v : {};
+
+let D = null, page = "home", spinning = false, TR = { open: false }, soundPack = false, reqFrom = null;
+let F = { q: "", type: "", rarity: "" };
+const sub = { settings: "edit", opt: "general", invPlayer: null };
+
+// ── icons & art ─────────────────────────────────────────────────────────────────────────────────
+const ICONS = {
+  home: '<path d="M12 3 2 12h3v8h5v-6h4v6h5v-8h3z"/>',
+  shop: '<path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5.2 4H2V2h4.5l.9 2H22l-3.6 8H8.1l-1 2H19v2H4l2.4-4.6z"/>',
+  market: '<path d="M3 3h18v2l-1 5H4L3 5zm1 9h16v9h-5v-5H9v5H4z"/>',
+  inventory: '<path d="M3 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3zm10 5v6h8V9zm3 2h2v2h-2z"/>',
+  trading: '<path d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm8 3a6 6 0 0 0-5.6 3.8L5 9v4h4l-1.3-1.3A4 4 0 0 1 16 11h2a6 6 0 0 0-6-5zm6 7h-4l1.3 1.3A4 4 0 0 1 8 13H6a6 6 0 0 0 11.6 1.2L19 15z"/>',
+  settings: '<path d="M19.4 13a7.7 7.7 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.7a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.7 7.7 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.4-2.7a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/>',
+  search: '<path d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/>',
+  key: '<path d="M7 1a6 6 0 1 1-5.6 8H0V5h1.4A6 6 0 0 1 7 1zm0 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm6 2h13v2l-2 2-2-2-2 2-2-2h-5z"/>'
+};
+const svg = (paths, vb) => '<svg viewBox="' + (vb || "0 0 24 24") + '">' + paths + '</svg>';
+function shade(hex, f) { const n = parseInt(String(hex).slice(1), 16) || 0; const m = c => Math.max(0, Math.min(255, Math.round(f >= 0 ? c + (255 - c) * f : c * (1 + f))));
+  return "rgb(" + m(n >> 16) + "," + m((n >> 8) & 255) + "," + m(n & 255) + ")"; }
+function crateSVG(c) {
+  return '<svg class="pic" viewBox="0 0 200 160"><ellipse cx="100" cy="148" rx="80" ry="9" fill="rgba(0,0,0,.25)"/>' +
+    '<polygon points="22,50 100,22 178,50 100,78" fill="' + shade(c, .3) + '"/>' +
+    '<polygon points="22,50 100,78 100,148 22,118" fill="' + shade(c, -.05) + '"/>' +
+    '<polygon points="178,50 100,78 100,148 178,118" fill="' + shade(c, -.35) + '"/>' +
+    '<polygon points="22,62 100,90 100,99 22,71" fill="rgba(0,0,0,.35)"/><polygon points="178,62 100,90 100,99 178,71" fill="rgba(0,0,0,.45)"/>' +
+    '<polygon points="34,74 46,78 46,104 34,100" fill="#1d1d1d"/><polygon points="76,89 88,93 88,119 76,115" fill="#1d1d1d"/><polygon points="166,74 154,78 154,104 166,100" fill="#151515"/><polygon points="124,89 112,93 112,119 124,115" fill="#151515"/>' +
+    '<polygon points="52,94 70,100 70,114 52,108" fill="rgba(255,255,255,.75)"/><polygon points="57,99 65,102 65,108 57,105" fill="' + shade(c, -.2) + '"/>' +
+    '<polygon points="22,50 100,22 178,50 100,78" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2"/></svg>';
+}
+function keySVG(c) { return '<svg class="pic" viewBox="0 0 200 120"><g transform="rotate(-18 100 60)"><circle cx="58" cy="60" r="34" fill="' + c + '"/><circle cx="58" cy="60" r="14" fill="rgba(0,0,0,.45)"/><rect x="86" y="52" width="92" height="16" rx="3" fill="' + c + '"/><rect x="150" y="66" width="10" height="20" fill="' + c + '"/><rect x="166" y="66" width="10" height="14" fill="' + c + '"/><circle cx="46" cy="46" r="8" fill="rgba(255,255,255,.35)"/></g></svg>'; }
+function weaponSVG() { return '<svg class="pic" viewBox="0 0 220 110"><path fill="#1c1c1c" d="M10 38h120l6-8h40l4 8h30v14h-26l-6 10h-24l-8-6H98l-6 10-10 34H58l8-36-14-4H38l-6 12H12l4-20H10z"/><path fill="#3a3a3a" d="M30 42h96v6H30zM150 34h20v4h-20z"/></svg>'; }
+function modelSVG() { return '<svg class="pic" viewBox="0 0 120 160"><circle cx="60" cy="28" r="20" fill="#2a2a2a"/><path fill="#2a2a2a" d="M30 54h60l10 52H86l-4 50H66l-6-40-6 40H38l-4-50H20z"/></svg>'; }
+function creditsSVG() { return '<svg class="pic" viewBox="0 0 160 130">' + [0, 1, 2, 3].map(i => '<ellipse cx="80" cy="' + (104 - i * 16) + '" rx="46" ry="14" fill="#b8730a"/><ellipse cx="80" cy="' + (98 - i * 16) + '" rx="46" ry="14" fill="#ffc53a"/>').join("") + '<text x="80" y="56" text-anchor="middle" font-size="18" font-weight="900" fill="#8a5300">$</text></svg>'; }
+function thumbFor(asset) { if (!asset || asset.indexOf("::") < 0) return null; const p = asset.split("::"); return "assets://" + p[0] + "/Thumbnails/" + p[1] + ".jpg"; }
+function artOf(kind, def, color, mystery) {
+  const a = el("div", "art"); const bg = el("div", "bg");
+  bg.style.background = "linear-gradient(160deg, " + shade(color, .4) + " 0%, " + color + " 45%, " + shade(color, .2) + " 72%, " + shade(color, -.15) + " 100%)"; a.appendChild(bg);
+  let html;
+  if (mystery) html = '<svg class="pic" viewBox="0 0 100 100"><text x="50" y="74" text-anchor="middle" font-size="72" font-weight="900" fill="rgba(0,0,0,.45)">?</text></svg>';
+  else if (kind === "case") html = crateSVG(color);
+  else if (kind === "key") html = keySVG(def.color || color);
+  else if (def.kind === "credits") html = creditsSVG();
+  else html = def.kind === "model" ? modelSVG() : weaponSVG();
+  a.insertAdjacentHTML("beforeend", html);
+  const thumb = !mystery && kind === "item" && thumbFor(def.asset);
+  if (thumb) { const img = el("img"); img.style.display = "none"; img.onload = () => { img.style.display = ""; const p = a.querySelector("svg.pic"); if (p) p.remove(); }; img.onerror = () => img.remove(); img.src = thumb; a.appendChild(img); }
+  return a;
+}
+
+// ── helpers ─────────────────────────────────────────────────────────────────────────────────────
+function rar(name) { return D.rarities.find(r => r.name === name) || { name: name || "", color: "#9aa3b5" }; }
+function rarIndex(name) { return Math.max(0, D.rarities.findIndex(r => r.name === name)); }
+function defOf(kind, ref) { return (kind === "case" ? D.cases : kind === "key" ? D.keys : D.items)[ref]; }
+function colorOf(kind, def) { return kind === "key" ? (def.color || "#e0a030") : rar(def.rarity).color; }
+function fmt(n) { return Number(n || 0).toLocaleString("en-US"); }
+function cash(n) { return fmt(n) + " " + (D.currency === "Credits" ? "₵" : D.currency); }
+function money(n) { return n > 0 ? cash(n) : t("free"); }
+function dur(s) { const h = Math.floor(s / 3600), m = Math.ceil((s % 3600) / 60); return h > 0 ? h + "h " + m + "m" : m + "m"; }
+function send(action, payload) { Events.Call("Do", action, JSON.stringify(payload || {})); }
+function toast(text, kind) { const e = $("toast"); e.textContent = text; e.className = "toast show " + (kind || ""); clearTimeout(toast.t); toast.t = setTimeout(() => e.className = "toast", 2600); }
+function btn(text, cls, fn) { const b = el("button", "ob " + (cls || ""), text); b.onclick = e => { e.stopPropagation(); fn(); }; return b; }
+function sound(file, fallback) { if (soundPack) Events.Call("Sound", file); else if (fallback) fallback(); }
+
+// card(kind, def, { price, count, seller, chance, mystery, tags, onclick, small, sel, lock })
+function card(kind, def, o) {
+  o = o || {};
+  const color = o.mystery ? "#5a5a5a" : colorOf(kind, def);
+  const c = el("div", "card" + (o.small ? " small" : "") + (o.sel ? " sel" : ""));
+  const h = el("div", "ch", o.mystery ? "???" : def.name); h.style.background = color; c.appendChild(h);
+  const a = artOf(kind, def, color, o.mystery); c.appendChild(a);
+  const tl = el("div", "tl"); a.appendChild(tl);
+  if (o.seller) tl.appendChild(el("span", "tag seller", o.seller));
+  (o.tags || []).forEach(tg => tl.appendChild(el("span", "tag " + (tg[1] || ""), tg[0])));
+  if (kind === "item" && def.perma && !o.mystery) tl.appendChild(el("span", "tag", t("perma")));
+  if (o.mystery) tl.appendChild(el("span", "tag q", "?"));
+  if (o.chance != null) a.appendChild(el("span", "chance", o.chance));
+  if (o.count > 1) a.appendChild(el("span", "count", "×" + o.count));
+  else if (kind === "case" && def.key && D.keys[def.key]) { const k = el("span", "keyb"); k.innerHTML = svg(ICONS.key, "0 0 26 14"); a.appendChild(k); }
+  if (o.price != null) a.appendChild(el("span", "pricep", money(o.price)));
+  if (o.lock) a.appendChild(el("div", "lockp", o.lock));
+  const rr = el("div", "rr"); rr.appendChild(el("span", null, t("rarity")));
+  const pill = el("span", "pill", o.mystery ? "?" : kind === "key" ? t("key") : def.rarity); pill.style.color = o.mystery ? "#bbb" : shade(color, .15); rr.appendChild(pill); c.appendChild(rr);
+  const cb = el("div", "cb"); cb.style.background = color; c.appendChild(cb);
+  if (o.onclick) c.onclick = o.onclick;
+  return c;
+}
+
+// ── modal ───────────────────────────────────────────────────────────────────────────────────────
+function modal(title, build, tabs, start) {
+  $("mtitle").textContent = title; const body = $("mbody"), foot = $("mfoot"), mt = $("mtabs");
+  body.innerHTML = ""; foot.innerHTML = ""; mt.innerHTML = ""; mt.className = "";
+  if (tabs) {
+    mt.className = "subtabs"; let cur = start || tabs[0][0];
+    const draw = () => { mt.innerHTML = ""; tabs.forEach(([id, label]) => { const b = el("button", id === cur ? "active" : "", label); b.onclick = () => { cur = id; draw(); }; mt.appendChild(b); });
+      body.innerHTML = ""; foot.innerHTML = ""; build(body, foot, cur); };
+    draw();
+  } else build(body, foot);
+  $("modal").classList.add("open");
+}
+function closeModal() { $("modal").classList.remove("open"); }
+function field(box, label, input, wide) { const l = el("label", wide ? "wide" : null, label); l.appendChild(input); box.appendChild(l); return input; }
+function inp(value, type) { const i = el("input"); if (type) i.type = type; i.value = value == null ? "" : value; return i; }
+function sel(options, value) { const s = el("select"); options.forEach(([v, l]) => { const o = el("option", null, l); o.value = v; s.appendChild(o); }); if (value != null) s.value = value; return s; }
+function toggle(on, change) { const s = el("button", "sw" + (on ? " on" : "")); s.onclick = e => { e.preventDefault(); s.classList.toggle("on"); if (change) change(s.classList.contains("on")); }; return s; }
+const isOn = s => s.classList.contains("on");
+function splitPreview(body, left, previewCard) { const sp = el("div", "split"); const pv = el("div", "preview"); pv.appendChild(previewCard); sp.appendChild(pv); if (left) sp.appendChild(left); body.appendChild(sp); }
+function caseContents(def) { const r = el("div"); r.appendChild(el("div", "section-title", t("contents"))); r.appendChild(contentsGrid(def));
+  if (def.key && D.keys[def.key]) { const k = el("div", "muted", t("requires") + " " + D.keys[def.key].name); k.style.marginTop = "10px"; r.appendChild(k); } return r; }
+
+// ── pages ───────────────────────────────────────────────────────────────────────────────────────
+const PAGES = ["home", "shop", "market", "inventory", "trading", "settings"];
+function renderNav() {
+  const nav = $("nav"); nav.innerHTML = "";
+  PAGES.forEach(p => {
+    if (p === "settings") { nav.appendChild(el("div", "spacer")); if (!D.admin) return; }
+    if (p === "market" && !D.settings.MarketEnabled && !D.admin) return;
+    if (p === "trading" && !D.settings.TradeEnabled && !TR.open) return;
+    const b = el("button", p === page ? "active" : ""); b.innerHTML = svg(ICONS[p]); b.appendChild(el("span", null, t(p)));
+    b.onclick = () => { page = p; F = { q: "", type: "", rarity: "" }; render(); }; nav.appendChild(b);
+  });
+}
+let redrawList = () => {};
+function filters(root, withSell) {
+  const f = el("div", "filters");
+  const s = el("div", "search"); s.innerHTML = svg(ICONS.search); const q = inp(F.q); q.placeholder = t("search"); s.appendChild(q); f.appendChild(s);
+  const ty = sel([["", t("itemfilter")], ["case", t("case")], ["key", t("key")], ["weapon", t("weapon")], ["model", t("model")], ["credits", t("credits")]], F.type); f.appendChild(ty);
+  const rs = sel([["", t("rarityfilter")]].concat(D.rarities.map(r => [r.name, r.name])), F.rarity); f.appendChild(rs);
+  f.appendChild(el("div", "grow"));
+  if (withSell) f.appendChild(btn(t("sellitem"), "small", sellPicker));
+  root.appendChild(f);
+  q.oninput = () => { F.q = q.value; redrawList(); }; ty.onchange = () => { F.type = ty.value; redrawList(); }; rs.onchange = () => { F.rarity = rs.value; redrawList(); };
+}
+function passes(kind, def) {
+  if (F.q && def.name.toLowerCase().indexOf(F.q.toLowerCase()) < 0) return false;
+  if (F.type && (kind === "item" ? def.kind : kind) !== F.type) return false;
+  if (F.rarity && (kind === "key" || def.rarity !== F.rarity)) return false;
+  return true;
+}
+function shopProducts() {
+  const list = [];
+  [["case", D.cases], ["key", D.keys], ["item", D.items]].forEach(([k, cat]) => Object.entries(cat).forEach(([id, d]) => d.shop && list.push([k, id, d])));
+  return list;
+}
+function productCard(kind, id, def) {
+  const wait = D.me.wait[id]; const b = D.me.bought[id]; const tags = [];
+  if (kind === "case" && def.limit > 0) tags.push([t("limit") + " " + (b ? b.n : 0) + "/" + def.limit, ""]);
+  return card(kind, def, { price: def.price, tags, lock: kind === "case" && wait ? t("availablein") + " " + dur(wait) : (kind === "case" && def.limit > 0 && b && b.n >= def.limit ? t("limitreached") : null), onclick: () => showProduct(kind, id) });
+}
+
+function renderHome(root) {
+  root.appendChild(el("div", "head", t("featured")));
+  const score = p => D.sales[p[0] + ":" + p[1]] || 0;
+  const prods = shopProducts();
+  const popular = prods.filter(p => p[0] === "case").sort((a, b) => score(b) - score(a)).slice(0, 2);
+  const used = new Set(popular.map(p => p[0] + p[1]));
+  const best = prods.filter(p => !used.has(p[0] + p[1])).sort((a, b) => score(b) - score(a)).slice(0, 2);
+  const special = (D.featured || []).map(f => [f.t, f.r, defOf(f.t, f.r)]).filter(p => p[2]).slice(0, 2);
+  const g = el("div", "home");
+  const panel = (title, list, cls) => { const p = el("div", "panel"); p.appendChild(el("h3", null, title)); const box = el("div", cls); p.appendChild(box);
+    if (!list.length) box.appendChild(el("div", "empty", t("nothing")));
+    list.forEach(([k, id, d]) => box.appendChild(d.shop ? productCard(k, id, d) : card(k, d, { onclick: () => showInfo(k, id) }))); g.appendChild(p); };
+  panel(t("popular"), popular, "col"); panel(t("best"), best, "row2"); panel(t("special"), special, "col");
+  root.appendChild(g);
+}
+
+function renderShop(root) {
+  root.appendChild(el("div", "head", t("shop")));
+  filters(root);
+  const box = el("div"); root.appendChild(box);
+  redrawList = () => { box.innerHTML = ""; const prods = shopProducts().filter(p => passes(p[0], p[2]));
+    if (!prods.length) return box.appendChild(el("div", "empty", t("nothing")));
+    [["case", t("cases")], ["key", t("keys")], ["item", t("items")]].forEach(([k, title]) => {
+      const list = prods.filter(p => p[0] === k).sort((a, b) => (a[2].price || 0) - (b[2].price || 0)); if (!list.length) return;
+      box.appendChild(el("div", "section-title", title)); const g = el("div", "grid"); list.forEach(p => g.appendChild(productCard(p[0], p[1], p[2]))); box.appendChild(g); });
+  };
+  redrawList();
+}
+function contentsGrid(c) {
+  const g = el("div", "contents"); const items = (c.items || []).filter(e => D.items[e.item]);
+  const total = items.reduce((s, e) => s + (Number(e.weight) || 0), 0) || 1;
+  items.slice().sort((a, b) => rarIndex(D.items[b.item].rarity) - rarIndex(D.items[a.item].rarity)).forEach(e => {
+    const p = e.weight / total; g.appendChild(card("item", D.items[e.item], { small: true, mystery: e.mystery, chance: e.mystery ? "?" : (p * 100).toFixed(p < .01 ? 2 : 1) + "%" }));
+  });
+  if (!items.length) g.appendChild(el("div", "empty", t("nothing")));
+  return g;
+}
+function showProduct(kind, id) {
+  const def = defOf(kind, id); if (!def) return;
+  modal(def.name, (body, foot) => {
+    let info = null;
+    if (kind === "case") info = caseContents(def);
+    else info = el("div", "muted", kind === "key" ? t("key") : (t(def.kind) + (def.kind === "credits" ? " · " + fmt(def.amount) : "") + (def.perma ? " · " + t("isperma") : "")));
+    splitPreview(body, info, card(kind, def, { price: def.price }));
+    let qty = 1; const single = kind === "item" || def.cooldown > 0;
+    const buy = btn("", obj(D.me.wait)[id] ? "grey" : "", () => { send("buy", { kind, id, qty }); closeModal(); });
+    const q = el("div", "qty"); const minus = el("button", null, "−"), plus = el("button", null, "+"), n = el("span", null, "1");
+    const upd = () => { n.textContent = qty; buy.textContent = t("buy") + " · " + money(def.price * qty); };
+    minus.onclick = () => { qty = Math.max(1, qty - 1); upd(); }; plus.onclick = () => { qty = Math.min(10, qty + 1); upd(); };
+    if (!single) { q.append(minus, n, plus); body.appendChild(q); }
+    upd(); foot.appendChild(buy);
+  });
+}
+function showInfo(kind, id) { const def = defOf(kind, id); if (!def) return; modal(def.name, body => splitPreview(body, kind === "case" ? caseContents(def) : null, card(kind, def))); }
+
+function renderInventory(root) {
+  root.appendChild(el("div", "head", t("inventory")));
+  filters(root);
+  const box = el("div"); root.appendChild(box);
+  redrawList = () => { box.innerHTML = "";
+    const groups = new Map();
+    D.me.inv.forEach(e => { const d = defOf(e.t, e.r); if (!d || !passes(e.t, d)) return; const k = e.t + ":" + e.r; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(e); });
+    if (!groups.size) return box.appendChild(el("div", "empty", D.me.inv.length ? t("nothing") : t("emptyinv")));
+    const g = el("div", "grid"); const order = { case: 0, key: 1, item: 2 };
+    const rank = e => e.t === "key" ? 0 : rarIndex(defOf(e.t, e.r).rarity);
+    [...groups.values()].sort((a, b) => order[a[0].t] - order[b[0].t] || rank(b[0]) - rank(a[0])).forEach(list => {
+      const e = list[0], d = defOf(e.t, e.r); const tags = [];
+      if (e.t === "item" && D.me.equipped === e.r) tags.push([t("equipped"), "eq"]);
+      if (e.t === "item" && D.me.perma[e.r]) tags.push([t("active"), "eq"]);
+      g.appendChild(card(e.t, d, { count: list.length, tags, onclick: () => entryMenu(e, d) }));
+    });
+    box.appendChild(g);
+  };
+  redrawList();
+}
+function entryMenu(e, d) {
+  modal(d.name, body => {
+    splitPreview(body, e.t === "case" ? caseContents(d) : null, card(e.t, d));
+    const acts = el("div", "actions");
+    if (e.t === "case") {
+      const have = D.me.inv.filter(x => x.t === "case" && x.r === e.r).length;
+      acts.appendChild(btn(t("open"), "gold", () => send("open", { uid: e.u, count: 1 })));
+      [3, 5].forEach(n => { if (have >= n) acts.appendChild(btn(t("open") + " ×" + n, "gold", () => send("open", { uid: e.u, count: n }))); });
+    }
+    if (e.t === "item") {
+      let label = t("use");
+      if (d.kind === "model") label = D.me.equipped === e.r ? t("unequip") : t("equip");
+      if (d.kind === "weapon" && d.perma) label = D.me.perma[e.r] ? t("deactivate") : t("activate");
+      acts.appendChild(btn(label, "gold", () => { send("use", { uid: e.u }); closeModal(); }));
+    }
+    const value = e.t === "item" ? (d.sell || 0) : Math.floor((d.price || 0) / 2);
+    if (value > 0) acts.appendChild(btn(t("sell") + " · " + money(value), "", () => { send("sell", { uid: e.u }); closeModal(); }));
+    if (D.settings.MarketEnabled) acts.appendChild(btn(t("list"), "", () => listDialog(e, d)));
+    if (D.others.length) acts.appendChild(btn(t("gift"), "", () => giftDialog(e, d)));
+    acts.appendChild(btn(t("del"), "red", () => { send("discard", { uid: e.u }); closeModal(); }));
+    body.appendChild(acts);
+  });
+}
+function listDialog(e, d) {
+  modal(t("list"), (body, foot) => { const f = el("div", "form"); f.style.width = "360px"; const p = field(f, t("price"), inp(d.sell || d.price || 100, "number"), true); body.appendChild(f);
+    const fee = el("div", "muted", Math.round((D.settings.MarketFee || 0) * 100) + "% " + t("fee_")); fee.style.marginTop = "10px"; body.appendChild(fee);
+    foot.appendChild(btn(t("confirm"), "", () => { send("list", { uid: e.u, price: Number(p.value) }); closeModal(); })); foot.appendChild(btn(t("cancel"), "red", closeModal)); });
+}
+function giftDialog(e, d) {
+  modal(t("gift") + " · " + d.name, (body, foot) => { const f = el("div", "form"); f.style.width = "360px"; const s = field(f, t("player"), sel(D.others.map(o => [o.id, o.name])), true); body.appendChild(f);
+    foot.appendChild(btn(t("confirm"), "", () => { send("gift", { uid: e.u, to: Number(s.value) }); closeModal(); })); foot.appendChild(btn(t("cancel"), "red", closeModal)); });
+}
+
+function renderMarket(root) {
+  root.appendChild(el("div", "head", t("marketplace")));
+  filters(root, D.settings.MarketEnabled);
+  const box = el("div", "panel"); root.appendChild(box);
+  redrawList = () => { box.innerHTML = "";
+    const list = D.market.filter(l => { const d = defOf(l.t, l.r); return d && passes(l.t, d); });
+    if (!list.length) return box.appendChild(el("div", "empty", t("emptymarket")));
+    const g = el("div", "grid");
+    list.forEach(l => { const d = defOf(l.t, l.r); g.appendChild(card(l.t, d, { price: l.price, seller: l.seller, onclick: () => listingMenu(l, d) })); });
+    box.appendChild(g);
+  };
+  redrawList();
+}
+function listingMenu(l, d) {
+  modal(d.name, (body, foot) => { splitPreview(body, l.t === "case" ? caseContents(d) : null, card(l.t, d, { price: l.price, seller: l.seller }));
+    if (!l.mine) foot.appendChild(btn(t("buy") + " · " + money(l.price), "", () => { send("buylisting", { n: l.n }); closeModal(); }));
+    if (l.mine || D.admin) foot.appendChild(btn(t("take"), "red", () => { send("unlist", { n: l.n }); closeModal(); })); });
+}
+function sellPicker() {
+  modal(t("pickitem"), body => { const g = el("div", "contents");
+    if (!D.me.inv.length) g.appendChild(el("div", "empty", t("emptyinv")));
+    D.me.inv.forEach(e => { const d = defOf(e.t, e.r); if (d) g.appendChild(card(e.t, d, { small: true, onclick: () => listDialog(e, d) })); }); body.appendChild(g); });
+}
+
+// ── trading ─────────────────────────────────────────────────────────────────────────────────────
+function renderTrading(root) {
+  root.appendChild(el("div", "head", t("trading")));
+  if (!TR.open) {
+    if (!D.others.length) return root.appendChild(el("div", "empty", t("noplayers")));
+    const g = el("div", "players");
+    D.others.forEach(o => { const r = el("div", "prow"); r.appendChild(el("div", "avatar", o.name.slice(0, 1).toUpperCase())); r.appendChild(el("div", "grow", o.name));
+      r.appendChild(o.trading ? el("span", "muted", t("trading_")) : btn(t("tradewith"), "small", () => send("traderequest", { to: o.id }))); g.appendChild(r); });
+    return root.appendChild(g);
+  }
+  const g = el("div", "trade");
+  const state = ready => el("span", "tstate" + (ready ? " ok" : ""), ready ? t("ready") : t("notready"));
+  // my side: offer on top, inventory below
+  const mine = el("div", "panel"); const mh = el("h3", null, t("youroffer")); mh.appendChild(state(TR.mine.ready)); mine.appendChild(mh);
+  const offered = new Set(TR.mine.uids || []);
+  const tc = el("div", "tcred"); const cr = inp(TR.mine.credits, "number"); cr.min = 0; tc.appendChild(cr); tc.appendChild(el("span", "muted", "/ " + cash(D.me.credits))); mine.appendChild(tc);
+  const push = () => send("tradeset", { uids: [...offered], credits: Number(cr.value) || 0 });
+  cr.onchange = push;
+  const off = el("div", "offer mine");
+  D.me.inv.filter(e => offered.has(e.u)).forEach(e => { const d = defOf(e.t, e.r); if (d) off.appendChild(card(e.t, d, { small: true, onclick: () => { offered.delete(e.u); push(); } })); });
+  if (!offered.size) off.appendChild(el("div", "muted", t("clickremove")));
+  mine.appendChild(off);
+  mine.appendChild(el("div", "muted", t("yourinv")));
+  const inv = el("div", "offer"); D.me.inv.filter(e => !offered.has(e.u)).forEach(e => { const d = defOf(e.t, e.r); if (d) inv.appendChild(card(e.t, d, { small: true, onclick: () => { offered.add(e.u); push(); } })); });
+  mine.appendChild(inv); g.appendChild(mine);
+  // their side
+  const th = el("div", "panel"); const thh = el("h3", null, t("theiroffer") + " " + TR.with); thh.appendChild(state(TR.theirs.ready)); th.appendChild(thh);
+  th.appendChild(el("div", "bigprice", "+ " + cash(TR.theirs.credits)));
+  const toff = el("div", "offer"); (TR.theirs.entries || []).forEach(e => { const d = defOf(e.t, e.r); if (d) toff.appendChild(card(e.t, d, { small: true, onclick: () => showInfo(e.t, e.r) })); });
+  th.appendChild(toff); g.appendChild(th);
+  // chat & buttons
+  const ch = el("div", "panel"); ch.appendChild(el("h3", null, t("chat")));
+  const log = el("div", "chat"); (TR.chat || []).forEach(m => { const line = el("div"); line.appendChild(el("b", null, m.from + ": ")); line.appendChild(document.createTextNode(m.text)); log.appendChild(line); }); ch.appendChild(log);
+  const say = inp(""); say.placeholder = t("say"); say.onkeydown = ev => { if (ev.key === "Enter" && say.value.trim()) { send("tradechat", { text: say.value }); say.value = ""; } }; ch.appendChild(say);
+  const bs = el("div", "actions");
+  bs.appendChild(btn(TR.mine.ready ? t("ready") + " ✓" : t("ready"), TR.mine.ready ? "on" : "", () => send("tradeready", { ready: !TR.mine.ready })));
+  bs.appendChild(btn(t("cancelt"), "red", () => send("tradecancel")));
+  ch.appendChild(bs); g.appendChild(ch);
+  root.appendChild(g);
+  setTimeout(() => { log.scrollTop = log.scrollHeight; }, 0);
+}
+
+// ── settings (admins) ───────────────────────────────────────────────────────────────────────────
+function renderSettings(root) {
+  const tabs = el("div", "tabs");
+  [["edit", t("edit")], ["options", t("options")], ["inventories", t("inventories")], ["featured", t("featured")]].forEach(([id, label]) => {
+    const b = el("button", sub.settings === id ? "active" : "", label); b.onclick = () => { sub.settings = id; render(); }; tabs.appendChild(b); });
+  root.appendChild(tabs);
+  ({ edit: renderEditItems, options: renderOptions, inventories: renderInventories, featured: renderFeatured })[sub.settings](root);
+}
+function renderEditItems(root) {
+  filters(root);
+  const box = el("div"); root.appendChild(box);
+  redrawList = () => { box.innerHTML = "";
+    [["case", t("cases"), D.cases, editCase], ["key", t("keys"), D.keys, editKey], ["item", t("items"), D.items, editItem]].forEach(([k, title, cat, edit]) => {
+      box.appendChild(el("div", "section-title", title)); const g = el("div", "grid");
+      const nc = el("div", "newcard", t("add")); nc.onclick = () => edit(null); g.appendChild(nc);
+      Object.entries(cat).filter(([id, d]) => passes(k, d)).forEach(([id, d]) => g.appendChild(card(k, d, { price: k === "item" && !d.shop ? null : d.price, tags: d.shop ? [] : [[t("hidden"), ""]], onclick: () => edit(id) })));
+      box.appendChild(g); });
+  };
+  redrawList();
+}
+function previewBox(build) { const pv = el("div", "preview"); pv.appendChild(el("h4", null, t("preview"))); const slot = el("div"); pv.appendChild(slot); const draw = () => { slot.innerHTML = ""; slot.appendChild(build()); }; draw(); return [pv, draw]; }
+const rarityOptions = () => D.rarities.map(r => [r.name, r.name]);
+const copy = v => JSON.parse(JSON.stringify(v));
+
+function editItem(id) {
+  const it = Object.assign({ name: "New item", rarity: D.rarities[0].name, kind: "weapon", asset: "nanos-world::SK_AK47", amount: 0, sell: 0, shop: false, price: 0, perma: false }, id ? copy(D.items[id]) : {});
+  modal((id ? t("editing") : t("creating")) + ": " + it.name, (body, foot) => {
+    const sp = el("div", "split"); const f = el("div", "form"); f.style.width = "560px";
+    const n = field(f, t("name"), inp(it.name)); const r = field(f, t("rarity"), sel(rarityOptions(), it.rarity));
+    const k = field(f, t("type"), sel([["weapon", t("weapon")], ["model", t("model")], ["credits", t("credits")]], it.kind)); const a = field(f, t("asset"), inp(it.asset));
+    const am = field(f, t("amount"), inp(it.amount, "number")); const sv = field(f, t("sellv"), inp(it.sell, "number"));
+    const sh = field(f, t("shopsell"), toggle(it.shop, () => sync())); const pr = field(f, t("shopprice"), inp(it.price, "number"));
+    const pm = field(f, t("isperma"), toggle(it.perma, () => sync()));
+    const [pv, draw] = previewBox(() => card("item", it, { price: it.shop ? it.price : null }));
+    function sync() { it.name = n.value; it.rarity = r.value; it.kind = k.value; it.asset = a.value; it.amount = Number(am.value); it.sell = Number(sv.value); it.shop = isOn(sh); it.price = Number(pr.value); it.perma = isOn(pm);
+      a.parentNode.style.display = it.kind === "credits" ? "none" : ""; am.parentNode.style.display = it.kind === "credits" ? "" : "none"; pm.parentNode.style.display = it.kind === "weapon" ? "" : "none"; draw(); }
+    f.oninput = sync; f.onchange = sync; sync();
+    sp.appendChild(f); sp.appendChild(pv); body.appendChild(sp);
+    foot.appendChild(btn(t("save"), "", () => { sync(); send("saveitem", Object.assign({ id }, it)); closeModal(); }));
+    if (id) foot.appendChild(btn(t("del"), "red", () => { send("deleteitem", { id }); closeModal(); }));
+  });
+}
+function editKey(id) {
+  const k = Object.assign({ name: "New key", price: 100, color: "#e0a030", shop: true, mesh: "" }, id ? copy(D.keys[id]) : {});
+  modal((id ? t("editing") : t("creating")) + ": " + k.name, (body, foot) => {
+    const sp = el("div", "split"); const f = el("div", "form"); f.style.width = "520px";
+    const n = field(f, t("name"), inp(k.name)); const p = field(f, t("price"), inp(k.price, "number"));
+    field(f, t("color"), colorPicker(k.color, c => { k.color = c; draw(); }), true);
+    const sh = field(f, t("shopsell"), toggle(k.shop, v => k.shop = v)); const m = field(f, t("mesh"), inp(k.mesh || ""));
+    const [pv, draw] = previewBox(() => card("key", k, { price: k.price }));
+    f.oninput = () => { k.name = n.value; k.price = Number(p.value); k.mesh = m.value; draw(); };
+    sp.appendChild(f); sp.appendChild(pv); body.appendChild(sp);
+    foot.appendChild(btn(t("save"), "", () => { send("savekey", Object.assign({ id }, k)); closeModal(); }));
+    if (id) foot.appendChild(btn(t("del"), "red", () => { send("deletekey", { id }); closeModal(); }));
+  });
+}
+// The case editor keeps a draft while the drop chance and item picker dialogs are open.
+function editCase(id, draft, startTab) {
+  const c = draft || Object.assign({ name: "New case", price: 100, rarity: D.rarities[0].name, key: "", mesh: "", shop: true, limit: 0, cooldown: 0, items: [] }, id ? copy(D.cases[id]) : {});
+  c.items = c.items || [];
+  const back = () => editCase(id, c, "items");
+  modal((id ? t("editing") : t("creating")) + ": " + c.name, (body, foot, tab) => {
+    const left = el("div"); left.style.width = "660px";
+    const [pv, draw] = previewBox(() => card("case", c, { price: c.price }));
+    if (tab === "details") {
+      const f = el("div", "form");
+      const n = field(f, t("name"), inp(c.name)); const p = field(f, t("price"), inp(c.price, "number"));
+      const r = field(f, t("rarity"), sel(rarityOptions(), c.rarity)); const m = field(f, t("mesh"), inp(c.mesh || ""));
+      f.oninput = f.onchange = () => { c.name = n.value; c.price = Number(p.value); c.rarity = r.value; c.mesh = m.value; draw(); };
+      left.appendChild(f);
+    } else if (tab === "limits") {
+      const f = el("div", "form");
+      field(f, t("shopsell"), toggle(c.shop, v => c.shop = v));
+      const keys = Object.entries(D.keys);
+      field(f, t("requireskey"), toggle(!!c.key, v => { c.key = v ? (c.key || (keys[0] && keys[0][0]) || "") : ""; ks.disabled = !v; ks.value = c.key; draw(); }));
+      const ks = field(f, t("key"), sel([["", t("none")]].concat(keys.map(([kid, kd]) => [kid, kd.name])), c.key || "")); ks.disabled = !c.key;
+      ks.onchange = () => { c.key = ks.value; draw(); };
+      const presets = [[0, t("none")], [3600, t("hour")], [86400, t("day")], [604800, t("week")]];
+      if (c.cooldown && !presets.some(x => x[0] === c.cooldown)) presets.push([c.cooldown, dur(c.cooldown)]);
+      const cd = field(f, t("cooldown"), sel(presets, c.cooldown || 0)); cd.onchange = () => c.cooldown = Number(cd.value);
+      const lm = field(f, t("plimit"), inp(c.limit || 0, "number")); lm.oninput = () => c.limit = Number(lm.value);
+      left.appendChild(f);
+    } else {
+      const total = c.items.reduce((s, e) => s + (Number(e.weight) || 0), 0) || 1;
+      const g = el("div", "contents"); g.style.width = "100%";
+      c.items.forEach((e, i) => { const d = D.items[e.item]; if (!d) return;
+        g.appendChild(card("item", d, { small: true, tags: e.mystery ? [["?", "q"]] : [], chance: (e.weight / total * 100).toFixed(1) + "%", onclick: () => entryEditor(c, i, back) })); });
+      const add = el("div", "newcard", t("add")); add.style.minHeight = "150px"; add.onclick = () => itemPicker(c, back); g.appendChild(add);
+      left.appendChild(g);
+    }
+    const sp = el("div", "split"); sp.appendChild(left); sp.appendChild(pv); body.appendChild(sp);
+    foot.appendChild(btn(t("save"), "", () => { send("savecase", Object.assign({}, c, { id })); closeModal(); }));
+    if (id) foot.appendChild(btn(t("del"), "red", () => { send("deletecase", { id }); closeModal(); }));
+  }, [["details", t("details")], ["limits", t("limitations")], ["items", t("itemsTab")]], startTab);
+}
+function entryEditor(c, i, back) {
+  const e = c.items[i], d = D.items[e.item];
+  modal(d.name, (body, foot) => {
+    const f = el("div", "form"); f.style.width = "400px";
+    const my = field(f, t("mystery"), toggle(e.mystery), true);
+    const l = el("label", "wide", t("dropchance")); const row = el("div"); row.style.cssText = "display:flex;gap:10px;align-items:center"; const w = inp(e.weight, "number"); w.style.width = "110px"; row.appendChild(w);
+    const pct = el("span", "muted"); row.appendChild(pct); l.appendChild(row); f.appendChild(l);
+    const upd = () => { const others = c.items.reduce((s, x, j) => s + (j === i ? 0 : Number(x.weight) || 0), 0); const v = Number(w.value) || 0; pct.textContent = "= " + (v / ((others + v) || 1) * 100).toFixed(2) + "% " + t("winchance"); };
+    w.oninput = upd; upd(); body.appendChild(f);
+    foot.appendChild(btn(t("save"), "", () => { e.weight = Number(w.value) || 0; e.mystery = isOn(my); back(); }));
+    foot.appendChild(btn(t("del"), "red", () => { c.items.splice(i, 1); back(); }));
+  });
+}
+function itemPicker(c, back) {
+  modal(t("add"), body => { const g = el("div", "contents");
+    Object.entries(D.items).filter(([iid]) => !c.items.some(e => e.item === iid)).forEach(([iid, d]) => g.appendChild(card("item", d, { small: true, onclick: () => { c.items.push({ item: iid, weight: rar(d.rarity).weight || 10 }); back(); } })));
+    body.appendChild(g); });
+}
+const SWATCHES = ["#9aa3b5", "#3fbf4f", "#3aa9d8", "#c040d8", "#e0a030", "#e0453c", "#ff7a2f", "#f5d90a", "#16c4b0", "#5b6cff", "#ff4fb5", "#ffffff"];
+function colorPicker(value, change) {
+  const box = el("div", "colorpick"); const hex = inp(value); hex.style.width = "100px";
+  const draw = () => box.querySelectorAll(".swatch").forEach(s => s.classList.toggle("on", s.dataset.c === value));
+  SWATCHES.forEach(c => { const s = el("div", "swatch"); s.style.background = c; s.dataset.c = c; s.onclick = () => { value = c; hex.value = c; draw(); change(c); }; box.appendChild(s); });
+  hex.oninput = () => { if (/^#[0-9a-fA-F]{6}$/.test(hex.value)) { value = hex.value.toLowerCase(); draw(); change(value); } };
+  box.appendChild(hex); draw(); return box;
+}
+function renderOptions(root) {
+  const g = el("div", "opts"); const list = el("div", "list");
+  const OPTS = [["general", t("general")], ["unboxing", t("unboxing")], ["announcing", t("announcing")], ["trading", t("tradingopt")], ["market", t("marketopt")], ["rarities", t("rarities")]];
+  OPTS.forEach(([id, label]) => { const b = el("button", sub.opt === id ? "active" : "", label); b.onclick = () => { sub.opt = id; render(); }; list.appendChild(b); });
+  g.appendChild(list);
+  const right = el("div"); right.appendChild(el("div", "head", OPTS.find(o => o[0] === sub.opt)[1].toUpperCase()));
+  const p = el("div", "panel"); right.appendChild(p); g.appendChild(right); root.appendChild(g);
+  const S = Object.assign({}, D.settings);
+  const save = () => send("settings", S);
+  const row = (title, desc, control) => { const r = el("div", "opt"); const tx = el("div", "txt"); tx.appendChild(el("b", null, title)); tx.appendChild(el("span", null, desc)); r.appendChild(tx); r.appendChild(control); p.appendChild(r); };
+  const num = (key, step) => { const i = inp(S[key], "number"); if (step) i.step = step; i.onchange = () => { S[key] = Number(i.value); save(); }; return i; };
+  const tog = key => toggle(S[key], v => { S[key] = v; save(); });
+  if (sub.opt === "general") {
+    const c = inp(S.ChatCommand); c.onchange = () => { S.ChatCommand = c.value; save(); }; row(t("cmd"), t("cmdd"), c);
+    const k = inp(D.menuKey || ""); k.disabled = true; row(t("key_"), t("keyd"), k);
+    row(t("start"), t("startd"), num("StartCredits"));
+    row(t("playr"), t("playrd"), num("PlaytimeReward")); row(t("playm"), t("playmd"), num("PlaytimeMinutes"));
+  } else if (sub.opt === "unboxing") row(t("crate"), t("crated"), tog("CrateInWorld"));
+  else if (sub.opt === "announcing") { const s = sel([["", t("none")]].concat(rarityOptions()), S.AnnounceFrom || ""); s.onchange = () => { S.AnnounceFrom = s.value; save(); }; row(t("annf"), t("annfd"), s); }
+  else if (sub.opt === "trading") row(t("tren"), t("trend"), tog("TradeEnabled"));
+  else if (sub.opt === "market") { row(t("mken"), t("mkend"), tog("MarketEnabled")); row(t("fee"), t("feed"), num("MarketFee", "0.01")); row(t("maxl"), t("maxld"), num("MaxListings")); }
+  else renderRarities(p);
+}
+function renderRarities(p) {
+  const list = D.rarities.map(r => Object.assign({ old: r.name }, r));
+  p.appendChild(el("div", "muted", list.length + " " + t("rarities").toLowerCase()));
+  const chips = el("div", "chips"); chips.style.margin = "12px 0 24px";
+  list.forEach((r, i) => { const c = el("div", "chip"); c.style.background = r.color; c.appendChild(el("span", null, r.name)); c.appendChild(el("span", null, "✎")); c.onclick = () => rarityEditor(list, i); chips.appendChild(c); });
+  p.appendChild(chips);
+  const a = el("div", "actions"); a.appendChild(btn(t("createrarity"), "", () => { list.push({ name: "New", color: "#ffffff", weight: 1 }); rarityEditor(list, list.length - 1); })); p.appendChild(a);
+}
+function rarityEditor(list, i) {
+  const r = list[i];
+  modal(r.name, (body, foot) => { const f = el("div", "form"); f.style.width = "400px";
+    const n = field(f, t("name"), inp(r.name), true); field(f, t("color"), colorPicker(r.color, c => r.color = c), true); const w = field(f, t("weight"), inp(r.weight, "number"), true);
+    body.appendChild(f);
+    foot.appendChild(btn(t("save"), "", () => { r.name = n.value.trim() || r.name; r.weight = Number(w.value) || 0; send("rarities", { list }); closeModal(); }));
+    if (list.length > 1) foot.appendChild(btn(t("del"), "red", () => { list.splice(i, 1); send("rarities", { list }); closeModal(); }));
+  });
+}
+function renderInventories(root) {
+  const g = el("div", "opts"); const list = el("div", "list");
+  if (!D.players.some(x => x.id === sub.invPlayer)) sub.invPlayer = D.players.length ? D.players[0].id : null;
+  D.players.forEach(pl => { const b = el("button", sub.invPlayer === pl.id ? "active" : "", pl.name); b.onclick = () => { sub.invPlayer = pl.id; render(); }; list.appendChild(b); });
+  g.appendChild(list);
+  const right = el("div"); g.appendChild(right); root.appendChild(g);
+  const pl = D.players.find(x => x.id === sub.invPlayer);
+  if (!pl) return right.appendChild(el("div", "empty", t("choose")));
+  right.appendChild(el("div", "head", pl.name + " · " + cash(pl.credits)));
+  const tools = el("div", "filters");
+  const amt = inp(100, "number"); amt.style.width = "120px"; tools.appendChild(amt); tools.appendChild(btn(t("givecred"), "small", () => send("givecredits", { to: pl.id, amount: Number(amt.value) })));
+  tools.appendChild(el("div", "grow"));
+  const opts = [].concat(Object.entries(D.cases).map(([k, d]) => ["case:" + k, t("case") + " · " + d.name]), Object.entries(D.keys).map(([k, d]) => ["key:" + k, t("key") + " · " + d.name]), Object.entries(D.items).map(([k, d]) => ["item:" + k, d.name]));
+  const s = sel(opts); tools.appendChild(s); tools.appendChild(btn(t("giveitem"), "small", () => { const [kind, ref] = s.value.split(":"); send("giveentry", { to: pl.id, kind, ref }); }));
+  right.appendChild(tools);
+  const grid = el("div", "grid");
+  pl.inv.forEach(e => { const d = defOf(e.t, e.r); if (!d) return; grid.appendChild(card(e.t, d, { onclick: () => modal(d.name, (body, foot) => { splitPreview(body, null, card(e.t, d)); foot.appendChild(btn(t("del"), "red", () => { send("takeentry", { to: pl.id, uid: e.u }); closeModal(); })); }) })); });
+  if (!pl.inv.length) grid.appendChild(el("div", "empty", t("nothing")));
+  right.appendChild(grid);
+}
+function renderFeatured(root) {
+  const help = el("div", "muted", t("featuredhelp")); help.style.marginBottom = "14px"; root.appendChild(help);
+  const list = (D.featured || []).slice();
+  const g = el("div", "grid");
+  [["case", D.cases], ["key", D.keys], ["item", D.items]].forEach(([k, cat]) => Object.entries(cat).forEach(([id, d]) => {
+    g.appendChild(card(k, d, { sel: list.some(f => f.t === k && f.r === id), onclick: () => { const i = list.findIndex(f => f.t === k && f.r === id); if (i >= 0) list.splice(i, 1); else list.push({ t: k, r: id }); send("featured", { list }); } }));
+  }));
+  root.appendChild(g);
+}
+
+// ── unboxing animation ──────────────────────────────────────────────────────────────────────────
+let audio;
+function beep(freq, len, vol, type) {
+  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); const o = audio.createOscillator(), g = audio.createGain();
+    o.type = type || "square"; o.frequency.value = freq; g.gain.setValueAtTime(vol || .04, audio.currentTime); g.gain.exponentialRampToValueAtTime(.0001, audio.currentTime + len);
+    o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime + len); } catch (e) {}
+}
+function fanfare(level) { [523, 659, 784, 1046, 1318].slice(0, 2 + level).forEach((f, i) => setTimeout(() => beep(f, .35, .06, "triangle"), i * 110)); }
+const DROPS = ["item_drop1_common.ogg", "item_drop2_uncommon.ogg", "item_drop3_rare.ogg", "item_drop4_mythical.ogg", "item_drop5_legendary.ogg"];
+function unbox(res) {
+  spinning = true; closeModal();
+  const rolls = res.rolls || [{ strip: res.strip, win: res.win, uid: res.uid }];
+  const many = rolls.length > 1, W = many ? 108 : 180, half = many ? 49 : 85;
+  const c = D.cases[res.case] || { name: "", items: [] };
+  $("reveal").classList.remove("show"); $("rlist").innerHTML = ""; $("rname").textContent = ""; $("rrar").textContent = "";
+  $("utitle").textContent = t("opening") + " · " + c.name + (many ? " ×" + rolls.length : "");
+  const mysteries = new Set((c.items || []).filter(e => e.mystery).map(e => e.item));
+  const box = $("reels"); box.innerHTML = ""; box.className = many ? "reels-many" : ""; box.style.display = "";
+  const strips = rolls.map(r => {
+    const reel = el("div", "reel"), strip = el("div", "strip"); reel.appendChild(strip); reel.appendChild(el("div", "marker")); box.appendChild(reel);
+    r.strip.forEach((id, i) => { const cd = card("item", D.items[id] || { name: "?", rarity: "" }, { small: true, mystery: mysteries.has(id) && i !== 44 }); if (many) cd.style.width = "98px"; strip.appendChild(cd); });
+    return [reel, strip];
+  });
+  $("unbox").classList.add("open");
+  sound("case_drop.ogg");
+  const duration = 6500, start = performance.now(); let lastTile = -1;
+  requestAnimationFrame(() => {
+    strips.forEach(([reel, strip], i) => {
+      const target = 44 * W + half - reel.clientWidth / 2 + (Math.random() * W * .7 - W * .35);
+      const d = duration - (strips.length - 1 - i) * 250;   // the reels stop one after the other
+      strip.style.transition = "transform " + d + "ms cubic-bezier(.08,.6,.12,1)"; strip.style.transform = "translateX(" + (-target) + "px)";
+    });
+    const [reel0, strip0] = strips[strips.length - 1];
+    (function tick() {
+      const m = new DOMMatrix(getComputedStyle(strip0).transform); const tile = Math.floor((-m.m41 + reel0.clientWidth / 2) / W);
+      if (tile !== lastTile) { lastTile = tile; beep(900 + Math.random() * 120, .03, .03); }
+      if (performance.now() - start < duration + 50) requestAnimationFrame(tick);
+    })();
+  });
+  setTimeout(() => {
+    const won = rolls.map(r => D.items[r.win] || { name: "?", rarity: "" });
+    let best = 0; won.forEach((it, i) => { if (rarIndex(it.rarity) > rarIndex(won[best].rarity)) best = i; });
+    const top = won[best], r = rar(top.rarity);
+    const level = Math.min(4, Math.round(rarIndex(top.rarity) * 4 / Math.max(1, D.rarities.length - 1)));
+    if (many) box.style.display = "none";
+    if (many) won.forEach((it, i) => { const cd = card("item", it); if (i === best) cd.classList.add("best"); $("rlist").appendChild(cd); });
+    else { $("rname").textContent = top.name; $("rname").style.color = r.color; $("rname").style.textShadow = "0 0 30px " + r.color;
+      $("rrar").textContent = (top.rarity || "").toUpperCase(); $("rrar").style.color = r.color; }
+    $("reveal").classList.add("show");
+    sound(DROPS[level], () => fanfare(level));
+  }, duration + 150);
+}
+$("rok").onclick = () => { $("unbox").classList.remove("open"); spinning = false; Events.Call("Request"); };
+
+// ── render & events ─────────────────────────────────────────────────────────────────────────────
+function render() {
+  if (!D) return;
+  if (page === "settings" && !D.admin) page = "home";
+  $("credits").textContent = cash(D.me.credits);
+  renderNav(); $("rok").textContent = t("continue_"); $("reqyes").textContent = t("accept"); $("reqno").textContent = t("decline");
+  const main = $("main"); const scroll = main.scrollTop; main.innerHTML = ""; redrawList = () => {};
+  ({ home: renderHome, shop: renderShop, market: renderMarket, inventory: renderInventory, trading: renderTrading, settings: renderSettings })[page](main);
+  main.scrollTop = scroll;
+}
+function setLang(c, remember) { lang = TEXTS[c] ? c : "en"; $("lang").value = lang; if (remember) { try { localStorage.setItem("pandora-cases-language", lang); } catch (e) {} } render(); }
+$("lang").value = lang;
+$("lang").onchange = () => setLang($("lang").value, true);
+$("close").onclick = () => { if (!spinning) Events.Call("Close"); };
+$("mclose").onclick = closeModal;
+$("reqyes").onclick = () => { if (reqFrom != null) send("tradeaccept", { from: reqFrom }); $("request").classList.remove("show"); reqFrom = null; };
+$("reqno").onclick = () => { if (reqFrom != null) send("tradedecline", { from: reqFrom }); $("request").classList.remove("show"); reqFrom = null; };
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !spinning) { if ($("modal").classList.contains("open")) closeModal(); else Events.Call("Close"); } });
+
+Events.Subscribe("Language", code => { if (!saved) setLang(String(code).slice(0, 2).toLowerCase(), false); });
+Events.Subscribe("Data", json => { try { D = JSON.parse(json); } catch (e) { return; }
+  D.items = obj(D.items); D.cases = obj(D.cases); D.keys = obj(D.keys); D.settings = obj(D.settings); D.sales = obj(D.sales);
+  D.me.perma = obj(D.me.perma); D.me.bought = obj(D.me.bought); D.me.wait = obj(D.me.wait); D.me.inv = D.me.inv || []; D.market = D.market || []; D.others = D.others || []; D.players = D.players || [];
+  D.players.forEach(p => p.inv = p.inv || []);
+  render(); });
+Events.Subscribe("Opened", json => { try { unbox(JSON.parse(json)); } catch (e) { spinning = false; } });
+Events.Subscribe("Notify", (text, kind) => toast(text, kind));
+Events.Subscribe("SoundPack", on => { soundPack = !!on; });
+Events.Subscribe("Trade", json => { let s; try { s = JSON.parse(json); } catch (e) { return; } const was = TR.open; TR = s; if (s.open && !was) { page = "trading"; closeModal(); } render(); });
+Events.Subscribe("TradeRequest", (id, name) => { reqFrom = id; $("reqtext").textContent = name + " " + t("wants"); $("request").classList.add("show"); });
+</script>
+</body></html>

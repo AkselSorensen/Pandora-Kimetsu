@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu des props</title>
+<style>
+  :root {
+    --glass: rgba(14, 17, 24, 0.92);
+    --panel: rgba(255, 255, 255, 0.05);
+    --panel-hover: rgba(255, 255, 255, 0.11);
+    --line: rgba(255, 255, 255, 0.09);
+    --accent: #f0b429;
+    --accent-soft: rgba(240, 180, 41, 0.16);
+    --text: #eef0f6;
+    --muted: #8d95aa;
+    --tile: 112px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; background: transparent; overflow: hidden;
+    font-family: "Segoe UI", system-ui, sans-serif; color: var(--text);
+  }
+  button { font: inherit; color: inherit; }
+
+  .window {
+    position: absolute; inset: 6vh 6vw;
+    max-width: 1280px; max-height: 760px; margin: auto;
+    display: grid; grid-template-rows: auto 1fr auto; grid-template-columns: 230px 1fr 190px;
+    background: var(--glass); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6); backdrop-filter: blur(14px); overflow: hidden;
+  }
+
+  /* barre du haut : onglets, recherche, taille des icônes */
+  header {
+    grid-column: 1 / -1; display: flex; align-items: center; gap: 14px;
+    padding: 10px 16px; border-bottom: 1px solid var(--line);
+  }
+  .brand { font-weight: 700; letter-spacing: 0.04em; font-size: 15px; margin-right: 6px; }
+  .brand b { color: var(--accent); }
+  .tabs { display: flex; gap: 4px; }
+  .tab {
+    background: transparent; border: 0; padding: 8px 16px; border-radius: 8px; cursor: pointer;
+    color: var(--muted); font-weight: 600; font-size: 14px; transition: background .15s, color .15s;
+  }
+  .tab:hover { background: var(--panel-hover); color: var(--text); }
+  .tab.active { background: var(--accent-soft); color: var(--accent); }
+  .spacer { flex: 1; }
+  .search {
+    position: relative; width: 260px;
+  }
+  .search input {
+    width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 9px;
+    color: var(--text); padding: 9px 12px 9px 34px; outline: none; font-size: 14px;
+  }
+  .search input:focus { border-color: var(--accent); }
+  .search::before {
+    content: ""; position: absolute; left: 12px; top: 50%; width: 9px; height: 9px;
+    border: 2px solid var(--muted); border-radius: 50%; transform: translateY(-70%);
+  }
+  .search::after {
+    content: ""; position: absolute; left: 22px; top: 60%; width: 6px; height: 2px;
+    background: var(--muted); transform: rotate(45deg);
+  }
+  .size { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+  .size input { accent-color: var(--accent); width: 90px; }
+
+  /* arborescence des packs */
+  aside.tree {
+    border-right: 1px solid var(--line); overflow-y: auto; padding: 10px 8px;
+  }
+  .tree h3 { margin: 6px 10px 8px; font-size: 11px; letter-spacing: 0.12em; color: var(--muted); font-weight: 600; }
+  .node {
+    display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+    background: transparent; border: 0; border-radius: 8px; padding: 8px 10px; cursor: pointer;
+    color: var(--text); font-size: 13.5px;
+  }
+  .node:hover { background: var(--panel-hover); }
+  .node.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .node .dot { width: 8px; height: 8px; border-radius: 3px; flex: none; }
+  .node .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .node .count { color: var(--muted); font-size: 11.5px; }
+
+  /* grille d'objets */
+  main { overflow-y: auto; padding: 16px; }
+  .crumbs { color: var(--muted); font-size: 12.5px; margin: 0 2px 12px; }
+  .crumbs b { color: var(--text); font-weight: 600; }
+  .grid {
+    display: grid; gap: 12px; align-content: start;
+    grid-template-columns: repeat(auto-fill, minmax(var(--tile), 1fr));
+  }
+  .card {
+    position: relative; background: var(--panel); border: 1px solid transparent; border-radius: 12px;
+    padding: 8px 8px 10px; cursor: pointer; text-align: center;
+    transition: transform .12s, background .12s, border-color .12s;
+  }
+  .card:hover { background: var(--panel-hover); border-color: var(--accent); transform: translateY(-2px); }
+  .card:active { transform: scale(.97); }
+  .icon {
+    aspect-ratio: 1; border-radius: 9px; display: grid; place-items: center; margin-bottom: 8px;
+    font-size: calc(var(--tile) * .34); font-weight: 800; color: rgba(255, 255, 255, .92);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+  }
+  .icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; display: block; }
+  .icon.has-img { background: #11141c !important; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 2px 12px; }
+  .chip { background: var(--panel); border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--muted); }
+  .chip:hover { background: var(--panel-hover); color: var(--text); }
+  .chip.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .grid.list { grid-template-columns: 1fr; gap: 6px; }
+  .row { display: grid; grid-template-columns: 70px 1fr auto; gap: 12px; align-items: center; background: var(--panel); border-radius: 9px; padding: 10px 14px; cursor: pointer; font-size: 13.5px; }
+  .row:hover { background: var(--panel-hover); }
+  .row .when, .row .how { color: var(--muted); font-size: 12px; }
+  #lang { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; font: inherit; font-size: 12px; }
+  .group { grid-column: 1 / -1; margin: 8px 2px 0; font-size: 11px; letter-spacing: .12em; font-weight: 700; color: var(--accent); }
+  .group small { color: var(--muted); font-weight: 600; letter-spacing: 0; margin-left: 6px; }
+  .group:first-child { margin-top: 0; }
+  .label { font-size: 12.5px; line-height: 1.25; max-height: 2.5em; overflow: hidden; word-break: break-word; }
+  .star {
+    position: absolute; top: 6px; right: 8px; font-size: 16px; line-height: 1; opacity: 0;
+    color: var(--muted); cursor: pointer; transition: opacity .12s, color .12s;
+  }
+  .card:hover .star, .star.on { opacity: 1; }
+  .star.on { color: var(--accent); }
+  .empty { grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 60px 0; }
+
+  /* panneau d'outils */
+  aside.tools {
+    border-left: 1px solid var(--line); padding: 14px 12px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .tools h3 { margin: 0 4px 4px; font-size: 11px; letter-spacing: 0.12em; color: var(--muted); font-weight: 600; }
+  .btn {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px;
+    cursor: pointer; font-size: 13.5px; text-align: left; transition: background .12s, border-color .12s;
+  }
+  .btn:hover { background: var(--panel-hover); }
+  .btn.danger:hover { border-color: #e5484d; color: #ff8a8e; }
+  .tip { margin-top: auto; color: var(--muted); font-size: 12px; line-height: 1.5; padding: 4px; }
+  kbd {
+    background: var(--panel-hover); border: 1px solid var(--line); border-bottom-width: 2px;
+    border-radius: 5px; padding: 0 6px; font-size: 11.5px;
+  }
+
+  footer {
+    grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: 8px 16px;
+    border-top: 1px solid var(--line); color: var(--muted); font-size: 12px;
+  }
+  footer .toast { color: var(--accent); }
+
+  ::-webkit-scrollbar { width: 9px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .16); border-radius: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  @media (max-width: 900px) {
+    .window { grid-template-columns: 170px 1fr; inset: 2vh 2vw; }
+    aside.tools { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="window">
+  <header>
+    <div class="brand"><span data-i18n="brand.a"></span> <b data-i18n="brand.b"></b></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="spacer"></div>
+    <label class="size"><span data-i18n="size"></span> <input type="range" id="size" min="84" max="176" value="112"></label>
+    <div class="search"><input type="text" id="search" data-i18n-placeholder="search" autocomplete="off" spellcheck="false"></div>
+  </header>
+
+  <aside class="tree" id="tree"></aside>
+  <main><div class="crumbs" id="crumbs"></div><div class="chips" id="chips"></div><div class="grid" id="grid"></div></main>
+
+  <aside class="tools">
+    <h3 data-i18n="tools"></h3>
+    <button class="btn" id="history" data-i18n="history"></button>
+    <button class="btn" id="undo" data-i18n="undo"></button>
+    <button class="btn danger" id="clear" data-i18n="clear"></button>
+    <button class="btn" id="close" data-i18n="close"></button>
+    <div class="tip"><span data-i18n="tip"></span><br><br><span id="tip-remove"></span><br><br><span id="tip-keys"></span></div>
+  </aside>
+
+  <footer><select id="lang" title="Language"></select><span id="status"></span><span class="spacer"></span><span class="toast" id="toast"></span></footer>
+</div>
+
+<script src="i18n.js"></script>
+<script>
+  const KINDS = [
+    { id: "Prop" },
+    { id: "Modèle" },
+    { id: "Arme" },
+  ];
+  const FAV_KEY = "props-menu-favorites";
+  const LANG_KEY = "props-menu-language";
+
+  let catalog = [];
+  let kind = "Prop";
+  let pack = null;      // null = tous les packs, "★" = favoris
+  let query = "";
+  let view = "items";   // "items" ou "history"
+  let history = [];
+  let keys = { toggle: "Q", remove: "X" };
+  let cat = null;       // sous-catégorie (fournie par le pack) ou null
+  let favorites = new Set();
+
+  try { favorites = new Set(JSON.parse(localStorage.getItem(FAV_KEY) || "[]")); } catch (e) {}
+  function saveFavorites() { try { localStorage.setItem(FAV_KEY, JSON.stringify([...favorites])); } catch (e) {} }
+
+  const $ = id => document.getElementById(id);
+  const favId = p => p.id;
+
+  function hue(text) {
+    let h = 0;
+    for (const ch of text) h = (h * 31 + ch.charCodeAt(0)) % 360;
+    return h;
+  }
+  function pretty(name) {
+    return name.replace(/^(SM|SK|S|P|W)_/i, "").replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2");
+  }
+  function initials(name) {
+    const words = pretty(name).split(/\s+/).filter(Boolean);
+    return ((words[0] || "?")[0] + (words[1] ? words[1][0] : "")).toUpperCase();
+  }
+  function packLabel(c) {
+    return c.replace(/-/g, " ").replace(/\b\w/g, m => m.toUpperCase());
+  }
+  function kindLabel(id) { return t("tab." + id); }
+  function itemsLabel(n) { return t(n === 1 ? "items.one" : "items.many", n); }
+  function applyTexts() {
+    document.documentElement.lang = currentLanguage;
+    document.querySelectorAll("[data-i18n]").forEach(e => { e.textContent = t(e.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(e => { e.placeholder = t(e.dataset.i18nPlaceholder); });
+    $("tip-remove").textContent = t("tip.remove", keys.remove);
+    $("tip-keys").innerHTML = "<kbd></kbd> " + t("tip.keys", "").trim() + "<br><kbd>Esc</kbd> " + t("tip.esc", "").trim();
+    $("tip-keys").querySelector("kbd").textContent = keys.toggle;
+    $("history").textContent = view === "history" ? t("history.back") : t("history");
+  }
+  function toast(text) {
+    $("toast").textContent = text;
+    clearTimeout(toast.t);
+    toast.t = setTimeout(() => { $("toast").textContent = ""; }, 1800);
+  }
+
+  function renderHistory() {
+    $("chips").innerHTML = "";
+    $("crumbs").innerHTML = "<b></b>";
+    $("crumbs").querySelector("b").textContent = t("history.title");
+    $("status").textContent = itemsLabel(history.length);
+    const grid = $("grid");
+    grid.innerHTML = "";
+    grid.classList.add("list");
+    if (!history.length) {
+      const e = document.createElement("div");
+      e.className = "empty";
+      e.textContent = t("history.empty");
+      grid.appendChild(e);
+      return;
+    }
+    const clear = document.createElement("button");
+    clear.className = "btn danger";
+    clear.style.gridColumn = "1 / -1";
+    clear.textContent = t("history.clear");
+    clear.onclick = () => { Events.Call("ClearHistory"); history = []; toast(t("toast.history")); render(); };
+    grid.appendChild(clear);
+    history.slice().reverse().forEach(h => {
+      const row = document.createElement("div");
+      row.className = "row";
+      const when = new Date(h.t * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      row.innerHTML = '<span class="when"></span><span class="what"></span><span class="how"></span>';
+      row.querySelector(".when").textContent = when;
+      row.querySelector(".what").textContent = pretty(h.a.split("::")[1] || h.a) + " · " + packLabel(h.a.split("::")[0]);
+      row.querySelector(".how").textContent = t(h.k === "model" ? "history.equipped" : "history.spawned");
+      row.onclick = () => { Events.Call("Spawn", h.k, h.a); toast(t(h.k === "model" ? "toast.equipped" : "toast.spawned", pretty(h.a.split("::")[1] || h.a))); };
+      grid.appendChild(row);
+    });
+  }
+
+  function render() {
+    // onglets (types d'objets)
+    $("tabs").innerHTML = "";
+    KINDS.forEach(k => {
+      const n = catalog.filter(p => p.k === k.id).length;
+      const b = document.createElement("button");
+      b.className = "tab" + (k.id === kind ? " active" : "");
+      b.textContent = kindLabel(k.id) + (n ? " · " + n : "");
+      b.onclick = () => { kind = k.id; pack = null; cat = null; view = "items"; render(); };
+      $("tabs").appendChild(b);
+    });
+
+    const ofKind = catalog.filter(p => p.k === kind);
+    const packs = [...new Set(ofKind.map(p => p.c))].sort();
+    const favs = ofKind.filter(p => favorites.has(favId(p)));
+
+    // arborescence
+    const tree = $("tree");
+    tree.innerHTML = "<h3>" + t("packs") + "</h3>";
+    function node(id, label, count, color) {
+      const b = document.createElement("button");
+      b.className = "node" + (pack === id ? " active" : "");
+      b.innerHTML = '<span class="dot" style="background:' + color + '"></span><span class="name"></span><span class="count">' + count + "</span>";
+      b.querySelector(".name").textContent = label;
+      b.onclick = () => { pack = id; cat = null; render(); };
+      tree.appendChild(b);
+    }
+    node(null, t("packs.all"), ofKind.length, "var(--accent)");
+    node("★", t("packs.favorites"), favs.length, "#ffd666");
+    packs.forEach(c => node(c, packLabel(c), ofKind.filter(p => p.c === c).length, "hsl(" + hue(c) + ",60%,55%)"));
+
+    applyTexts();
+    if (view === "history") { renderHistory(); return; }
+    $("chips").innerHTML = "";
+
+    // grille
+    const q = query.trim().toLowerCase();
+    const inPack = ofKind.filter(p => pack === null || (pack === "★" ? favorites.has(favId(p)) : p.c === pack));
+    const cats = [...new Set(inPack.map(p => p.g).filter(Boolean))].sort();
+    if (cat && !cats.includes(cat)) cat = null;
+    const chips = $("chips");
+    chips.innerHTML = "";
+    if (cats.length > 1) {
+      [null].concat(cats).forEach(c => {
+        const b = document.createElement("button");
+        b.className = "chip" + (c === cat ? " active" : "");
+        b.textContent = c === null ? t("cat.all") : packLabel(c);
+        b.onclick = () => { cat = c; render(); };
+        chips.appendChild(b);
+      });
+    }
+    const items = inPack.filter(p =>
+      (!cat || p.g === cat) &&
+      (!q || p.n.toLowerCase().includes(q) || p.c.toLowerCase().includes(q))
+    );
+    const where = pack === null ? t("packs.all") : pack === "★" ? t("packs.favorites") : packLabel(pack);
+    $("crumbs").innerHTML = "<b></b> › " + kindLabel(kind);
+    $("crumbs").querySelector("b").textContent = where;
+    $("status").textContent = itemsLabel(items.length);
+
+    const grid = $("grid");
+    grid.innerHTML = "";
+    grid.classList.remove("list");
+    if (!items.length) {
+      const e = document.createElement("div");
+      e.className = "empty";
+      e.textContent = catalog.length ? t("empty") : t("loading");
+      grid.appendChild(e);
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    const withGroups = kind === "Modèle";
+    const ordered = withGroups ? items.slice().sort((a, b) => (b.e || 0) - (a.e || 0)) : items;
+    let lastGroup = null;
+    ordered.forEach(p => {
+      if (withGroups && p.e !== lastGroup) {
+        lastGroup = p.e;
+        const n = ordered.filter(x => x.e === p.e).length;
+        const g = document.createElement("div");
+        g.className = "group";
+        g.innerHTML = (p.e ? t("group.creator") : t("group.others")) + "<small>" + n + "</small>";
+        frag.appendChild(g);
+      }
+      const h = hue(p.c + p.n);
+      const card = document.createElement("div");
+      card.className = "card";
+      card.title = p.c + " :: " + p.n;
+      card.innerHTML =
+        '<div class="icon" style="background:linear-gradient(145deg,hsl(' + h + ',55%,42%),hsl(' + ((h + 40) % 360) + ',60%,26%))"></div>' +
+        '<div class="label"></div><span class="star">★</span>';
+      const icon = card.querySelector(".icon");
+      icon.textContent = initials(p.n);
+      // aperçu généré (Forge > Thumbnail Generator) : thumbs/<pack>/<nom>.png, sinon tuile colorée
+      const img = new Image();
+      img.onload = () => { icon.textContent = ""; icon.classList.add("has-img"); icon.appendChild(img); };
+      img.onerror = () => { if (!img.dataset.retry) { img.dataset.retry = 1; img.src = "thumbs/" + p.c + "/" + p.n + ".png"; } };
+      img.src = p.t || ("thumbs/" + p.c + "/" + p.n + ".png");
+      card.querySelector(".label").textContent = pretty(p.n);
+      const star = card.querySelector(".star");
+      if (favorites.has(favId(p))) star.classList.add("on");
+      star.onclick = ev => {
+        ev.stopPropagation();
+        const id = favId(p);
+        favorites.has(id) ? favorites.delete(id) : favorites.add(id);
+        saveFavorites();
+        render();
+      };
+      card.onclick = () => {
+        Events.Call("Spawn", p.k === "Prop" ? "prop" : p.k === "Arme" ? "weapon" : "model", p.id);
+        toast(t(p.k === "Modèle" ? "toast.equipped" : "toast.spawned", pretty(p.n)));
+      };
+      frag.appendChild(card);
+    });
+    grid.appendChild(frag);
+  }
+
+  $("search").addEventListener("input", e => { query = e.target.value; render(); });
+  $("size").addEventListener("input", e => { document.documentElement.style.setProperty("--tile", e.target.value + "px"); });
+  $("undo").onclick = () => { Events.Call("Undo"); toast(t("toast.undo")); };
+  $("clear").onclick = () => { Events.Call("Clear"); toast(t("toast.clear")); };
+  $("close").onclick = () => Events.Call("Close");
+  $("history").onclick = () => {
+    view = view === "history" ? "items" : "history";
+    if (view === "history") Events.Call("RequestHistory");
+    render();
+  };
+
+  // sélecteur de langue : le choix du joueur est mémorisé, sinon la langue du jeu est utilisée
+  Object.keys(LANGUAGES).forEach(code => {
+    const o = document.createElement("option");
+    o.value = code; o.textContent = LANGUAGES[code];
+    $("lang").appendChild(o);
+  });
+  function chooseLanguage(code, remember) {
+    $("lang").value = setLanguage(code);
+    if (remember) { try { localStorage.setItem(LANG_KEY, code); } catch (e) {} }
+    render();
+  }
+  $("lang").onchange = e => chooseLanguage(e.target.value, true);
+  let savedLanguage = null;
+  try { savedLanguage = localStorage.getItem(LANG_KEY); } catch (e) {}
+  if (savedLanguage) chooseLanguage(savedLanguage, false);
+
+  Events.Subscribe("Settings", function (json) {
+    try {
+      const cfg = JSON.parse(json);
+      keys = { toggle: cfg.toggleKey || keys.toggle, remove: cfg.removeKey || keys.remove };
+      if (!savedLanguage && cfg.language) { const c = String(cfg.language).slice(0, 2).toLowerCase(); chooseLanguage(LANGUAGES[c] ? c : "en", false); }
+    } catch (e) {}
+    render();
+  });
+
+  Events.Subscribe("History", function (json) {
+    try { history = JSON.parse(json); } catch (e) { history = []; }
+    if (view === "history") render();
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") Events.Call("Close");
+  });
+
+  Events.Subscribe("Catalog", function (json) {
+    try {
+      catalog = JSON.parse(json);
+    } catch (err) {
+      $("grid").textContent = t("error", err.message);
+      return;
+    }
+    if (!catalog.some(p => p.k === kind) && catalog.length) kind = catalog[0].k;
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>

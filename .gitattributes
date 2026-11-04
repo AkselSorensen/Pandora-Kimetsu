@@ -1,0 +1,7 @@
+# Fins de ligne : LF partout dans le dépôt (le Lua, le HTML et les scripts sont lus tels quels par nanos world), sauf les lanceurs Windows.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.png binary
+*.jpg binary
+*.gltf text eol=lf
+*.bin binary

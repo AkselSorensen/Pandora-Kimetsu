@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>Pandora Store</title>
+<style>
+  :root { --accent: #8b5cf6; --bg: #0c0c13; --card: #13131c; --line: rgba(255,255,255,.07); --muted: #8a8aa0; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Segoe UI", Inter, system-ui, sans-serif; color: #e7e7ef; background: transparent; height: 100vh; display: grid; place-items: center; overflow: hidden; }
+  #app { width: min(1100px, 94vw); height: min(700px, 90vh); background: var(--bg); border: 1px solid var(--line); border-radius: 20px; display: grid; grid-template-columns: 230px 1fr; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+  aside { background: #0a0a10; border-right: 1px solid var(--line); padding: 20px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 20px; }
+  .logo { width: 36px; height: 36px; border-radius: 11px; background: var(--accent); display: grid; place-items: center; box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 40%, transparent); }
+  .brand b { font-size: 15px; } .brand small { display: block; color: var(--muted); font-size: 11px; }
+  .tab { border: 0; background: none; color: var(--muted); text-align: left; padding: 10px 12px; border-radius: 10px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .tab:hover { color: #fff; background: rgba(255,255,255,.04); } .tab.on { color: #fff; background: color-mix(in srgb, var(--accent) 18%, transparent); }
+  .wallet { margin-top: auto; padding: 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); }
+  .wallet small { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; } .wallet div { font-size: 22px; font-weight: 800; margin-top: 2px; }
+  main { display: flex; flex-direction: column; min-width: 0; }
+  header { display: flex; align-items: center; gap: 12px; padding: 18px 24px; border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 20px; font-weight: 800; flex: 1; }
+  .x { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; border: 1px solid var(--line); background: none; color: var(--muted); cursor: pointer; } .x:hover { color: #fff; }
+  .scroll { flex: 1; overflow-y: auto; padding: 22px 24px; }
+  .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2a2a38; border-radius: 8px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+  .chip { border: 0; padding: 7px 13px; border-radius: 10px; background: rgba(255,255,255,.05); color: var(--muted); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; } .chip.on { background: var(--accent); color: #fff; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: transform .2s, border-color .2s; }
+  .card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+  .art { height: 110px; position: relative; display: grid; place-items: center; background-size: cover; background-position: center; }
+  .art .ico { width: 52px; height: 52px; border-radius: 15px; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.2); display: grid; place-items: center; color: #fff; }
+  .art .dur { position: absolute; top: 9px; right: 9px; background: rgba(0,0,0,.5); padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+  .body { padding: 14px; display: flex; flex-direction: column; flex: 1; }
+  .body h3 { font-size: 15px; } .perks { display: flex; gap: 4px; flex-wrap: wrap; margin: 8px 0 12px; }
+  .perk { font-size: 11px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: #c7c7d4; }
+  .foot { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+  .price { font-weight: 800; font-size: 17px; } .cr { font-size: 12px; color: var(--accent); font-weight: 700; }
+  .btn { border: 0; border-radius: 10px; padding: 8px 12px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; background: var(--accent); color: #fff; } .btn:disabled { opacity: .45; cursor: default; }
+  .btn.ghost { background: rgba(255,255,255,.07); }
+  .site { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+  .panel h2 { font-size: 15px; margin-bottom: 8px; } .panel p { color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+  .code { display: flex; gap: 8px; margin: 16px 0 10px; } .code span { flex: 1; height: 60px; border-radius: 12px; background: #0a0a10; border: 1px solid var(--line); display: grid; place-items: center; font-size: 28px; font-weight: 800; }
+  .url { font-family: Consolas, monospace; font-size: 15px; color: #fff; background: #0a0a10; border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-top: 12px; user-select: all; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); } .row:first-child { border: 0; }
+  .row b { flex: 1; font-size: 14px; } .row small { color: #4ade80; font-size: 12px; font-weight: 600; }
+  .empty { color: var(--muted); font-size: 14px; padding: 30px; text-align: center; }
+  #toast { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%) translateY(20px); opacity: 0; transition: .25s; padding: 12px 18px; border-radius: 12px; font-weight: 600; font-size: 14px; pointer-events: none; }
+  #toast.show { opacity: 1; transform: translateX(-50%); } #toast.ok { background: #064e3b; color: #a7f3d0; } #toast.err { background: #7f1d1d; color: #fecaca; }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; place-items: center; } .modal.on { display: grid; }
+  .modal .panel { width: 380px; } .modal .acts { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside>
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg></div><div><b id="storeName">Pandora Store</b><small id="serverName">Boutique</small></div></div>
+    <button class="tab on" data-tab="shop">Boutique</button>
+    <button class="tab" data-tab="mine">Mes packages</button>
+    <button class="tab" data-tab="site">Payer sur le site</button>
+    <div class="wallet"><small>Crédits boutique</small><div id="credits">0</div></div>
+  </aside>
+  <main>
+    <header><h1 id="title">Boutique</h1><button class="x" id="close" aria-label="Fermer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+    <div class="scroll" id="view"></div>
+  </main>
+</div>
+<div class="modal" id="confirm"><div class="panel"><h2 id="cTitle"></h2><p id="cText"></p><div class="acts"><button class="btn ghost" id="cNo">Annuler</button><button class="btn" id="cYes">Acheter</button></div></div></div>
+<div id="toast"></div>
+<script>
+  const S = { tab: "shop", cat: 0, store: null, me: { credits: 0, packages: [] }, code: null, error: null };
+  const PERKS = { role: "Grade", credits: "Crédits caisses", caseItem: "Caisses", weapon: "Arme perma", chat: "Annonce", storeCredits: "Crédits boutique" };
+  const I = {
+    box: '<path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v8"/>',
+    crown: '<path d="m3 7 4 4 5-7 5 7 4-4-2 12H5L3 7Z"/>',
+    gun: '<path d="M3 9h15l3-2v4h-6l-1 2h-3l-1 4H6l1-4H3V9Z"/>',
+    crate: '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 11h18M10 11v3h4v-3M7 6V4h10v2"/>',
+    gift: '<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v8h14v-8M12 8v13M12 8c-2-4-6-4-6-1.5S10 8 12 8Zm0 0c2-4 6-4 6-1.5S14 8 12 8Z"/>',
+    coin: '<circle cx="12" cy="12" r="8"/><path d="M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4M12 8v1.5m0 6V17"/>',
+    wallet: '<path d="M4 7h15a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7Zm0 0 12-3v3"/><circle cx="16" cy="13" r="1.2"/>',
+    chat: '<path d="M4 5h16v11H8l-4 4V5Z"/>',
+  };
+  const svg = (k, size = 26) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[k] || I.box}</svg>`;
+  const ART = [["role", "crown", "#8b5cf6,#ec4899"], ["weapon", "gun", "#f97316,#ef4444"], ["caseItem", "crate", "#eab308,#f97316"], ["credits", "coin", "#22c55e,#06b6d4"], ["storeCredits", "wallet", "#06b6d4,#6366f1"], ["chat", "chat", "#64748b,#334155"]];
+  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const call = (name, ...a) => window.Events && Events.Call(name, ...a);
+  const on = (name, fn) => window.Events && Events.Subscribe(name, (json) => { try { fn(JSON.parse(json)); } catch (e) { console.error(e); } });
+  const money = (c) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: S.store?.currency || "EUR" }).format((c || 0) / 100);
+  const dur = (d) => (d > 0 ? `${d} jours` : "À vie");
+  const left = (d) => { if (!d) return "À vie"; const ms = new Date(d) - Date.now(); if (ms <= 0) return "Terminé"; const j = Math.floor(ms / 864e5); return j > 0 ? `${j} j restants` : `${Math.floor(ms / 36e5)} h restantes`; };
+
+  function toast(text, kind) { const t = document.getElementById("toast"); t.textContent = text; t.className = "show " + kind; clearTimeout(t._h); t._h = setTimeout(() => (t.className = ""), 3000); }
+
+  const lasting = (p) => p.perks.includes("role") || p.perks.includes("weapon");
+  const badge = (p) => (lasting(p) ? `<span class="dur">${dur(p.durationDays)}</span>` : "");
+  function art(p) {
+    if (p.imageUrl) return `<div class="art" style="background-image:url('${esc(p.imageUrl)}')">${badge(p)}</div>`;
+    const [, ico, g] = ART.find(([k]) => p.perks.includes(k)) || ["", "box", "#6366f1,#8b5cf6"];
+    const [a, b] = g.split(",");
+    return `<div class="art" style="background:linear-gradient(135deg,${a},${b})"><div class="ico">${svg(ico)}</div>${badge(p)}</div>`;
+  }
+
+  function card(p) {
+    const perks = [...new Set(p.perks)].map((k) => `<span class="perk">${PERKS[k] || esc(k)}</span>`).join("");
+    const canCredits = p.creditPrice != null;
+    return `<div class="card">${art(p)}<div class="body"><h3>${esc(p.name)}</h3><div class="perks">${perks}</div><div class="foot">
+      <div>${p.buyable.tebex ? `<div class="price">${money(p.price)}</div>` : ""}${canCredits ? `<div class="cr">${p.creditPrice.toLocaleString("fr-FR")} crédits</div>` : ""}</div>
+      ${canCredits ? `<button class="btn" data-buy="${p.id}" ${S.me.credits < p.creditPrice ? "disabled" : ""}>Acheter</button>` : `<button class="btn ghost" data-tab="site">Sur le site</button>`}
+    </div></div></div>`;
+  }
+
+  function render() {
+    const v = document.getElementById("view");
+    document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("on", t.dataset.tab === S.tab));
+    document.getElementById("title").textContent = { shop: "Boutique", mine: "Mes packages", site: "Payer sur le site" }[S.tab];
+    document.getElementById("credits").textContent = (S.me.credits || 0).toLocaleString("fr-FR");
+    if (S.tab === "shop") {
+      if (S.error) return (v.innerHTML = `<div class="empty">${esc(S.error)}</div>`);
+      if (!S.store) return (v.innerHTML = `<div class="empty">Chargement...</div>`);
+      const cats = S.store.categories.filter((c) => c.packages.length);
+      const shown = cats.filter((c) => !S.cat || c.id === S.cat);
+      v.innerHTML = `<div class="chips"><button class="chip ${!S.cat ? "on" : ""}" data-cat="0">Tout</button>${cats.map((c) => `<button class="chip ${S.cat === c.id ? "on" : ""}" data-cat="${c.id}">${esc(c.name)}</button>`).join("")}</div>
+        <div class="grid">${shown.flatMap((c) => c.packages).map(card).join("") || ""}</div>`;
+    } else if (S.tab === "mine") {
+      v.innerHTML = S.me.packages.length ? `<div class="panel">${S.me.packages.map((p) => `<div class="row"><b>${esc(p.name)}</b><small>${left(p.expiresAt)}</small></div>`).join("")}</div>` : `<div class="empty">Aucun package actif sur ce serveur.</div>`;
+    } else {
+      const digits = (S.code?.code || "------").split("").map((d) => `<span>${esc(d)}</span>`).join("");
+      v.innerHTML = `<div class="site">
+        <div class="panel"><h2>Ton code de connexion</h2><p>Sur le site, clique sur Connexion et entre ce code. Il marche 10 minutes, une seule fois.</p><div class="code">${digits}</div><p>Tu peux aussi te connecter avec Steam : c'est le même compte.</p></div>
+        <div class="panel"><h2>Payer par carte ou PayPal</h2><p>Les paiements en argent passent par Tebex sur le site. Ce que tu achètes arrive ici tout seul en quelques secondes, même si tu es déconnecté.</p><div class="url">${esc(S.code?.url?.replace(/\/login$/, "") || S.store?.url || "")}</div></div>
+      </div>`;
+    }
+  }
+
+  let pending = null;
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-tab],[data-cat],[data-buy]");
+    if (!t) return;
+    if (t.dataset.tab) S.tab = t.dataset.tab;
+    if (t.dataset.cat) S.cat = Number(t.dataset.cat);
+    if (t.dataset.buy) {
+      const p = S.store.categories.flatMap((c) => c.packages).find((x) => x.id === Number(t.dataset.buy));
+      pending = p.id;
+      document.getElementById("cTitle").textContent = p.name;
+      document.getElementById("cText").textContent = `Acheter pour ${p.creditPrice.toLocaleString("fr-FR")} crédits boutique ?`;
+      document.getElementById("confirm").classList.add("on");
+      return;
+    }
+    render();
+  });
+  document.getElementById("cNo").onclick = () => document.getElementById("confirm").classList.remove("on");
+  document.getElementById("cYes").onclick = () => { document.getElementById("confirm").classList.remove("on"); if (pending) call("Buy", pending); };
+  document.getElementById("close").onclick = () => call("Close");
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") call("Close"); });
+
+  on("Catalog", (d) => { S.store = d; S.error = null; document.getElementById("storeName").textContent = d.storeName; document.getElementById("serverName").textContent = d.server;
+    if (/^#[0-9a-f]{6}$/i.test(d.accent)) document.documentElement.style.setProperty("--accent", d.accent); render(); });
+  on("Me", (d) => { S.me = d; render(); });
+  on("Code", (d) => { S.code = d; render(); });
+  on("Error", (d) => { S.error = d.message; render(); });
+  on("Bought", (d) => toast(d.message, d.ok ? "ok" : "err"));
+  render();
+</script>
+</body>
+</html>
