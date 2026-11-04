@@ -1203,4 +1203,4 @@ html.demon #spellbar { bottom: 46px; } /* laisse la place à la mention « Palie
 .wl-btn.alt:hover { background: rgba(214, 138, 28, 0.22); }
 
 /* Illustration de droite : fichier facultatif, absent du dépôt (img/welcome-art.webp) ; sans lui l'écran reste propre */
-#wl-art { position: absolute; right: 3em; bottom: 0; height: 100%; aspect-ratio: 923 / 1080; background: url("img/welcome-art.webp") right bottom / contain no-repeat; filter: drop-shadow(0 0 2em rgba(150, 10, 30, 0.5)); }
+#wl-art { position: absolute; right: 3em; bottom: 0; height: 100%; width: 48vw; background: url("img/welcome-art.webp") right bottom / contain no-repeat; filter: drop-shadow(0 0 2em rgba(150, 10, 30, 0.5)); }
