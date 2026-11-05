@@ -888,53 +888,120 @@ function applyTheme() {
 	$("demon-fx").classList.toggle("hidden", !isDemon());
 }
 
-// Choix du camp : deux cartes, un bouton de confirmation. Le serveur enregistre le choix, une seule fois par personnage.
-const camp = { selected: "" };
+// Choix de la faction : chaque carte ouvre une confirmation avant l’envoi définitif au serveur.
+const camp = { pending: "", closeTimer: 0, confirmTimer: 0, fallbackTimer: 0 };
 
 function renderCamp() {
 	const order = hud.campOrder && hud.campOrder.length ? hud.campOrder : Object.keys(hud.camps || {});
 	$("camp-cards").innerHTML = order
 		.filter((id) => hud.camps[id])
-		.map((id) => {
+		.map((id, index) => {
 			const def = hud.camps[id];
-			const points = list(def.points).map((point) => `<li>${escapeHtml(point)}</li>`).join("");
-			const selected = camp.selected === id;
+			const pending = camp.pending === id;
 			return (
-				`<div class="camp-card${selected ? " selected" : ""}" data-camp="${id}" style="--camp:${def.color}">` +
-				(selected ? `<span class="camp-badge">${CHECK}Sélectionné</span>` : "") +
-				`<span class="kanji">${escapeHtml(def.kanji)}</span>` +
-				`<h3>${escapeHtml(def.name)}</h3>` +
-				`<p>${escapeHtml(def.blurb)}</p>` +
-				`<ul>${points}</ul>` +
+				`<div class="camp-card${pending ? " pending" : ""} ${index === 0 ? "left" : "right"}" data-camp="${id}" style="--camp:${def.color}">` +
+				`<button type="button" class="camp-pick" data-camp="${id}" aria-label="Sélectionner ${escapeHtml(def.name)}">Sélectionner</button>` +
 				`</div>`
 			);
 		})
 		.join("");
-	const picked = hud.camps && hud.camps[camp.selected];
-	const confirm = $("camp-confirm");
-	confirm.disabled = !picked;
-	confirm.dataset.camp = picked ? camp.selected : "";
-	confirm.textContent = picked ? `Devenir ${picked.name}` : "Choisis un camp";
+}
+
+function openCampConfirmation(id) {
+	const def = hud.camps[id];
+	if (!def) return;
+	clearTimeout(camp.closeTimer);
+	clearTimeout(camp.confirmTimer);
+	clearTimeout(camp.fallbackTimer);
+	camp.pending = id;
+	const dialog = $("camp-confirmation");
+	dialog.dataset.camp = id;
+	$("camp-confirm-title").textContent = "Confirmer votre choix ?";
+	$("camp-confirm-message").textContent = `Vous avez choisi la faction ${def.name}. Ce choix est définitif pour ce personnage.`;
+	$("camp-confirm-accept").disabled = false;
+	$("camp-confirm-accept").textContent = "Confirmer";
+	$("camp-confirm-cancel").disabled = false;
+	dialog.classList.remove("hidden", "is-closing", "is-confirming");
+	renderCamp();
+}
+
+function closeCampConfirmation() {
+	const dialog = $("camp-confirmation");
+	if (dialog.classList.contains("hidden") || dialog.classList.contains("is-confirming")) return;
+	clearTimeout(camp.closeTimer);
+	dialog.classList.add("is-closing");
+	camp.closeTimer = setTimeout(() => {
+		dialog.classList.add("hidden");
+		dialog.classList.remove("is-closing");
+		camp.pending = "";
+		renderCamp();
+	}, 220);
+}
+
+function confirmCampChoice() {
+	const id = camp.pending;
+	if (!id) return;
+	clearTimeout(camp.closeTimer);
+	const dialog = $("camp-confirmation");
+	$("camp-confirm-accept").disabled = true;
+	$("camp-confirm-cancel").disabled = true;
+	$("camp-confirm-accept").textContent = "Confirmation…";
+	dialog.classList.remove("is-closing");
+	dialog.classList.add("is-confirming");
+	camp.confirmTimer = setTimeout(() => Events.Call("wakfu:chooseCamp", id), 360);
+	camp.fallbackTimer = setTimeout(() => {
+		if ($("camp").classList.contains("hidden") || camp.pending !== id) return;
+		dialog.classList.remove("is-confirming");
+		dialog.dataset.camp = id;
+		$("camp-confirm-title").textContent = "Le choix n’a pas été confirmé";
+		$("camp-confirm-message").textContent = "Le serveur n’a pas confirmé ce choix. Vous pouvez réessayer.";
+		$("camp-confirm-accept").textContent = "Réessayer";
+		$("camp-confirm-accept").disabled = false;
+		$("camp-confirm-cancel").disabled = false;
+	}, 2000);
 }
 
 Events.Subscribe("wakfu:campOpen", (open) => {
 	$("camp").classList.toggle("hidden", !open);
 	if (open) {
-		camp.selected = "";
+		camp.pending = "";
+		clearTimeout(camp.closeTimer);
+		clearTimeout(camp.confirmTimer);
+		clearTimeout(camp.fallbackTimer);
+		$("camp-confirmation").classList.add("hidden");
+		$("camp-confirmation").classList.remove("is-closing", "is-confirming");
+		$("camp-confirm-accept").textContent = "Confirmer";
 		renderCamp();
+	} else {
+		clearTimeout(camp.fallbackTimer);
+		$("camp-confirmation").classList.add("hidden");
 	}
 });
 
 document.addEventListener("click", (event) => {
 	if ($("camp").classList.contains("hidden")) return;
-	const card = event.target.closest("[data-camp]");
-	if (card && card.classList.contains("camp-card")) {
-		camp.selected = card.dataset.camp;
-		return renderCamp();
+	if (event.target.closest("#camp-confirm-cancel") || event.target.classList.contains("camp-confirm-scrim")) {
+		closeCampConfirmation();
+		return;
 	}
-	if (event.target.closest("#camp-confirm") && camp.selected) Events.Call("wakfu:chooseCamp", camp.selected);
+	if (event.target.closest("#camp-confirm-accept")) {
+		if ($("camp-confirm-accept").textContent === "Réessayer") {
+			openCampConfirmation(camp.pending);
+		} else {
+			confirmCampChoice();
+		}
+		return;
+	}
+	if (!$("camp-confirmation").classList.contains("hidden")) return;
+	const pick = event.target.closest(".camp-pick");
+	const card = event.target.closest(".camp-card");
+	const id = pick ? pick.dataset.camp : card ? card.dataset.camp : "";
+	if (id) openCampConfirmation(id);
 });
 
+document.addEventListener("keydown", (event) => {
+	if (event.key === "Escape" && !$("camp-confirmation").classList.contains("hidden")) closeCampConfirmation();
+});
 // Jauges du démon. Le panneau n'existe que pour un démon.
 function setGauge(id, ratio, text) {
 	const gauge = $(id);
