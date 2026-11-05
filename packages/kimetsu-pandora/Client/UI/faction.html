@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Pandora - Choisissez votre faction</title>
+<!-- Écran de choix de faction seul, à ouvrir directement dans un navigateur (planche Figma « Choisissez votre faction »).
+     Le même écran est intégré au HUD du jeu (index.html, id="camp"). Les boutons n'ont ici aucun effet réel :
+     dans le jeu, le second clic envoie le choix au serveur (wakfu:chooseCamp). Les textes viennent de Shared/Classes.lua. -->
+<style>
+@font-face { font-family: "Unbounded"; src: url("fonts/Unbounded-Variable.ttf") format("truetype"); font-style: normal; font-weight: 200 900; font-display: swap; }
+
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #08030a; }
+#camp { position: fixed; }
+/* Choix de la faction : écran obligatoire à la première connexion (planche Figma « Choisissez votre faction »), 1em = 1/120 de la largeur */
+#camp { position: absolute; inset: 0; z-index: 30; pointer-events: auto; overflow: hidden; color: #f4eee6; font-family: "Montserrat", "Segoe UI", system-ui, sans-serif; font-size: calc(100vw / 120); background: url("img/faction-background.png") center center / 2142px 1205px no-repeat, #08030a; }
+#camp-info { position: absolute; z-index: 5; left: 3em; top: 1.6em; width: 62em; max-width: calc(100vw - 6em); }
+#camp-info img { display: block; width: 100%; height: auto; }
+#camp-discord { position: absolute; z-index: 5; top: 1.5em; right: 3em; display: block; width: 21.75em; height: 3em; padding: 0; border: 0; background: none; cursor: pointer; transition: transform 180ms ease, filter 180ms ease; }
+#camp-discord:hover { transform: translateY(-2px) scale(1.035); filter: brightness(1.08); }
+#camp-discord:active { transform: translateY(0) scale(0.98); }
+@media (prefers-reduced-motion: reduce) { #camp-discord { transition: none; } #camp-discord:hover, #camp-discord:active { transform: none; } }
+#camp-discord img { display: block; width: 100%; height: 100%; object-fit: contain; }
+#camp-title { position: absolute; z-index: 2; left: 50%; top: 7.2%; transform: translateX(-50%); margin: 0; text-align: center; font-family: "Unbounded", sans-serif; font-weight: 900; font-size: 4.2em; line-height: 0.98; letter-spacing: 0; color: #fff; }
+#camp-title small { display: block; margin-bottom: 0.18em; font-size: 0.28em; font-weight: 500; letter-spacing: 0.12em; color: rgba(244, 238, 230, 0.8); }
+
+#camp-cards { position: absolute; inset: 0; pointer-events: none; }
+.camp-card { box-sizing: border-box; position: absolute; top: 54%; width: min(27vw, 540px); max-width: 540px; aspect-ratio: 540 / 809; transform: translateY(-50%); display: flex; flex-direction: column; padding: 1.4em; border-radius: 0.6em; border: 1px solid rgba(255, 255, 255, 0.08); background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--camp) 26%, transparent), rgba(0, 0, 0, 0) 65%), rgba(8, 4, 6, 0.9); pointer-events: auto; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+.camp-card.left { left: 5.5%; }
+.camp-card.right { right: 7.5%; }
+.camp-card[data-camp="slayer"] { box-shadow: 0 0 2.2em rgba(207, 31, 64, 0.48); } .camp-card[data-camp="slayer"]:hover, .camp-card[data-camp="slayer"].selected { border-color: rgba(207, 31, 64, 0.8); } .camp-card[data-camp="demon"]:hover, .camp-card[data-camp="demon"].selected { border-color: rgba(150, 45, 210, 0.8); }
+.camp-card[data-camp="slayer"].selected { box-shadow: 0 0 2.6em rgba(207, 31, 64, 0.42); } .camp-card[data-camp="demon"].selected { box-shadow: 0 0 2.6em rgba(150, 45, 210, 0.42); }
+.camp-art { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.camp-character { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center top; filter: drop-shadow(0 0 1.2em color-mix(in srgb, var(--camp) 38%, transparent)); transform: scale(1.3); transform-origin: center top; }
+.camp-card h3 { margin: 0.4em 0 0.3em; font-family: "Montserrat", "Segoe UI Black", "Arial Black", sans-serif; font-weight: 900; font-size: 1.5em; letter-spacing: 0.01em; color: #fff; }
+.camp-card p { margin: 0 0 1.1em; font-size: 0.8em; line-height: 1.45; text-align: justify; color: rgba(244, 238, 230, 0.7); }
+.camp-card[data-camp="demon"] p { color: #b9aacb; }
+.camp-card[data-camp="slayer"] { background: url("img/slayer-card.png") center / 100% 100% no-repeat; }
+.camp-card[data-camp="demon"] { width: min(27vw, 534.37px); max-width: 534.37px; aspect-ratio: 534.37 / 805; background: url("img/demon-card.png") right bottom / 174.3% 103.6% no-repeat; box-shadow: 0 0 2.2em rgba(150, 45, 210, 0.48); }
+.camp-pick { cursor: pointer; padding: 0.85em; border: 1px solid transparent; border-radius: 0.35em; font: inherit; font-size: 0.85em; font-weight: 700; color: #fff; background: color-mix(in srgb, var(--camp) 55%, #1a0508); }
+.camp-card[data-camp="demon"] .camp-pick { position: absolute; z-index: 2; left: 6.2%; bottom: 2.8%; width: 87.6%; height: 8.8%; box-sizing: border-box; padding: 0; border: 0; border-radius: 0.35em; color: transparent; background: url("img/select-button-demon.png") center / 100% 100% no-repeat; }
+.camp-card[data-camp="slayer"] .camp-pick { position: absolute; z-index: 2; left: 6.2%; bottom: 5%; width: 87.6%; height: 8.8%; box-sizing: border-box; padding: 0; border: 0; border-radius: 0.35em; color: transparent; background: url("img/select-button.png") center / 100% 100% no-repeat; }
+.camp-pick:hover { filter: none; }
+.camp-card.selected .camp-pick { border-color: transparent; box-shadow: none; }
+
+</style>
+</head>
+<body>
+	<div id="camp">
+<div id="camp-info"><img src="img/discord-help-text.png" alt="Message pour contacter le serveur Discord"></div>
+<button id="camp-discord" type="button" aria-label="Rejoindre le serveur Discord"><img src="img/discord-button.png" alt="Rejoindre le serveur Discord"></button>
+
+		<h2 id="camp-title"><small>CHOISISSEZ VOTRE</small>FACTION</h2>
+		<div id="camp-cards"></div>
+	</div>
+
+
+<script>
+const $ = (id) => document.getElementById(id);
+const escapeHtml = (text) => String(text).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const hud = { camps: {"demon": {"name": "Démon", "kanji": "鬼", "color": "#c8323c", "blurb": "La nuit t'appartient. Ta chair se recoud d'elle-même, tes griffes et ton sang frappent, et chaque humain dévoré te rend plus fort, jusqu'aux Lunes.", "cardTitle": "DEMON", "cardText": "Les Démons sont des êtres nés des ténèbres, dotés d'une force surnaturelle et d'une longévité quasi immortelle."}, "slayer": {"name": "Pourfendeur", "kanji": "鬼殺", "color": "#2f8fd0", "blurb": "Tu rejoins le Corps des Pourfendeurs de démons : une lame Nichirin, un souffle à maîtriser et la nuit à tenir jusqu'à l'aube.", "cardTitle": "POURFENDEURS", "cardText": "Les pourfendeurs sont des chasseurs de démons membre de l'Armée des pourfendeurs de démons."}}, campOrder: ["slayer", "demon"] };
+const camp = { selected: "" };
+
+function renderCamp() {
+	$("camp-cards").innerHTML = hud.campOrder
+		.filter((id) => hud.camps[id])
+		.map((id, index) => {
+			const def = hud.camps[id];
+			const selected = camp.selected === id;
+			return (
+                `<div class="camp-card${selected ? " selected" : ""} ${index === 0 ? "left" : "right"}" data-camp="${id}" style="--camp:${def.color}">` +
+                `<button type="button" class="camp-pick" data-camp="${id}" aria-label="${selected ? "Confirmer" : "Sélectionner"}">${selected ? "Confirmer" : "Sélectionner"}</button>` +
+				`</div>`
+			);
+		})
+		.join("");
+}
+
+document.addEventListener("click", (event) => {
+	const pick = event.target.closest(".camp-pick");
+	const card = event.target.closest(".camp-card");
+	const id = pick ? pick.dataset.camp : card ? card.dataset.camp : "";
+	if (!id) return;
+	if (pick && camp.selected === id) return console.log("wakfu:chooseCamp", id); // dans le jeu : envoi au serveur
+	camp.selected = id;
+	renderCamp();
+});
+renderCamp();
+</script>
+</body>
+</html>
