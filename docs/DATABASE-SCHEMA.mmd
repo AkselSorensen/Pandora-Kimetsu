@@ -1,0 +1,371 @@
+erDiagram
+    FACTION {
+        int faction_id PK
+        string name
+        string description
+    }
+    PLAYER {
+        uuid player_id PK
+        string steam_id UK
+        string first_name
+        string last_name
+        string display_name
+        string email
+        datetime created_at
+        datetime last_login
+        bool is_banned
+    }
+    ADMIN_ROLE {
+        int role_id PK
+        string name
+    }
+    PLAYER_ROLE {
+        uuid player_id PK, FK
+        int role_id PK, FK
+    }
+    CHARACTER {
+        uuid character_id PK
+        uuid player_id FK
+        int faction_id FK
+        string name
+        int level
+        int xp
+        int reroll_count
+        int skill_points_unspent
+        bool is_active
+        datetime created_at
+    }
+    CHARACTER_APPEARANCE {
+        uuid character_id PK, FK
+        json appearance
+        int version
+        datetime updated_at
+    }
+    FACTION_CHANGE {
+        bigint change_id PK
+        uuid character_id FK
+        int from_faction_id FK
+        int to_faction_id FK
+        bigint tx_id FK
+        int refunded_points
+        string source
+        datetime created_at
+    }
+    GIFT_ROLL {
+        bigint roll_id PK
+        uuid character_id FK
+        int granted_skill_id FK
+        string roll_kind
+        bool is_reroll
+        bigint tx_id FK
+        datetime created_at
+    }
+    SKILL_TREE {
+        int tree_id PK
+        int faction_id FK
+        string name
+        string kind
+    }
+    SKILL_NODE {
+        int skill_id PK
+        int tree_id FK
+        int parent_skill_id FK
+        string name
+        string description
+        int required_level
+    }
+    CHARACTER_SKILL {
+        uuid character_id PK, FK
+        int skill_id PK, FK
+        int points
+        datetime unlocked_at
+    }
+    COMBAT_STATS {
+        uuid character_id PK, FK
+        int kills
+        int deaths
+        bigint damage_dealt
+        bigint damage_taken
+        int playtime_seconds
+        datetime updated_at
+    }
+    INVENTORY {
+        uuid inventory_id PK
+        uuid player_id FK
+        int capacity
+    }
+    ITEM {
+        int item_id PK
+        string name
+        string category
+        string rarity
+        string description
+        bool stackable
+    }
+    ITEM_INSTANCE {
+        bigint instance_id PK
+        int item_id FK
+        uuid inventory_id FK
+        uuid character_id FK
+        int quantity
+        int durability
+        bool is_equipped
+        int slot
+        string source
+        datetime acquired_at
+    }
+    WEAPON {
+        int item_id PK, FK
+        string weapon_type
+        int base_damage
+        int max_durability
+    }
+    BLUEPRINT {
+        int blueprint_id PK
+        int item_id FK
+        int result_item_id FK
+        bigint yen_cost
+    }
+    ITEM_PERK {
+        int perk_id PK
+        string name
+        string description
+    }
+    INSTANCE_PERK {
+        bigint instance_id PK, FK
+        int perk_id PK, FK
+        float value
+    }
+    EQUIPMENT_REROLL {
+        bigint reroll_id PK
+        bigint instance_id FK
+        uuid player_id FK
+        bigint tx_id FK
+        json old_perks
+        json new_perks
+        datetime created_at
+    }
+    CRATE_TYPE {
+        int crate_type_id PK
+        int item_id FK
+        string name
+        bigint yen_price
+    }
+    CRATE_LOOT {
+        int crate_type_id PK, FK
+        int item_id PK, FK
+        int weight
+    }
+    CRATE_OPEN {
+        bigint open_id PK
+        uuid player_id FK
+        int crate_type_id FK
+        int won_item_id FK
+        datetime opened_at
+    }
+    TRADE {
+        bigint trade_id PK
+        uuid initiator_player_id FK
+        uuid receiver_player_id FK
+        string status
+        bigint fee_tx_id FK
+        datetime created_at
+        datetime closed_at
+    }
+    TRADE_ITEM {
+        bigint trade_id PK, FK
+        bigint instance_id PK, FK
+    }
+    TRADE_CURRENCY {
+        bigint trade_id PK, FK
+        uuid offered_by PK, FK
+        int currency_id PK, FK
+        bigint amount
+    }
+    ITEM_LOG {
+        bigint log_id PK
+        bigint instance_id
+        uuid player_id FK
+        uuid to_player_id FK
+        bigint trade_id FK
+        string event_type
+        datetime created_at
+    }
+    OUTFIT {
+        int outfit_id PK
+        string name
+        string slot
+        string rarity
+    }
+    PLAYER_OUTFIT {
+        uuid player_id PK, FK
+        int outfit_id PK, FK
+        datetime acquired_at
+    }
+    CHARACTER_OUTFIT {
+        uuid character_id PK, FK
+        int outfit_id PK, FK
+        bool is_equipped
+    }
+    COSMETIC {
+        int cosmetic_id PK
+        string name
+        string type
+        string rarity
+    }
+    PLAYER_COSMETIC {
+        uuid player_id PK, FK
+        int cosmetic_id PK, FK
+        datetime acquired_at
+    }
+    CHARACTER_COSMETIC {
+        uuid character_id PK, FK
+        int cosmetic_id PK, FK
+        bool is_equipped
+    }
+    CURRENCY {
+        int currency_id PK
+        string code
+    }
+    WALLET {
+        uuid player_id PK, FK
+        int currency_id PK, FK
+        bigint balance
+    }
+    SHOP_ORDER {
+        bigint order_id PK
+        uuid player_id FK
+        string product_code
+        int amount_cents
+        string currency_code
+        string payment_ref
+        string status
+        datetime created_at
+    }
+    TRANSACTION {
+        bigint tx_id PK
+        uuid player_id FK
+        int currency_id FK
+        bigint order_id FK
+        bigint amount
+        string reason
+        uuid admin_id FK
+        datetime created_at
+    }
+    SANCTION {
+        int sanction_id PK
+        uuid player_id FK
+        uuid admin_id FK
+        string type
+        string reason
+        datetime starts_at
+        datetime ends_at
+    }
+    GAME_LOG {
+        bigint log_id PK
+        uuid player_id FK
+        uuid character_id FK
+        string action
+        json details
+        datetime created_at
+    }
+    HOUSE {
+        int house_id PK
+        string name
+        string map_name
+        float pos_x
+        float pos_y
+        float pos_z
+    }
+    HOUSE_INSTANCE {
+        bigint instance_id PK
+        int house_id FK
+        uuid owner_player_id FK
+        bool is_locked
+        datetime created_at
+    }
+    HOUSE_INSTANCE_GUEST {
+        bigint instance_id PK, FK
+        uuid guest_player_id PK, FK
+        uuid invited_by FK
+        datetime invited_at
+    }
+    PLACED_OBJECT {
+        bigint placed_id PK
+        bigint instance_id FK
+        int item_id FK
+        float pos_x
+        float pos_y
+        float pos_z
+        float rot_yaw
+    }
+
+    PLAYER ||--o{ PLAYER_ROLE : "a des rôles"
+    ADMIN_ROLE ||--o{ PLAYER_ROLE : "attribué à"
+    PLAYER ||--o{ CHARACTER : "possède"
+    FACTION ||--o{ CHARACTER : "appartient à"
+    CHARACTER ||--o| CHARACTER_APPEARANCE : "a une apparence"
+    CHARACTER ||--o{ FACTION_CHANGE : "a changé de camp"
+    FACTION ||--o{ FACTION_CHANGE : "depuis"
+    FACTION ||--o{ FACTION_CHANGE : "vers"
+    TRANSACTION ||--o| FACTION_CHANGE : "paie le changement"
+    FACTION ||--o{ SKILL_TREE : "a des arbres"
+    SKILL_TREE ||--o{ SKILL_NODE : "contient"
+    SKILL_NODE ||--o{ SKILL_NODE : "débloque (parent)"
+    CHARACTER ||--o{ CHARACTER_SKILL : "a débloqué"
+    SKILL_NODE ||--o{ CHARACTER_SKILL : "débloqué"
+    CHARACTER ||--o{ GIFT_ROLL : "a tiré"
+    SKILL_NODE ||--o{ GIFT_ROLL : "accordé"
+    CHARACTER ||--|| COMBAT_STATS : "a"
+    PLAYER ||--|| INVENTORY : "a"
+    INVENTORY ||--o{ ITEM_INSTANCE : "contient"
+    ITEM ||--o{ ITEM_INSTANCE : "instance de"
+    CHARACTER ||--o{ ITEM_INSTANCE : "équipé par (vide = non équipé)"
+    ITEM ||--o| WEAPON : "est une arme"
+    ITEM ||--o| BLUEPRINT : "est un plan"
+    ITEM ||--o{ BLUEPRINT : "crée"
+    ITEM_INSTANCE ||--o{ INSTANCE_PERK : "a des bonus"
+    ITEM_PERK ||--o{ INSTANCE_PERK : "bonus"
+    ITEM_INSTANCE ||--o{ EQUIPMENT_REROLL : "reroll"
+    PLAYER ||--o{ EQUIPMENT_REROLL : "effectue"
+    ITEM ||--o| CRATE_TYPE : "est une caisse"
+    CRATE_TYPE ||--o{ CRATE_LOOT : "contient"
+    ITEM ||--o{ CRATE_LOOT : "peut tomber"
+    PLAYER ||--o{ CRATE_OPEN : "ouvre"
+    CRATE_TYPE ||--o{ CRATE_OPEN : "ouverte"
+    ITEM ||--o{ CRATE_OPEN : "gagné"
+    OUTFIT ||--o{ PLAYER_OUTFIT : "débloquée"
+    PLAYER ||--o{ PLAYER_OUTFIT : "possède"
+    OUTFIT ||--o{ CHARACTER_OUTFIT : "portée"
+    CHARACTER ||--o{ CHARACTER_OUTFIT : "porte"
+    PLAYER ||--o{ PLAYER_COSMETIC : "possède"
+    COSMETIC ||--o{ PLAYER_COSMETIC : "débloqué"
+    CHARACTER ||--o{ CHARACTER_COSMETIC : "porte"
+    COSMETIC ||--o{ CHARACTER_COSMETIC : "porté"
+    PLAYER ||--o{ WALLET : "a un solde"
+    CURRENCY ||--o{ WALLET : "en"
+    PLAYER ||--o{ TRANSACTION : "effectue"
+    CURRENCY ||--o{ TRANSACTION : "en"
+    PLAYER ||--o{ SHOP_ORDER : "achète"
+    SHOP_ORDER ||--o{ TRANSACTION : "crédite"
+    PLAYER ||--o{ SANCTION : "reçoit"
+    PLAYER ||--o{ SANCTION : "donne (admin)"
+    PLAYER ||--o{ GAME_LOG : "génère"
+    HOUSE ||--o{ HOUSE_INSTANCE : "a des instances"
+    PLAYER ||--o{ HOUSE_INSTANCE : "possède"
+    HOUSE_INSTANCE ||--o{ PLACED_OBJECT : "contient"
+    ITEM ||--o{ PLACED_OBJECT : "meuble"
+    HOUSE_INSTANCE ||--o{ HOUSE_INSTANCE_GUEST : "invite"
+    PLAYER ||--o{ HOUSE_INSTANCE_GUEST : "est invité"
+    TRANSACTION ||--o| GIFT_ROLL : "paie le reroll"
+    TRANSACTION ||--o| EQUIPMENT_REROLL : "paie le reroll"
+    PLAYER ||--o{ TRADE : "initie"
+    PLAYER ||--o{ TRADE : "reçoit"
+    TRADE ||--o{ TRADE_ITEM : "contient"
+    ITEM_INSTANCE ||--o{ TRADE_ITEM : "proposé"
+    PLAYER ||--o{ ITEM_LOG : "concerne"
+    TRADE ||--o{ ITEM_LOG : "lié à"
+    TRADE ||--o{ TRADE_CURRENCY : "contient (devises)"
+    PLAYER ||--o{ TRADE_CURRENCY : "offre"
+    CURRENCY ||--o{ TRADE_CURRENCY : "en"
+    TRANSACTION ||--o| TRADE : "paie les frais"
