@@ -1169,6 +1169,29 @@ html.demon #spellbar { bottom: 46px; } /* laisse la place à la mention « Palie
 .camp-card[data-camp="demon"] .camp-pick { bottom: 2.8%; background: url("img/select-button-demon.png") center / 100% 100% no-repeat; }
 .camp-pick:hover { filter: none; }
 .camp-card.selected .camp-pick { border-color: transparent; box-shadow: none; }
+#camp-confirmation { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; }
+#camp-confirmation.hidden { display: none !important; }
+.camp-confirm-scrim { position: absolute; inset: 0; background: rgba(3, 2, 8, 0.78); backdrop-filter: blur(7px); }
+.camp-confirm-panel { position: relative; z-index: 1; width: min(40em, calc(100vw - 4em)); box-sizing: border-box; padding: 2.2em 2.4em; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 1em; background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--camp-confirm-color) 22%, transparent), transparent 70%), #100b13; text-align: center; box-shadow: 0 1.5em 5em rgba(0, 0, 0, 0.55); animation: campPanelIn 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+#camp-confirmation[data-camp="slayer"] { --camp-confirm-color: #cf1f40; }
+#camp-confirmation[data-camp="demon"] { --camp-confirm-color: #962dd2; }
+.camp-confirm-kicker { margin: 0 0 0.7em; color: var(--camp-confirm-color, #cf1f40); font-size: 0.72em; font-weight: 800; letter-spacing: 0.22em; }
+#camp-confirm-title { margin: 0; color: #fff; font-family: "Unbounded", sans-serif; font-size: 1.8em; font-weight: 800; line-height: 1.2; }
+#camp-confirm-message { margin: 1em 0 1.7em; color: rgba(244, 238, 230, 0.76); font-size: 0.9em; line-height: 1.55; }
+.camp-confirm-actions { display: flex; justify-content: center; gap: 1em; }
+.camp-confirm-actions button { min-width: 10em; padding: 0.85em 1.2em; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 0.45em; color: #fff; font: inherit; font-size: 0.82em; font-weight: 700; cursor: pointer; transition: transform 160ms ease, filter 160ms ease; }
+#camp-confirm-cancel { background: rgba(255, 255, 255, 0.07); }
+#camp-confirm-accept { border-color: transparent; background: linear-gradient(110deg, color-mix(in srgb, var(--camp-confirm-color) 85%, #250912), color-mix(in srgb, var(--camp-confirm-color) 60%, #100814)); }
+.camp-confirm-actions button:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); }
+.camp-confirm-actions button:disabled { opacity: 0.65; cursor: wait; }
+#camp-confirmation.is-closing { animation: campOverlayOut 220ms ease-in both; }
+#camp-confirmation.is-confirming .camp-confirm-scrim { animation: campScrimToBlack 360ms ease-in both; }
+#camp-confirmation.is-confirming .camp-confirm-panel { animation: campPanelOut 280ms ease-in both; }
+@keyframes campOverlayOut { to { opacity: 0; } }
+@keyframes campPanelIn { from { opacity: 0; transform: translateY(1em) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes campPanelOut { to { opacity: 0; transform: translateY(-0.6em) scale(0.98); } }
+@keyframes campScrimToBlack { to { background-color: #000; backdrop-filter: blur(0); } }
+@media (prefers-reduced-motion: reduce) { .camp-confirm-panel, .camp-confirm-actions button { animation-duration: 1ms; transition-duration: 1ms; } }
 /* Écran de bienvenue (planche Figma « Tengen — Bienvenue ») : 1em = 1/120 de la largeur, comme dans l'écran de chargement */
 #welcome { position: fixed; inset: 0; z-index: 60; background: #050204 url("img/kukushibo-bg.png") center center / cover no-repeat; color: #f4eee6; font-family: "Montserrat", "Segoe UI", system-ui, sans-serif; font-size: calc(100vw / 120); overflow: hidden; }
 #wl-glow { position: absolute; right: -6em; top: 2em; width: 62em; height: 62em; border-radius: 50%; background: radial-gradient(circle, rgba(150, 10, 30, 0.85) 0%, rgba(110, 6, 22, 0.5) 38%, rgba(0, 0, 0, 0) 68%); filter: blur(2.4em); }
