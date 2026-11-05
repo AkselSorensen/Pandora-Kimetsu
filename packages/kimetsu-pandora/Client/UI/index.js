@@ -888,35 +888,25 @@ function applyTheme() {
 	$("demon-fx").classList.toggle("hidden", !isDemon());
 }
 
-// Choix du camp : deux cartes, un bouton de confirmation. Le serveur enregistre le choix, une seule fois par personnage.
+// Choix de la faction : deux cartes avec leur bouton « Sélectionner ». Le choix est définitif : un premier clic marque la carte (le bouton devient
+// « Confirmer »), un second clic sur ce même bouton envoie le choix. Le serveur l'enregistre, une seule fois par personnage.
 const camp = { selected: "" };
 
 function renderCamp() {
 	const order = hud.campOrder && hud.campOrder.length ? hud.campOrder : Object.keys(hud.camps || {});
 	$("camp-cards").innerHTML = order
 		.filter((id) => hud.camps[id])
-		.map((id) => {
+		.map((id, index) => {
 			const def = hud.camps[id];
-			const points = list(def.points).map((point) => `<li>${escapeHtml(point)}</li>`).join("");
 			const selected = camp.selected === id;
 			return (
-				`<div class="camp-card${selected ? " selected" : ""}" data-camp="${id}" style="--camp:${def.color}">` +
-				(selected ? `<span class="camp-badge">${CHECK}Sélectionné</span>` : "") +
-				`<span class="kanji">${escapeHtml(def.kanji)}</span>` +
-				`<h3>${escapeHtml(def.name)}</h3>` +
-				`<p>${escapeHtml(def.blurb)}</p>` +
-				`<ul>${points}</ul>` +
+				`<div class="camp-card${selected ? " selected" : ""} ${index === 0 ? "left" : "right"}" data-camp="${id}" style="--camp:${def.color}">` +
+				`<button type="button" class="camp-pick" data-camp="${id}" aria-label="${selected ? "Confirmer" : "Sélectionner"}">${selected ? "Confirmer" : "Sélectionner"}</button>` +
 				`</div>`
 			);
 		})
 		.join("");
-	const picked = hud.camps && hud.camps[camp.selected];
-	const confirm = $("camp-confirm");
-	confirm.disabled = !picked;
-	confirm.dataset.camp = picked ? camp.selected : "";
-	confirm.textContent = picked ? `Devenir ${picked.name}` : "Choisis un camp";
 }
-
 Events.Subscribe("wakfu:campOpen", (open) => {
 	$("camp").classList.toggle("hidden", !open);
 	if (open) {
@@ -927,12 +917,13 @@ Events.Subscribe("wakfu:campOpen", (open) => {
 
 document.addEventListener("click", (event) => {
 	if ($("camp").classList.contains("hidden")) return;
-	const card = event.target.closest("[data-camp]");
-	if (card && card.classList.contains("camp-card")) {
-		camp.selected = card.dataset.camp;
-		return renderCamp();
-	}
-	if (event.target.closest("#camp-confirm") && camp.selected) Events.Call("wakfu:chooseCamp", camp.selected);
+	const pick = event.target.closest(".camp-pick");
+	const card = event.target.closest(".camp-card");
+	const id = pick ? pick.dataset.camp : card ? card.dataset.camp : "";
+	if (!id) return;
+	if (pick && camp.selected === id) return Events.Call("wakfu:chooseCamp", id); // second clic : confirmé
+	camp.selected = id;
+	renderCamp();
 });
 
 // Jauges du démon. Le panneau n'existe que pour un démon.
