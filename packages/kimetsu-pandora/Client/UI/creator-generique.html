@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Création de personnage (générique)</title>
+<style>
+	:root {
+		--bg: #050505;
+		--panel: rgba(12, 12, 14, 0.92);
+		--line: rgba(255, 255, 255, 0.1);
+		--text: #f2f2f2;
+		--muted: rgba(242, 242, 242, 0.55);
+		--green: #1f7a3a;
+		--green-hi: #2fa653;
+		--purple: #5b1fa0;
+		--blue: #2d9cdb;
+		--pink: #d33fb8;
+		--accent: #8a2be2;
+	}
+	* { box-sizing: border-box; }
+	html, body { margin: 0; min-height: 100%; }
+	body {
+		background: radial-gradient(ellipse at 50% 30%, #3a0a0a 0%, #120404 40%, var(--bg) 75%);
+		color: var(--text);
+		font-family: "Segoe UI", system-ui, sans-serif;
+		padding: 16px;
+	}
+	.frame {
+		position: relative;
+		max-width: 1000px;
+		margin: 0 auto;
+		min-height: 620px;
+		padding: 20px 24px 16px;
+		border-radius: 10px;
+		overflow: hidden;
+		background: linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.9));
+		border: 1px solid var(--line);
+	}
+	/* Yeux en filigrane en arrière-plan */
+	.eyes {
+		position: absolute;
+		left: 28%;
+		top: 18%;
+		width: 200px;
+		height: 380px;
+		opacity: 0.12;
+		background:
+			radial-gradient(circle at 50% 22%, #bbb 0 22px, transparent 23px),
+			radial-gradient(circle at 50% 55%, #bbb 0 22px, transparent 23px),
+			radial-gradient(circle at 50% 88%, #bbb 0 22px, transparent 23px);
+		pointer-events: none;
+	}
+	header {
+		position: relative;
+		text-align: center;
+		margin-bottom: 14px;
+	}
+	header .kicker { font-size: 13px; letter-spacing: 0.3em; color: var(--muted); }
+	header h1 {
+		margin: 2px 0 0;
+		font-size: 40px;
+		font-weight: 900;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+	.discord {
+		position: absolute;
+		right: 0;
+		top: 0;
+		background: #5865f2;
+		color: #fff;
+		border: none;
+		border-radius: 6px;
+		padding: 8px 14px;
+		font: inherit;
+		font-size: 12px;
+		cursor: pointer;
+	}
+	.layout {
+		position: relative;
+		display: grid;
+		grid-template-columns: 240px 1fr 300px;
+		gap: 16px;
+		align-items: start;
+	}
+	.card {
+		background: var(--panel);
+		border: 1px solid var(--line);
+		border-radius: 8px;
+		padding: 14px;
+	}
+	/* Carte gauche : camp */
+	.camp-card { padding: 0; overflow: hidden; }
+	.camp-art {
+		height: 270px;
+		background: radial-gradient(circle at 50% 35%, #5a1c1c, #140707 70%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #c79cff;
+		font-size: 13px;
+		letter-spacing: 0.1em;
+	}
+	.camp-text { padding: 12px 14px 14px; }
+	.camp-text h2 { margin: 0 0 6px; font-size: 18px; letter-spacing: 0.06em; }
+	.camp-text p { margin: 0 0 12px; font-size: 12px; line-height: 1.4; color: var(--muted); }
+	.camp-btn {
+		width: 100%;
+		height: 42px;
+		border: none;
+		border-radius: 6px;
+		background: var(--purple);
+		color: #fff;
+		font: inherit;
+		cursor: pointer;
+	}
+	/* Colonne centrale : aperçu du personnage */
+	.preview {
+		height: 520px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: flex-end;
+		position: relative;
+	}
+	.figure {
+		width: 150px;
+		height: 330px;
+		border-radius: 75px 75px 18px 18px;
+		background: linear-gradient(180deg, #2a2a33, #15151b);
+		border: 1px solid var(--line);
+		position: relative;
+		transition: background 0.2s;
+	}
+	.figure::before {
+		content: "";
+		position: absolute;
+		top: -48px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 72px;
+		height: 72px;
+		border-radius: 50%;
+		background: var(--skin, #e8c9a6);
+	}
+	.figure .hair {
+		position: absolute;
+		top: -58px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 96px;
+		height: 50px;
+		border-radius: 48px 48px 14px 14px;
+		background: var(--hair, #2a2a2a);
+	}
+	.figure .tunic {
+		position: absolute;
+		inset: 90px 10px 0 10px;
+		border-radius: 40px 40px 14px 14px;
+		background: var(--tunic, #5b1fa0);
+	}
+	.preview-name { margin-top: 18px; font-size: 16px; letter-spacing: 0.06em; }
+	.preview-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+	/* Colonne droite : étapes et options */
+	.steps h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.12em; font-weight: 500; color: var(--muted); }
+	.step {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 10px 12px;
+		border-radius: 6px;
+		background: rgba(255,255,255,0.04);
+		border: 1px solid var(--line);
+		margin-bottom: 6px;
+		font-size: 14px;
+		cursor: pointer;
+		color: var(--text);
+		width: 100%;
+		text-align: left;
+		font-family: inherit;
+	}
+	.step .dot { width: 10px; height: 10px; border-radius: 50%; background: #c0392b; }
+	.step.done .dot { background: #2ecc71; }
+	.step[aria-current="step"] { border-color: var(--blue); }
+	.panel-title { font-size: 12px; letter-spacing: 0.14em; color: var(--muted); margin: 12px 0 8px; }
+	.field-label { font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+	input[type="text"] {
+		width: 100%;
+		padding: 9px 10px;
+		border-radius: 6px;
+		border: 1px solid var(--line);
+		background: #0c0c0e;
+		color: var(--text);
+		font: inherit;
+		font-size: 14px;
+	}
+	.row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+	.chip {
+		padding: 8px;
+		border-radius: 6px;
+		border: 1px solid var(--line);
+		background: #0c0c0e;
+		color: var(--text);
+		font: inherit;
+		font-size: 13px;
+		cursor: pointer;
+	}
+	.chip[aria-pressed="true"] { border-color: var(--blue); background: rgba(45,156,219,0.15); }
+	.chip.female[aria-pressed="true"] { border-color: var(--pink); background: rgba(211,63,184,0.15); }
+	.stepper {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 8px 10px;
+		border-radius: 6px;
+		background: #0c0c0e;
+		border: 1px solid var(--line);
+		font-size: 14px;
+	}
+	.stepper button {
+		background: none;
+		border: none;
+		color: var(--text);
+		font-size: 18px;
+		cursor: pointer;
+		padding: 0 6px;
+	}
+	.swatches { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+	.swatch {
+		aspect-ratio: 1;
+		border-radius: 50%;
+		border: 2px solid transparent;
+		cursor: pointer;
+		padding: 0;
+	}
+	.swatch[aria-pressed="true"] { border-color: #fff; }
+	.slider { width: 100%; accent-color: var(--blue); }
+	/* Onglets d'étapes à gauche du panneau (icônes simples) */
+	.tabs { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+	.tab {
+		width: 36px;
+		height: 36px;
+		border-radius: 6px;
+		border: 1px solid var(--line);
+		background: #101014;
+		color: var(--text);
+		cursor: pointer;
+		font-size: 14px;
+	}
+	.tab[aria-pressed="true"] { background: #17505c; border-color: #2bb6c9; }
+	.screen { display: none; }
+	.screen.active { display: block; }
+	.next-row { margin-top: 14px; display: grid; gap: 8px; }
+	.btn {
+		height: 40px;
+		border: 1px solid var(--line);
+		border-radius: 6px;
+		background: #0c0c0e;
+		color: var(--text);
+		font: inherit;
+		cursor: pointer;
+	}
+	.btn.green { background: var(--green); border-color: var(--green-hi); color: #d8f5e0; }
+	.btn.green:hover { background: var(--green-hi); }
+	footer.note {
+		margin-top: 16px;
+		font-size: 12px;
+		color: var(--muted);
+		text-align: left;
+	}
+	@media (max-width: 820px) {
+		.layout { grid-template-columns: 1fr; }
+		.camp-card { order: 1; }
+		.preview { order: 0; height: 320px; }
+		.discord { position: static; display: block; margin: 0 auto 10px; }
+	}
+</style>
+</head>
+<body>
+<div class="frame">
+	<div class="eyes" aria-hidden="true"></div>
+
+	<header>
+		<button class="discord" type="button">Rejoindre le serveur Discord</button>
+		<div class="kicker">CRÉATION DE</div>
+		<h1>Personnage</h1>
+	</header>
+
+	<div class="layout">
+		<!-- Gauche : camp choisi -->
+		<aside class="card camp-card">
+			<div class="camp-art">[ illustration du camp ]</div>
+			<div class="camp-text">
+				<h2 id="camp-title">DÉMON</h2>
+				<p id="camp-desc">Les démons sont des êtres nés des ténèbres, dotés d'une force surnaturelle et d'une longévité quasi immortelle.</p>
+				<button class="camp-btn" type="button" aria-label="Emblème du camp">◈ ◈</button>
+			</div>
+		</aside>
+
+		<!-- Centre : aperçu du personnage -->
+		<section class="preview" aria-label="Aperçu du personnage">
+			<div class="figure" id="figure">
+				<div class="hair" id="hair"></div>
+				<div class="tunic" id="tunic"></div>
+			</div>
+			<div class="preview-name" id="preview-name">Sans nom</div>
+			<div class="preview-sub" id="preview-sub">Étape 1 sur 4</div>
+		</section>
+
+		<!-- Droite : étapes et options -->
+		<aside class="card steps">
+			<h3>CRÉATION DE VOTRE PERSONNAGE</h3>
+			<button class="step" type="button" data-step="0" aria-current="step"><span>Identité</span><span class="dot"></span></button>
+			<button class="step" type="button" data-step="1"><span>Pilosité</span><span class="dot"></span></button>
+			<button class="step" type="button" data-step="2"><span>Visage</span><span class="dot"></span></button>
+			<button class="step" type="button" data-step="3"><span>Tenue</span><span class="dot"></span></button>
+
+			<!-- Écran 1 : identité -->
+			<div class="screen active" data-screen="0">
+				<div class="panel-title">IDENTITÉ</div>
+				<div class="row">
+					<div>
+						<div class="field-label">Prénom</div>
+						<input id="prenom" type="text" maxlength="16" placeholder="Entrez votre prénom">
+					</div>
+					<div>
+						<div class="field-label">Nom</div>
+						<input id="nom" type="text" maxlength="16" placeholder="Entrez votre nom">
+					</div>
+				</div>
+				<div class="field-label">Sexe</div>
+				<div class="row">
+					<button class="chip" type="button" data-sex="Homme" aria-pressed="true">♂ Homme</button>
+					<button class="chip female" type="button" data-sex="Femme" aria-pressed="false">♀ Femme</button>
+				</div>
+				<div class="field-label">Âge : <span id="age-val">1.02</span></div>
+				<input class="slider" id="age" type="range" min="1" max="1.2" step="0.01" value="1.02">
+				<div class="field-label">Taille : <span id="taille-val">1.02</span></div>
+				<input class="slider" id="taille" type="range" min="1" max="1.2" step="0.01" value="1.02">
+				<div class="field-label">Couleur de peau</div>
+				<div class="swatches" id="skin"></div>
+			</div>
+
+			<!-- Écran 2 : pilosité -->
+			<div class="screen" data-screen="1">
+				<div class="panel-title">PILOSITÉ</div>
+				<div class="field-label">Forme des yeux</div>
+				<div class="stepper"><button type="button" data-prev="eyes">‹</button><span id="eyes-val">12</span><button type="button" data-next="eyes">›</button></div>
+				<div class="field-label">Pupilles</div>
+				<div class="stepper"><button type="button" data-prev="pupil">‹</button><span id="pupil-val">12</span><button type="button" data-next="pupil">›</button></div>
+				<div class="field-label">Couleur des pupilles</div>
+				<div class="swatches" id="pupil-colors"></div>
+			</div>
+
+			<!-- Écran 3 : visage -->
+			<div class="screen" data-screen="2">
+				<div class="panel-title">VISAGE</div>
+				<div class="field-label">Forme du visage</div>
+				<div class="stepper"><button type="button" data-prev="face">‹</button><span id="face-val">12</span><button type="button" data-next="face">›</button></div>
+			</div>
+
+			<!-- Écran 4 : tenue -->
+			<div class="screen" data-screen="3">
+				<div class="panel-title">TENUE D'ARRIVÉE</div>
+				<div class="field-label">Tenue</div>
+				<div class="stepper"><button type="button" data-prev="outfit">‹</button><span id="outfit-val">12</span><button type="button" data-next="outfit">›</button></div>
+			</div>
+
+			<div class="next-row">
+				<button class="btn green" type="button" id="next">CONTINUER ET RETOURNER</button>
+				<button class="btn green" type="button" id="finish">TERMINER</button>
+				<button class="btn" type="button" id="back">RETOUR</button>
+			</div>
+		</aside>
+	</div>
+
+	<footer class="note">Vous avez un souci que vous n'arrivez pas à régler ? Faites un ticket sur le serveur Discord.</footer>
+</div>
+
+<script>
+	const SKINS = ["#f6d3a4", "#e3b57f", "#b97c4f", "#7a4a2b", "#4a2d1c", "#f0a860", "#ece3d8"];
+	const PUPIL_COLORS = ["#8a6fb0", "#2ecc71", "#1f2fd0", "#6b1210", "#8e44ad", "#8b5e3c", "#9b59b6", "#c2185b", "#e0b060", "#f1c40f", "#16a085", "#d12aa0", "#d7263d", "#d9b5e8"];
+	const CAMPS = {
+		demon: { title: "DÉMON", desc: "Les démons sont des êtres nés des ténèbres, dotés d'une force surnaturelle et d'une longévité quasi immortelle." },
+		slayer: { title: "POURFENDEUR", desc: "Le Corps des Pourfendeurs : lame Nichirin et souffle à maîtriser." }
+	};
+	const state = { camp: "demon", sex: "Homme", skin: 0, pupil: 0, eyes: 12, face: 12, outfit: 12, screen: 0 };
+
+	const $ = (id) => document.getElementById(id);
+
+	// Pastilles de couleur de peau et de pupilles
+	$("skin").innerHTML = SKINS.map((c, i) => `<button class="swatch" type="button" data-skin="${i}" style="background:${c}" aria-label="Peau ${i + 1}"></button>`).join("");
+	$("pupil-colors").innerHTML = PUPIL_COLORS.map((c, i) => `<button class="swatch" type="button" data-pupil="${i}" style="background:${c}" aria-label="Pupille ${i + 1}"></button>`).join("");
+
+	function render() {
+		// Étapes
+		document.querySelectorAll(".step").forEach((b, i) => {
+			b.setAttribute("aria-current", i === state.screen ? "step" : "false");
+			b.classList.toggle("done", i < state.screen);
+		});
+		document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", Number(s.dataset.screen) === state.screen));
+		document.querySelectorAll("[data-skin]").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.skin) === state.skin)));
+		document.querySelectorAll("[data-pupil]").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.pupil) === state.pupil)));
+		document.querySelectorAll("[data-sex]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.sex === state.sex)));
+
+		// Aperçu
+		$("figure").style.setProperty("--skin", SKINS[state.skin]);
+		$("figure").style.setProperty("--hair", PUPIL_COLORS[state.pupil] === "#d9b5e8" ? "#2a2a2a" : "#2a2a2a");
+		$("tunic").style.setProperty("--tunic", state.camp === "demon" ? "#5b1fa0" : "#2d9cdb");
+		const nom = [$("prenom").value.trim(), $("nom").value.trim()].filter(Boolean).join(" ");
+		$("preview-name").textContent = nom || "Sans nom";
+		$("preview-sub").textContent = `Étape ${state.screen + 1} sur 4`;
+
+		// Valeurs
+		$("eyes-val").textContent = state.eyes;
+		$("pupil-val").textContent = state.pupil + 1;
+		$("face-val").textContent = state.face;
+		$("outfit-val").textContent = state.outfit;
+
+		// Camp
+		$("camp-title").textContent = CAMPS[state.camp].title;
+		$("camp-desc").textContent = CAMPS[state.camp].desc;
+
+		// Bouton suivant / terminer
+		$("next").style.display = state.screen < 3 ? "block" : "none";
+		$("finish").style.display = state.screen === 3 ? "block" : "none";
+		$("back").style.display = state.screen > 0 ? "block" : "none";
+	}
+
+	document.querySelectorAll(".step").forEach((b) => b.addEventListener("click", () => { state.screen = Number(b.dataset.step); render(); }));
+	document.querySelectorAll("[data-skin]").forEach((b) => b.addEventListener("click", () => { state.skin = Number(b.dataset.skin); render(); }));
+	document.querySelectorAll("[data-pupil]").forEach((b) => b.addEventListener("click", () => { state.pupil = Number(b.dataset.pupil); render(); }));
+	document.querySelectorAll("[data-sex]").forEach((b) => b.addEventListener("click", () => { state.sex = b.dataset.sex; render(); }));
+
+	// Flèches ‹ › : clés et bornes
+	const keys = { eyes: "eyes", pupil: "pupil", face: "face", outfit: "outfit" };
+	document.querySelectorAll("[data-next]").forEach((b) => b.addEventListener("click", () => {
+		const k = keys[b.dataset.next];
+		if (k === "pupil") state.pupil = (state.pupil + 1) % PUPIL_COLORS.length;
+		else state[k] = Math.min(99, state[k] + 1);
+		render();
+	}));
+	document.querySelectorAll("[data-prev]").forEach((b) => b.addEventListener("click", () => {
+		const k = keys[b.dataset.prev];
+		if (k === "pupil") state.pupil = (state.pupil - 1 + PUPIL_COLORS.length) % PUPIL_COLORS.length;
+		else state[k] = Math.max(0, state[k] - 1);
+		render();
+	}));
+
+	$("prenom").addEventListener("input", render);
+	$("nom").addEventListener("input", render);
+	$("age").addEventListener("input", (e) => { $("age-val").textContent = Number(e.target.value).toFixed(2); });
+	$("taille").addEventListener("input", (e) => { $("taille-val").textContent = Number(e.target.value).toFixed(2); });
+
+	$("next").addEventListener("click", () => { state.screen = Math.min(3, state.screen + 1); render(); });
+	$("back").addEventListener("click", () => { state.screen = Math.max(0, state.screen - 1); render(); });
+	$("finish").addEventListener("click", () => { $("preview-sub").textContent = "Personnage prêt (aperçu, pas encore relié au jeu)"; });
+
+	render();
+</script>
+</body>
+</html>
