@@ -485,16 +485,14 @@ kbd {
 
 #menu-grid {
 	display: grid;
-	grid-template-columns: 466px 386px 296px;
-	grid-template-rows: 247px 234px 44px;
+	grid-template-columns: 506px 440px 297px;
+	grid-template-rows: 247px 235px 44px;
 	gap: 14px;
 	grid-template-areas:
 		"resume settings premium"
 		"shop shop2 premium"
 		"quit quit quit";
 }
-
-#menu-grid { grid-template-columns: 466px 386px 296px; }
 
 .tile {
 	position: relative;
@@ -511,79 +509,64 @@ kbd {
 }
 .tile:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.35); filter: brightness(1.12); }
 
-#tile-resume   { grid-area: resume; }
-#tile-settings { grid-area: settings; }
-#tile-premium  { grid-area: premium; }
+#tile-resume   { grid-area: resume; width: 466px; justify-self: start; }
+#tile-settings { grid-area: settings; width: 440px; justify-self: start; }
+#tile-premium  { grid-area: premium; width: 297px; height: 494px; align-self: start; }
 #tile-shop     { grid-area: shop; width: 506px; }
-#tile-discord  { grid-area: shop2; width: 346px; justify-self: end; }
+#tile-discord  { grid-area: shop2; width: 440px; justify-self: end; }
 
 .tile-art {
 	position: absolute;
 	inset: 0;
-	background-size: cover;
-	background-position: center;
+	width: 100%;
+	height: 100%;
+	object-fit: fill;
+	display: block;
 }
-#tile-resume .tile-art   { background: radial-gradient(circle at 70% 40%, #1c6a73, transparent 60%), linear-gradient(135deg, #04070a, #0e2a33); }
-#tile-settings .tile-art { background: radial-gradient(circle at 70% 40%, #6b6a14, transparent 60%), linear-gradient(135deg, #0a0b06, #1d1c07); }
-#tile-shop .tile-art     { background: radial-gradient(circle at 70% 60%, #8a1c26, transparent 65%), linear-gradient(135deg, #07070a, #200a10); }
-#tile-discord .tile-art  { background: radial-gradient(circle at 60% 50%, #3b2a8a, transparent 65%), linear-gradient(135deg, #06060d, #14103a); }
-#tile-premium .tile-art  { background: radial-gradient(circle at 60% 40%, #8a6a10, transparent 65%), linear-gradient(135deg, #0b0905, #1d1708); }
 
-.tile-text {
-	position: absolute;
-	left: 24px;
-	right: 24px;
-	bottom: 18px;
+/* Barre inférieure du menu pause : temps de jeu et déconnexion */
+#bottom-bar {
+	grid-area: quit;
 	display: flex;
-	flex-direction: column;
-	gap: 2px;
+	align-items: center;
+	gap: 8px;
+	width: max-content;
+	height: 44px;
 }
-.tile-text.top { top: 12px; bottom: auto; }
-.tile-text.bottom { bottom: 18px; }
-#tile-premium .tile-text:not(.top):not(.bottom) { display: none; }
-
-.tile-title {
+#playtime-panel {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	font-size: 29px;
-	font-weight: 800;
-	letter-spacing: 0.5px;
-	text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+	width: 268px;
+	height: 34px;
+	box-sizing: border-box;
+	padding: 0 10px;
+	border: 1px solid #444;
+	border-radius: 8px;
+	background: rgba(42, 42, 42, 0.92);
+	color: #b9b9b9;
+	font: 600 13px "Fira Sans", "Segoe UI", sans-serif;
 }
-
-.tile-sub {
-	font-size: 15px;
-	color: rgba(255, 255, 255, 0.55);
-	font-family: "Fira Sans", "Segoe UI", sans-serif;
-}
-.tile-sub.gold { color: #f2a30f; font-weight: 600; }
-
-/* Images de la maquette posées à droite de chaque tuile, collées en bas */
-#tile-resume .tile-art   { background: url("img/menu-reprendre.png") right bottom / auto 100% no-repeat, radial-gradient(circle at 70% 40%, #1c6a73, transparent 60%), linear-gradient(135deg, #04070a, #0e2a33); }
-#tile-settings .tile-art { background: url("img/menu-parametres.png") right bottom / auto 100% no-repeat, radial-gradient(circle at 70% 40%, #6b6a14, transparent 60%), linear-gradient(135deg, #0a0b06, #1d1c07); }
-#tile-premium .tile-art  { background: url("img/menu-premium.png") right bottom / auto 100% no-repeat, radial-gradient(circle at 60% 40%, #8a6a10, transparent 65%), linear-gradient(135deg, #0b0905, #1d1708); }
-
-/* Bottom bar : l'image est la barre, le bouton transparent couvre "Se déconnecter" */
-#bottom-bar {
-	grid-area: quit;
-	position: relative;
-	width: 1176px;
-	height: 44px;
-}
-#bottom-bar img { position: absolute; inset: 0; width: 100%; height: 100%; }
+#playtime-panel svg { width: 14px; height: 14px; fill: #2b9be9; flex: 0 0 auto; }
+#playtime-panel strong { margin-left: auto; color: #f3f3f3; font-size: 13px; }
 #quit-button {
-	position: absolute;
-	right: 0;
-	top: 0;
-	width: 192px;
-	height: 44px;
-	border: none;
-	border-radius: 10px;
-	background: transparent;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 135px;
+	height: 34px;
+	padding: 0 10px;
+	border: 1px solid rgba(210, 40, 40, 0.16);
+	border-radius: 8px;
+	background: rgba(117, 28, 28, 0.55);
+	color: #df2329;
+	font: 600 12px "Fira Sans", "Segoe UI", sans-serif;
 	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s;
 }
-#quit-button:hover { background: rgba(255, 90, 95, 0.12); }
+#quit-button svg { width: 14px; height: 14px; fill: currentColor; }
+#quit-button:hover { background: rgba(145, 30, 30, 0.7); border-color: rgba(230, 50, 50, 0.35); }
 
 /* Créateur de personnage : colonnes sur les côtés, le centre reste libre pour le joueur */
 #creator {

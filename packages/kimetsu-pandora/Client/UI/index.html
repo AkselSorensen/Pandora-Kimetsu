@@ -101,48 +101,31 @@
 	<!-- Menu pause (Échap) -->
 	<div id="menu" class="hidden">
 		<div id="menu-grid">
-			<button class="tile" id="tile-resume" data-action="resume">
-				<span class="tile-art"></span>
-				<span class="tile-text">
-					<span class="tile-title"><svg viewBox="0 0 16 18" width="16" height="18"><path d="M1 1 L15 9 L1 17 Z" fill="#fff"/></svg>REPRENDRE</span>
-					<span class="tile-sub">Reprenez là où vous vous êtes arrêté…</span>
-				</span>
+			<button class="tile" id="tile-resume" data-action="resume" aria-label="Reprendre">
+				<img class="tile-art" src="img/menu-reprendre.png" alt="">
 			</button>
-			<button class="tile" id="tile-settings" data-action="settings">
-				<span class="tile-art"></span>
-				<span class="tile-text">
-					<span class="tile-title"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="#f2c20f" fill-rule="evenodd" d="M10 1h4l.7 3 2.2 1.2 2.9-1.1 2 3.5-2.3 2 .1 2.5 2.3 2-2 3.5-2.9-1-2.2 1.3-.7 3h-4l-.7-3-2.2-1.3-2.9 1-2-3.5 2.3-2-.1-2.5-2.3-2 2-3.5 2.9 1.1L9.3 4zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/></svg>PARAMETRES</span>
-					<span class="tile-sub">Un soucis de configuration…</span>
-				</span>
+			<button class="tile" id="tile-settings" data-action="settings" aria-label="Paramètres">
+				<img class="tile-art" src="img/menu-parametres.png" alt="">
 			</button>
-			<button class="tile" id="tile-shop" data-action="shop">
-				<span class="tile-art"></span>
-				<span class="tile-text">
-					<span class="tile-title"><svg viewBox="0 0 24 22" width="22" height="20"><path fill="#e0344b" d="M1 1h4l1 3h17l-2.5 9H8L4.5 3H1zM9 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm10 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>BOUTIQUE</span>
-					<span class="tile-sub">Améliorez votre expérience de jeu dès maintenant !</span>
-				</span>
+			<button class="tile" id="tile-shop" data-action="shop" aria-label="Boutique">
+				<img class="tile-art" src="img/menu-boutique.png" alt="">
 			</button>
-			<button class="tile" id="tile-discord" data-action="discord">
-				<span class="tile-art"></span>
-				<span class="tile-text">
-					<span class="tile-title"><svg viewBox="0 0 24 18" width="24" height="18"><path fill="#6a73f0" d="M20 1.5A19 19 0 0 0 15.3 0l-.6 1.2a17 17 0 0 0-5.4 0L8.7 0A19 19 0 0 0 4 1.5C1 6 .2 10.400 .6 14.800A19 19 0 0 0 6.400 17.700l1.200-2a12 12 0 0 1-1.900-.9l.5-.4a13.500 13.500 0 0 0 11.600 0l.5.400c-.6.400-1.200.7-1.900.9l1.200 2a19 19 0 0 0 5.800-2.900C24 9.700 22.600 5.400 20 1.500zM8 12c-1.100 0-2-1-2-2.300s.9-2.300 2-2.300 2 1 2 2.300S9.100 12 8 12zm8 0c-1.100 0-2-1-2-2.300s.9-2.300 2-2.300 2 1 2 2.300-.9 2.300-2 2.300z"/></svg>DISCORD</span>
-					<span class="tile-sub">Rejoignez notre communauté…</span>
-				</span>
+			<button class="tile" id="tile-discord" data-action="discord" aria-label="Discord">
+				<img class="tile-art" src="img/menu-discord.png" alt="">
 			</button>
-			<button class="tile" id="tile-premium" data-action="premium">
-				<span class="tile-art"></span>
-				<span class="tile-text top">
-					<span class="tile-title"><svg viewBox="0 0 24 23" width="24" height="23"><path fill="#f2c20f" d="M12 0l3.100 7.600 8.200.6-6.300 5.300 2 8-7-4.400-7 4.400 2-8L.700 8.200l8.200-.6z"/></svg>PREMIUM</span>
-					<span class="tile-sub">Votre status premium :</span>
-					<span class="tile-sub gold">Actif (29j 12h)</span>
-				</span>
-				<span class="tile-text bottom">
-					<span class="tile-sub">Prolongez votre abonnement dans la boutique…</span>
-				</span>
+			<button class="tile" id="tile-premium" data-action="premium" aria-label="Premium">
+				<img class="tile-art" src="img/menu-premium.png" alt="">
 			</button>
 			<div id="bottom-bar">
-				<img src="img/menu-bottom.png" alt="">
-				<button id="quit-button" data-action="disconnect" aria-label="Se déconnecter"></button>
+				<div id="playtime-panel" aria-label="Temps de jeu">
+					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 5v4.4l3 1.8-1 1.7-4-2.5V7h2Z"/></svg>
+					<span>Temps de jeu</span>
+					<strong id="playtime-value">0m</strong>
+				</div>
+				<button id="quit-button" data-action="disconnect">
+					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6v-2H4V5h6V3Zm5.6 4.6L14.2 9 16.8 11H8v2h8.8l-2.6 2 1.4 1.4L21 12l-5.4-4.4Z"/></svg>
+					<span>Se déconnecter</span>
+				</button>
 			</div>
 		</div>
 	</div>

@@ -1148,13 +1148,25 @@ Events.Subscribe("wakfu:devourStop", stopDevour);
 // (il ne sera cumulé qu'avec la sauvegarde des joueurs, tâche B1).
 const welcomeSince = Date.now();
 
+function formatSessionTime() {
+	const minutes = Math.floor((Date.now() - welcomeSince) / 60000);
+	return minutes >= 60 ? Math.floor(minutes / 60) + "h " + (minutes % 60) + "m" : minutes + "m";
+}
+
+function updateMenuPlaytime() {
+	const value = $("playtime-value");
+	if (value) value.textContent = formatSessionTime();
+}
+
+updateMenuPlaytime();
+setInterval(updateMenuPlaytime, 30000);
+
 function welcomeFill() {
 	const state = hud.state || {};
 	$("wl-name").textContent = state.name || "Joueur";
 	$("wl-rank").textContent = state.rank && state.rank.name ? state.rank.name : "-";
 	$("wl-money").textContent = String(state.kamas || 0).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ¥";
-	const minutes = Math.floor((Date.now() - welcomeSince) / 60000);
-	$("wl-time").textContent = minutes >= 60 ? Math.floor(minutes / 60) + "h " + (minutes % 60) + "m" : minutes + "m";
+	$("wl-time").textContent = formatSessionTime();
 }
 
 Events.Subscribe("wakfu:welcomeOpen", (open) => {
