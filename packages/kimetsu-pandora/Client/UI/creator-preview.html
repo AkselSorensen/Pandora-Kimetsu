@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Créateur de personnage (aperçu)</title>
+<!-- Aperçu HTML du créateur, en attendant la maquette Figma. Pas encore relié au jeu : le Lua utilise Client/UI/index.html. -->
+<style>
+	:root {
+		--bg: #08030a;
+		--panel: rgba(16, 10, 18, 0.88);
+		--line: rgba(255, 255, 255, 0.12);
+		--text: #f4eee6;
+		--muted: rgba(244, 238, 230, 0.62);
+		--slayer: #2f8fd0;
+		--demon: #c8323c;
+		--accent: var(--slayer);
+		--error: #ff8b8b;
+	}
+	body.demon { --accent: var(--demon); }
+	* { box-sizing: border-box; }
+	html, body { height: 100%; margin: 0; }
+	body {
+		background: radial-gradient(circle at 50% 30%, #241a2a, var(--bg) 70%);
+		color: var(--text);
+		font-family: "Montserrat", "Segoe UI", system-ui, sans-serif;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 24px 16px;
+	}
+	main {
+		width: min(920px, 100%);
+		display: grid;
+		grid-template-columns: 1fr 1.1fr;
+		gap: 24px;
+		background: var(--panel);
+		border: 1px solid var(--line);
+		border-radius: 16px;
+		padding: 28px;
+	}
+	h1 { grid-column: 1 / -1; margin: 0; font-size: 22px; letter-spacing: 0.08em; }
+	h1 small { display: block; color: var(--muted); font-size: 12px; letter-spacing: 0.2em; font-weight: 500; }
+	.label { font-size: 12px; letter-spacing: 0.16em; color: var(--muted); margin: 0 0 8px; }
+	.field { margin-bottom: 18px; }
+
+	/* Aperçu du personnage : silhouette placeholder teintée par la couleur choisie */
+	.preview {
+		border: 1px solid var(--line);
+		border-radius: 12px;
+		min-height: 320px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.3));
+	}
+	.silhouette {
+		width: 120px;
+		height: 240px;
+		border-radius: 60px 60px 18px 18px;
+		background: var(--tint, #6b4a8e);
+		box-shadow: 0 0 40px var(--tint, #6b4a8e);
+		transition: background 0.2s, box-shadow 0.2s;
+		position: relative;
+	}
+	.silhouette::before {
+		content: "";
+		position: absolute;
+		top: -36px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+		background: #e8c9a6;
+	}
+	.preview-name { margin-top: 26px; font-size: 18px; letter-spacing: 0.06em; min-height: 1.4em; }
+	.preview-camp { margin-top: 6px; font-size: 12px; letter-spacing: 0.16em; color: var(--accent); }
+
+	/* Choix du camp */
+	.camps { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+	.camp {
+		border: 1px solid var(--line);
+		border-radius: 12px;
+		background: rgba(0, 0, 0, 0.35);
+		color: var(--text);
+		padding: 16px 14px;
+		text-align: left;
+		cursor: pointer;
+		font: inherit;
+	}
+	.camp b { display: block; font-size: 16px; letter-spacing: 0.06em; }
+	.camp small { display: block; margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+	.camp[aria-pressed="true"] { border-color: var(--camp-color); box-shadow: inset 0 0 0 1px var(--camp-color); }
+	.camp.slayer { --camp-color: var(--slayer); }
+	.camp.demon { --camp-color: var(--demon); }
+
+	/* Boutons de choix */
+	.options { display: flex; flex-wrap: wrap; gap: 8px; }
+	.chip {
+		border: 1px solid var(--line);
+		background: rgba(0, 0, 0, 0.35);
+		color: var(--text);
+		border-radius: 999px;
+		padding: 8px 16px;
+		cursor: pointer;
+		font: inherit;
+		font-size: 14px;
+	}
+	.chip:hover, .camp:hover { border-color: var(--accent); }
+	.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+	.dot {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		border: 2px solid transparent;
+		cursor: pointer;
+		padding: 0;
+	}
+	.dot[aria-pressed="true"] { border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,0.25); }
+
+	/* Nom */
+	input[type="text"] {
+		width: 100%;
+		padding: 12px 14px;
+		border-radius: 10px;
+		border: 1px solid var(--line);
+		background: rgba(0, 0, 0, 0.45);
+		color: var(--text);
+		font: inherit;
+		font-size: 16px;
+	}
+	input[type="text"]:focus { outline: none; border-color: var(--accent); }
+	.hint { margin-top: 6px; font-size: 12px; color: var(--muted); min-height: 1em; }
+	.hint.error { color: var(--error); }
+
+	/* Actions */
+	.actions { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+	.btn {
+		height: 48px;
+		padding: 0 28px;
+		border-radius: 10px;
+		font: inherit;
+		font-size: 15px;
+		cursor: pointer;
+		border: 1px solid var(--line);
+		background: rgba(0, 0, 0, 0.5);
+		color: var(--text);
+	}
+	.btn.primary { border: none; background: var(--accent); color: #fff; font-weight: 600; letter-spacing: 0.06em; }
+	.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+	.status { font-size: 13px; color: var(--muted); }
+	.status.ok { color: #8fd694; }
+
+	@media (max-width: 720px) {
+		main { grid-template-columns: 1fr; padding: 20px; }
+		.preview { min-height: 240px; }
+	}
+</style>
+</head>
+<body>
+<main>
+	<h1><small>CRÉATION DU PERSONNAGE</small>Ton personnage</h1>
+
+	<section aria-labelledby="camp-label">
+		<div id="camp-label" class="label">CAMP</div>
+		<div class="camps field">
+			<button class="camp slayer" type="button" data-camp="slayer" aria-pressed="true">
+				<b>Pourfendeur</b>
+				<small>Le Corps des Pourfendeurs : lame Nichirin et souffle à maîtriser.</small>
+			</button>
+			<button class="camp demon" type="button" data-camp="demon" aria-pressed="false">
+				<b>Démon</b>
+				<small>La nuit t'appartient : régénération, sang et chair humaine.</small>
+			</button>
+		</div>
+
+		<div class="label">GENRE</div>
+		<div class="options field" id="gender">
+			<button class="chip" type="button" data-gender="Homme" aria-pressed="true">Homme</button>
+			<button class="chip" type="button" data-gender="Femme" aria-pressed="false">Femme</button>
+		</div>
+
+		<div class="label">APPARENCE</div>
+		<div class="options field" id="skin">
+			<button class="chip" type="button" data-skin="Classique" aria-pressed="true">Classique</button>
+			<button class="chip" type="button" data-skin="Pâle" aria-pressed="false">Pâle</button>
+			<button class="chip" type="button" data-skin="Hâlé" aria-pressed="false">Hâlé</button>
+		</div>
+
+		<div class="label">COULEUR PRINCIPALE</div>
+		<div class="options field" id="colors"></div>
+	</section>
+
+	<section aria-labelledby="name-label">
+		<div class="preview" id="preview">
+			<div class="silhouette" id="silhouette"></div>
+			<div class="preview-name" id="preview-name">Sans nom</div>
+			<div class="preview-camp" id="preview-camp">POURFENDEUR</div>
+		</div>
+		<div class="field" style="margin-top:18px">
+			<label id="name-label" class="label" for="nick">NOM (3 À 16 CARACTÈRES)</label>
+			<input id="nick" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Ton nom">
+			<div class="hint" id="nick-hint">Au moins 3 caractères pour valider.</div>
+		</div>
+	</section>
+
+	<div class="actions">
+		<button class="btn" type="button" id="back">Retour</button>
+		<span class="status" id="status" role="status"></span>
+		<button class="btn primary" type="button" id="validate" disabled>VALIDER</button>
+	</div>
+</main>
+
+<script>
+	const NICK_MIN = 3;
+	const COLORS = [
+		{ name: "Orange", hex: "#e0602a" },
+		{ name: "Bleu", hex: "#18b8ee" },
+		{ name: "Vert", hex: "#4f9e3a" },
+		{ name: "Violet", hex: "#6b4a8e" },
+		{ name: "Jaune", hex: "#fdb10d" },
+		{ name: "Rouge", hex: "#c8323c" },
+	];
+	const CAMP_NAMES = { slayer: "POURFENDEUR", demon: "DÉMON" };
+
+	const state = { camp: "slayer", gender: "Homme", skin: "Classique", color: 1, nick: "" };
+
+	const $ = (id) => document.getElementById(id);
+
+	// Couleurs : une pastille par teinte
+	$("colors").innerHTML = COLORS.map(
+		(c, i) => `<button class="dot" type="button" data-color="${i + 1}" style="background:${c.hex}" aria-label="${c.name}"></button>`
+	).join("");
+
+	function render() {
+		document.body.classList.toggle("demon", state.camp === "demon");
+		document.querySelectorAll(".camp").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.camp === state.camp)));
+		document.querySelectorAll("[data-gender]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.gender === state.gender)));
+		document.querySelectorAll("[data-skin]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.skin === state.skin)));
+		document.querySelectorAll("[data-color]").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.color) === state.color)));
+
+		$("silhouette").style.setProperty("--tint", COLORS[state.color - 1].hex);
+		$("preview-name").textContent = state.nick.trim() || "Sans nom";
+		$("preview-camp").textContent = CAMP_NAMES[state.camp];
+
+		const valid = state.nick.trim().length >= NICK_MIN;
+		$("validate").disabled = !valid;
+		$("nick-hint").textContent = valid ? "Nom valide." : `Au moins ${NICK_MIN} caractères pour valider.`;
+		$("nick-hint").classList.toggle("error", !valid && state.nick.length > 0);
+	}
+
+	document.querySelectorAll(".camp").forEach((b) => b.addEventListener("click", () => { state.camp = b.dataset.camp; render(); }));
+	document.querySelectorAll("[data-gender]").forEach((b) => b.addEventListener("click", () => { state.gender = b.dataset.gender; render(); }));
+	document.querySelectorAll("[data-skin]").forEach((b) => b.addEventListener("click", () => { state.skin = b.dataset.skin; render(); }));
+	document.querySelectorAll("[data-color]").forEach((b) => b.addEventListener("click", () => { state.color = Number(b.dataset.color); render(); }));
+
+	$("nick").addEventListener("input", (e) => { state.nick = e.target.value; render(); });
+
+	$("validate").addEventListener("click", () => {
+		// Aperçu seulement : le jeu enverra ces choix au serveur (wakfu:create)
+		$("status").textContent = `${state.nick.trim()} · ${CAMP_NAMES[state.camp]} · ${state.gender} · ${state.skin}`;
+		$("status").classList.add("ok");
+	});
+
+	$("back").addEventListener("click", () => { $("status").textContent = "Retour (aperçu)"; $("status").classList.remove("ok"); });
+
+	render();
+</script>
+</body>
+</html>
