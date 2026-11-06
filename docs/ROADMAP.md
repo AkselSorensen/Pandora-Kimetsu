@@ -68,7 +68,7 @@ Rien de cela n'a été vérifié dans une vraie partie : tout est testé par sim
 | A20 Coffres liés à l'inventaire | A | P1 | L | À faire |
 | A21 Soleil qui brûle les démons | A | P1 | M | À faire |
 | A22 Combat au sabre et aux pouvoirs démoniaques | A | P1 | L | À faire |
-| A23 Créateur de personnage | A | P1 | L | À faire |
+| A23 Créateur de personnage | A | P1 | L | En cours : le créateur s'ouvre après le choix du camp, nom de 3 caractères minimum ; reste la fiche RP et l'apparence par camp |
 | A24 Emplacements supplémentaires pour les VIP | A | P2 | M | À faire |
 | A25 Zones de glycine pour les démons | A | P1 | M | À faire |
 | A26 Équipement par paliers T1 à T4 | A | P1 | L | À faire |

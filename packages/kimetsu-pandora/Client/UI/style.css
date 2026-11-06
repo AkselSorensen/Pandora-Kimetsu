@@ -696,6 +696,16 @@ kbd {
 	justify-content: space-between;
 	align-items: center;
 }
+#creator-error {
+	position: absolute;
+	left: 40px;
+	right: 40px;
+	bottom: 100px;
+	min-height: 1em;
+	text-align: center;
+	color: #ff8b8b;
+	font-size: 15px;
+}
 #creator-back {
 	height: 48px;
 	padding: 0 24px;

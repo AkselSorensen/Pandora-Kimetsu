@@ -307,6 +307,7 @@ const GENDERS = ["Homme", "Femme"];
 const COLORS = ["#e0602a", "#18b8ee", "#4f9e3a", "#6b4a8e", "#fdb10d", "#c8323c"];
 
 const creator = { class: "", gender: "Homme", color: 1, skin: "" };
+const NICK_MIN = 3; // un personnage sans nom ne se valide pas : le créateur reste ouvert
 let SKINS = [""];
 
 function sendCreation() {
@@ -346,7 +347,16 @@ document.addEventListener("click", (event) => {
 	else if (gender) { creator.gender = gender.dataset.gender; sendCreation(); }
 	else if (skin) { creator.skin = skin.dataset.skin; sendCreation(); }
 	else if (color) { creator.color = Number(color.dataset.color); sendCreation(); }
-	else if (event.target.closest("#creator-ok")) { sendCreation(); Events.Call("wakfu:creatorClose"); }
+	else if (event.target.closest("#creator-ok")) {
+		const nick = $("nick-input").value.trim();
+		if (nick.length < NICK_MIN) {
+			$("creator-error").textContent = `Le nom doit faire au moins ${NICK_MIN} caractères.`;
+			return;
+		}
+		$("creator-error").textContent = "";
+		sendCreation();
+		Events.Call("wakfu:creatorClose");
+	}
 	else if (event.target.closest("#creator-back")) Events.Call("wakfu:creatorClose");
 });
 

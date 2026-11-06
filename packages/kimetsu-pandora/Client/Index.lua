@@ -620,6 +620,11 @@ Events.SubscribeRemote("wakfu:state", function(state)
 	knownCamp = state.camp
 	if campOpen and not welcomeOpen and state.camp then -- le serveur a enregistré le camp : l'écran de choix se ferme
 		setCamp(false)
+		-- Premier choix du camp : le créateur s'ouvre pour donner un nom et une apparence au personnage.
+		-- Sur une reconnexion, l'écran de camp n'était pas ouvert : le créateur reste fermé.
+		if not creatorOpen and not menuOpen then
+			setCreator(true)
+		end
 	end
 end)
 
