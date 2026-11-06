@@ -191,6 +191,24 @@
 		</div>
 	</div>
 
+	<!-- Sélection de personnage (planche Figma « Voix démon / Sélection de personnage ») : ouverte depuis l'écran de bienvenue, trois cartes -->
+	<div id="select" class="hidden">
+		<div id="sl-glow"></div>
+		<div id="sl-box">
+			<header>
+				<div class="sl-head">
+					<h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 9.500l2.500 1.500M16 9.500L13.500 11M8.500 16c2-2 5-2 7 0" fill="none" stroke="#12070B" stroke-width="2" stroke-linecap="round"/></svg>SELECTION DE PERSONNAGE</h2>
+					<p>Voici tous les personnages que vous possédez, sélectionnez en un.</p>
+				</div>
+				<div class="sl-actions">
+					<span id="sl-discord" class="hidden"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5.400A17 17 0 0 0 15.800 4l-.5 1a15.600 15.600 0 0 0-4.600 0l-.5-1A17 17 0 0 0 6 5.400C3.400 9.300 2.700 13.100 3 16.800a17 17 0 0 0 5.200 2.600l1.100-1.800a11 11 0 0 1-1.700-.8l.4-.3a12 12 0 0 0 10 0l.4.300a11 11 0 0 1-1.700.8l1.100 1.800a17 17 0 0 0 5.200-2.600c.4-4.300-.7-8-3-11.400Z"/></svg>Rejoindre le serveur Discord</span>
+					<button id="sl-back" type="button">&#8592; Retour</button>
+				</div>
+			</header>
+			<div id="sl-slots"></div>
+		</div>
+	</div>
+
 	<!-- Reroll de classe (touche R) : maquette 1536 x 1024, mise à l'échelle par index.js (--rr-scale) -->
 	<div id="reroll" class="hidden">
 		<div id="rr-stage">
@@ -276,6 +294,25 @@
 			<button id="creator-back" type="button">Retour</button>
 			<button id="creator-ok" type="button">VALIDER</button>
 		</div>
+	</div>
+
+	<!-- Sélection des catégories de re-roll (PNJ Yushiro) -->
+	<div id="reroll-selector" class="hidden" aria-label="Sélection re-roll">
+		<div class="rs-panel">
+			<header class="rs-header">
+				<img src="img/reroll-title.png" alt="Menu reroll — Dans quelle page souhaitez-vous aller ?">
+				<div class="rs-header-actions">
+					<button id="rs-back" type="button" aria-label="Retour"><img src="img/reroll-back.png" alt="Retour"></button>
+					<button id="rs-close" type="button" aria-label="Fermer"><img src="img/reroll-close.png" alt="Fermer"></button>
+				</div>
+		</header>
+		<div class="rs-cards">
+			<button class="rs-card" type="button" data-reroll-choice="capacite" aria-label="Re-roll capacité"><img src="img/reroll-capacite.png" alt="Re-roll capacité"><span class="rs-selected">Sélectionné</span></button>
+			<button class="rs-card" type="button" data-reroll-choice="armes" aria-label="Re-roll armes"><img src="img/reroll-armes.png" alt="Re-roll armes"><span class="rs-selected">Sélectionné</span></button>
+			<button class="rs-card" type="button" data-reroll-choice="equipements" aria-label="Re-roll équipements"><img src="img/reroll-equipements.png" alt="Re-roll équipements"><span class="rs-selected">Sélectionné</span></button>
+		</div>
+		<p class="rs-note">La sélection est visuelle pour le moment.</p>
+	</div>
 	</div>
 </body>
 </html>

@@ -188,6 +188,7 @@
     { id: "Prop" },
     { id: "Modèle" },
     { id: "Arme" },
+    { id: "Entité" },
   ];
   const FAV_KEY = "props-menu-favorites";
   const LANG_KEY = "props-menu-language";
@@ -382,7 +383,7 @@
         render();
       };
       card.onclick = () => {
-        Events.Call("Spawn", p.k === "Prop" ? "prop" : p.k === "Arme" ? "weapon" : "model", p.id);
+        Events.Call("Spawn", p.k === "Prop" ? "prop" : p.k === "Arme" ? "weapon" : p.k === "Entité" ? "entity" : "model", p.id);
         toast(t(p.k === "Modèle" ? "toast.equipped" : "toast.spawned", pretty(p.n)));
       };
       frag.appendChild(card);

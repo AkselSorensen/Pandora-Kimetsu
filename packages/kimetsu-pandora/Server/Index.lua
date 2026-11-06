@@ -481,6 +481,9 @@ local civilBodies = {}
 -- Les PNJ du Domaine prennent corps dans le monde : un personnage immobile et un nom flottant.
 local function spawnNpcs()
 	for _, npc in ipairs(Npcs.List) do
+		if npc.manual then
+			goto continue
+		end
 		local location = Vector(npc.position.x, npc.position.y, npc.position.z)
 		-- Ils regardent vers le centre du Domaine, là où apparaissent les joueurs.
 		local character = Character(location, Rotator(0, npc.yaw or 180, 0), npc.mesh)
@@ -494,8 +497,25 @@ local function spawnNpcs()
 		if npc.civil then
 			civilBodies[npc.id] = { character = character, label = label }
 		end
+		::continue::
 	end
 end
+
+Events.Subscribe("PropsMenu:EntitySpawned", function(entity, npcId)
+	if not entity or not npcId then return end
+	local npc = Npcs.Get(npcId)
+	if not npc or not npc.manual then return end
+	entity:SetInvulnerable(true)
+	entity:SetValue("npcId", npcId, true)
+	Npcs.RegisterEntity(npcId, entity)
+	local label = TextRender(entity:GetLocation() + Vector(0, 0, 125), Rotator(0, 0, 0), npc.name, 22, Color(1, 0.75, 0.1), TextRenderRenderingType.UnlitCameraAligned)
+	Character.Subscribe("Destroy", function(character)
+		if character == entity then
+			Npcs.UnregisterEntity(character)
+			if label and label:IsValid() then label:Destroy() end
+		end
+	end)
+end)
 
 spawnNpcs()
 
@@ -671,6 +691,12 @@ Events.SubscribeRemote("wakfu:interact", function(player)
 	-- Le Maître des respirations ouvre directement l'écran de reroll de classe.
 	if Npcs.HasService(npc, "classreroll") then
 		sendRemote(player, "wakfu:openClassReroll")
+		return
+	end
+
+	-- Le PNJ Yushiro ouvre le panneau de sélection des trois re-rolls.
+	if Npcs.HasService(npc, "rerollselector") then
+		sendRemote(player, "wakfu:openRerollSelector")
 		return
 	end
 

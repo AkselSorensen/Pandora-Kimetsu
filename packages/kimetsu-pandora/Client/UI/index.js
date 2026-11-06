@@ -1181,5 +1181,79 @@ Events.Subscribe("wakfu:state", () => {
 document.addEventListener("click", (event) => {
 	if ($("welcome").classList.contains("hidden")) return;
 	if (event.target.closest("#wl-start")) Events.Call("wakfu:welcomeStart");
-	else if (event.target.closest("#wl-character")) Events.Call("wakfu:welcomeCharacter");
+	else if (event.target.closest("#wl-character")) openSelect();
+});
+
+// Sélection de personnage (planche Figma) : un personnage par joueur pour l'instant, les deux autres emplacements sont verrouillés
+// (ils viendront avec la sauvegarde B1 et les emplacements VIP A24). Le bouton du personnage choisi continue l'arrivée :
+// le choix du camp s'il n'est pas fait, sinon le créateur de personnage.
+const SELECT_DISCORD = ""; // texte du bouton Discord de la planche ; vide = le bouton reste masqué (il n'a pas de lien à ouvrir)
+
+function openSelect() {
+	const state = hud.state || {};
+	const camp = state.camp;
+	const rank = state.rank && state.rank.name ? state.rank.name : "Nouveau personnage";
+	const cls = state.class || "";
+	const glyph = camp === "demon" ? "鬼" : camp ? glyphOf(cls) : "?";
+	const color = camp === "demon" ? "#c8323c" : camp ? classColor(cls) : "#8b8580";
+	const lock = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>`;
+	const slots = [
+		`<div class="sl-card on" style="--sl-color:${color}">
+			<div class="sl-art"></div>
+			<div class="sl-name">${escapeHtml(state.name || "Joueur")}</div>
+			<div class="sl-rank">${escapeHtml(rank)}</div>
+			<button type="button" class="sl-pick">${camp ? "SELECTIONNEZ" : "CRÉER"}</button>
+		</div>`,
+	];
+	for (let i = 2; i <= 3; i++) {
+		slots.push(`<div class="sl-card locked">
+			<div class="sl-art">${lock}</div>
+			<div class="sl-name">EMPLACEMENT ${i}</div>
+			<button type="button" class="sl-pick" disabled>[Conditions]</button>
+		</div>`);
+	}
+	$("sl-slots").innerHTML = slots.join("");
+	$("sl-discord").classList.toggle("hidden", !SELECT_DISCORD);
+	if (SELECT_DISCORD) $("sl-discord").lastChild.textContent = SELECT_DISCORD;
+	$("select").classList.remove("hidden");
+	$("welcome").classList.add("hidden"); // le personnage 3D est rendu par le jeu derrière cet écran : le fond de bienvenue le cacherait
+	Events.Call("wakfu:selectOpen", true);
+}
+
+function closeSelect(backToWelcome) {
+	$("select").classList.add("hidden");
+	Events.Call("wakfu:selectOpen", false);
+	if (backToWelcome) $("welcome").classList.remove("hidden");
+}
+
+document.addEventListener("click", (event) => {
+	if ($("select").classList.contains("hidden")) return;
+	if (event.target.closest("#sl-back")) closeSelect(true);
+	else if (event.target.closest(".sl-card.on .sl-pick")) {
+		closeSelect(false);
+		Events.Call("wakfu:welcomeCharacter");
+	}
+});
+
+Events.Subscribe("wakfu:welcomeOpen", (open) => {
+	if (!open && !$("select").classList.contains("hidden")) closeSelect(false);
+});
+
+// Le panneau re-roll permet de sélectionner visuellement une catégorie ; les effets seront raccordés ensuite.
+Events.Subscribe("wakfu:rerollSelectorOpen", (open) => {
+	$("reroll-selector").classList.toggle("hidden", !open);
+	if (open) document.querySelectorAll(".rs-card").forEach((card) => card.classList.remove("selected"));
+});
+
+document.addEventListener("click", (event) => {
+	if ($("reroll-selector").classList.contains("hidden")) return;
+	if (event.target.closest("#rs-close") || event.target.closest("#rs-back")) return Events.Call("wakfu:rerollSelectorClose");
+	const card = event.target.closest(".rs-card");
+	if (card) {
+		document.querySelectorAll(".rs-card").forEach((item) => item.classList.toggle("selected", item === card));
+	}
+});
+
+document.addEventListener("keydown", (event) => {
+	if (!$("reroll-selector").classList.contains("hidden") && event.key === "Escape") Events.Call("wakfu:rerollSelectorClose");
 });

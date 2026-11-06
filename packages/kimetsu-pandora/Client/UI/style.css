@@ -1202,3 +1202,58 @@ html.demon #spellbar { bottom: 46px; } /* laisse la place à la mention « Palie
 
 /* Illustration de droite : fichier facultatif, absent du dépôt (img/welcome-art.webp) ; sans lui l'écran reste propre */
 #wl-art { position: absolute; right: 3em; bottom: 0; height: 100%; width: 48vw; background: url("img/welcome-art.webp") right bottom / contain no-repeat; filter: drop-shadow(0 0 2em rgba(150, 10, 30, 0.5)); }
+
+/* Sélection de personnage (planche Figma « Voix démon ») : même échelle que l'écran de bienvenue (1em = 1/120 de la largeur) */
+#select { position: fixed; inset: 0; z-index: 70; background: rgba(5, 2, 4, 0.5); color: #f4eee6; font-family: "Montserrat", "Segoe UI", system-ui, sans-serif; font-size: calc(100vw / 120); overflow: hidden; }
+#sl-glow { position: absolute; left: 6%; top: -6em; width: 60em; height: 24em; background: radial-gradient(ellipse, rgba(150, 10, 30, 0.45), rgba(0, 0, 0, 0) 68%); filter: blur(1.6em); }
+#sl-box { position: absolute; inset: 2.4em 5em 3em; display: flex; flex-direction: column; gap: 1.4em; }
+#sl-box header { display: flex; justify-content: space-between; align-items: center; gap: 2em; padding: 1.1em 1.6em; border-radius: 0.7em; border: 1px solid rgba(255, 255, 255, 0.08); background: radial-gradient(ellipse at 6% 0%, rgba(170, 12, 32, 0.4), rgba(0, 0, 0, 0) 55%), rgba(255, 255, 255, 0.025); }
+#sl-box h2 { margin: 0; display: flex; align-items: center; gap: 0.6em; font-family: "Montserrat", "Segoe UI Black", "Arial Black", sans-serif; font-weight: 900; font-size: 1.35em; letter-spacing: 0.01em; }
+#sl-box h2 svg { width: 1.1em; height: 1.1em; fill: #cf1f40; }
+#sl-box header p { margin: 0.35em 0 0; font-size: 0.8em; color: rgba(244, 238, 230, 0.6); }
+.sl-actions { display: flex; align-items: center; gap: 0.8em; }
+#sl-discord { display: flex; align-items: center; gap: 0.6em; padding: 0.7em 1.1em; border-radius: 0.4em; background: #5865f2; color: #fff; font-size: 0.8em; font-weight: 700; }
+#sl-discord.hidden { display: none; }
+#sl-discord svg { width: 1.2em; height: 1.2em; fill: currentColor; }
+#sl-back { cursor: pointer; padding: 0.7em 1.2em; border-radius: 0.4em; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.05); color: #f4eee6; font: inherit; font-size: 0.8em; font-weight: 600; }
+#sl-back:hover { background: rgba(255, 255, 255, 0.12); }
+#sl-slots { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2em; }
+.sl-card { position: relative; display: flex; flex-direction: column; align-items: center; min-height: 0; padding: 1.2em 1.2em 1.6em; border-radius: 0.6em; border: 1px solid rgba(255, 255, 255, 0.07); background: radial-gradient(ellipse at 50% 38%, color-mix(in srgb, var(--sl-color, #7a1030) 22%, transparent), rgba(0, 0, 0, 0) 62%), rgba(10, 6, 8, 0.45); }
+.sl-card.on { border-color: color-mix(in srgb, var(--sl-color) 40%, transparent); }
+.sl-art { flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
+.sl-art span { font-size: 12em; line-height: 1; font-weight: 800; color: var(--sl-color); opacity: 0.9; text-shadow: 0 0 0.35em var(--sl-color); }
+.sl-card.locked .sl-art svg { width: 8em; height: 8em; fill: #b8182f; color: #b8182f; filter: drop-shadow(0 0 1em rgba(207, 31, 64, 0.65)); }
+.sl-card.locked { background: radial-gradient(ellipse at 50% 38%, rgba(150, 30, 190, 0.2), rgba(0, 0, 0, 0) 62%), #080506; }
+.sl-rank { margin-top: 0.15em; font-size: 0.8em; color: rgba(244, 238, 230, 0.55); }
+.sl-name { font-family: "Montserrat", "Segoe UI Black", "Arial Black", sans-serif; font-weight: 900; font-size: 1.6em; letter-spacing: 0.01em; text-align: center; }
+/* bouton « coup de pinceau » */
+.sl-pick { margin-top: 0.8em; cursor: pointer; border: 0; padding: 0.55em 2.6em; font: inherit; font-size: 0.82em; font-weight: 800; letter-spacing: 0.02em; color: #fff; background: linear-gradient(#a3182c, #7e0f1f); clip-path: polygon(1% 14%, 5% 0, 18% 9%, 38% 0, 60% 8%, 82% 0, 99% 12%, 100% 52%, 97% 100%, 74% 91%, 48% 100%, 24% 92%, 4% 100%, 0 58%); }
+.sl-pick:hover:not(:disabled) { background: linear-gradient(#c21d36, #94112a); }
+.sl-pick:disabled { cursor: default; }
+
+/* Sélection des trois catégories auprès de Yushiro */
+#reroll-selector { box-sizing: border-box; position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 3vh 3vw; overflow: auto; background: rgba(0, 0, 0, .58); backdrop-filter: blur(3px); color: #fff; }
+#reroll-selector.hidden { display: none; }
+.rs-panel { width: min(92vw, 1500px); max-height: 90vh; display: flex; flex-direction: column; gap: 1.25em; padding: clamp(1em, 2vw, 2em); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; background: linear-gradient(rgba(4, 2, 4, .42), rgba(4, 2, 4, .62)), url("img/reroll-background.png") center / cover no-repeat; box-shadow: 0 20px 70px rgba(0,0,0,.6); animation: rerollPopupIn .22s ease-out both; }
+@keyframes rerollPopupIn { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.rs-header { position: relative; width: 100%; }
+.rs-header > img { display: block; width: 100%; height: auto; }
+.rs-eyebrow { color: #d88989; font-size: .75em; font-weight: 800; letter-spacing: .28em; }
+.rs-header h2 { margin: .12em 0; font-size: clamp(1.5em, 3vw, 2.6em); font-weight: 900; letter-spacing: .06em; }
+.rs-header p { margin: 0; color: rgba(255,255,255,.64); }
+.rs-header-actions { position: absolute; right: 2.5%; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: .55em; }
+.rs-header-actions button { display: block; padding: 0; border: 0; background: transparent; cursor: pointer; transition: transform .16s ease, filter .16s ease; }
+.rs-header-actions button:hover { transform: translateY(-1px); filter: brightness(1.16); }
+.rs-header-actions button:active { transform: translateY(1px); }
+.rs-header-actions button img { display: block; width: auto; height: clamp(2.35em, 4vw, 3.35em); }
+.rs-cards { min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); justify-items: center; align-items: start; gap: clamp(.7em, 2vw, 2em); }
+.rs-card { position: relative; display: block; width: min(100%, 414px); aspect-ratio: 414 / 546; padding: 0; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; overflow: hidden; background: #080608; cursor: pointer; text-align: left; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.rs-card img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+/* Ces deux PNG contiennent 62 px de toile noire avant le bord réel de la carte. */
+.rs-card:first-child img, .rs-card:last-child img { inset: 0 0 0 auto; width: auto; max-width: none; height: 100%; object-fit: contain; }
+.rs-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,.6); }
+.rs-card.selected { border-color: #f4e8ea; box-shadow: 0 0 0 2px rgba(255,255,255,.7), 0 0 28px rgba(210,35,58,.35); }
+.rs-selected { position: absolute; right: .8em; top: .8em; opacity: 0; padding: .5em .8em; border-radius: 999px; background: rgba(25,12,16,.88); color: white; font-size: .8em; font-weight: 800; transition: opacity .16s ease; }
+.rs-card.selected .rs-selected { opacity: 1; }
+.rs-note { margin: 0; text-align: center; color: rgba(255,255,255,.5); font-size: .8em; }
+@media (max-width: 760px) { #reroll-selector { padding: 2vh 3vw; } .rs-cards { gap: .55em; } .rs-card { border-radius: 6px; } .rs-header p, .rs-note { font-size: .75em; } }

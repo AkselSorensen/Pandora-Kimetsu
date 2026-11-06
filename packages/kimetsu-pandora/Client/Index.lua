@@ -238,6 +238,50 @@ hud:Subscribe("wakfu:inventoryClose", function()
 	setInventory(false)
 end)
 
+-- Sélection de personnage (ouverte depuis l'écran de bienvenue) : le personnage du joueur est isolé sur la plateforme du créateur (le serveur fait le travail,
+-- événements creatorEnter / creatorAim / creatorExit) ; la caméra le place dans la première carte, à gauche, et il tourne lentement sur lui-même :
+-- le client envoie un angle qui augmente, le serveur fait face à cet angle. Réglages à ajuster en jeu (jamais vus à l'écran) :
+-- SELECT_CAMERA_SHIFT positif = le personnage va vers la gauche ; (-146 le place à droite pour l'inventaire, ~9 unités par % de largeur d'écran).
+local SELECT_CAMERA_ARM = 115
+local SELECT_CAMERA_SHIFT = 280
+local SELECT_CAMERA_HEIGHT = -65
+local SELECT_SPIN_DEGREES = 2 -- degrés par pas de 50 ms, soit 40 degrés par seconde
+
+local selectOpen = false
+local selectTimer
+
+local function setSelect(open)
+	if open == selectOpen then
+		return
+	end
+	selectOpen = open
+	local localPlayer = Client.GetLocalPlayer()
+	if open and localPlayer then
+		local yaw = localPlayer:GetCameraRotation().Yaw
+		localPlayer:SetCameraArmLength(SELECT_CAMERA_ARM)
+		localPlayer:SetCameraSocketOffset(Vector(0, SELECT_CAMERA_SHIFT, SELECT_CAMERA_HEIGHT))
+		localPlayer:SetCameraRotation(Rotator(0, yaw, 0))
+		Events.CallRemote("wakfu:creatorEnter", Reliability.Reliable, yaw)
+		local angle = 0
+		selectTimer = Timer.SetInterval(function()
+			angle = (angle + SELECT_SPIN_DEGREES) % 360
+			Events.CallRemote("wakfu:creatorAim", Reliability.Unreliable, yaw + angle)
+		end, 50)
+	elseif localPlayer then
+		if selectTimer then
+			Timer.ClearInterval(selectTimer)
+			selectTimer = nil
+		end
+		localPlayer:ResetCamera()
+		Zoom.Reapply()
+		Events.CallRemote("wakfu:creatorExit", Reliability.Reliable)
+	end
+end
+
+hud:Subscribe("wakfu:selectOpen", function(open)
+	setSelect(open and true or false)
+end)
+
 -- Actions du HUD : le serveur valide chacune et renvoie le sac mis à jour.
 for _, action in ipairs({ "invUse", "invUnequip", "invMove", "invDrop", "invDelete", "invGive" }) do
 	hud:Subscribe("wakfu:" .. action, function(...)
@@ -380,6 +424,26 @@ end)
 
 -- Reroll de classe (PNJ Maître des respirations) : écran plein, sans plateforme ; le serveur applique le changement.
 local rerollOpen = false
+local rerollSelectorOpen = false
+
+local function setRerollSelector(open)
+	rerollSelectorOpen = open
+	Input.SetInputEnabled(not open)
+	hud:SetVisibility(open and WidgetVisibility.Visible or WidgetVisibility.VisibleNotHitTestable)
+	Input.SetMouseEnabled(open)
+	if open then hud:SetFocus() else hud:RemoveFocus() end
+	toHud("wakfu:rerollSelectorOpen", open)
+end
+
+Events.SubscribeRemote("wakfu:openRerollSelector", function()
+	if not campOpen and not menuOpen and not creatorOpen and not inventoryOpen and not rerollOpen and not rerollSelectorOpen and not forgeOpen and not trailOpen then
+		setRerollSelector(true)
+	end
+end)
+
+hud:Subscribe("wakfu:rerollSelectorClose", function()
+	setRerollSelector(false)
+end)
 
 local function setReroll(open)
 	rerollOpen = open
@@ -395,13 +459,13 @@ local function setReroll(open)
 end
 
 Events.SubscribeRemote("wakfu:openClassReroll", function()
-	if not campOpen and not menuOpen and not creatorOpen and not inventoryOpen and not rerollOpen and not forgeOpen and not trailOpen then
+	if not campOpen and not menuOpen and not creatorOpen and not inventoryOpen and not rerollOpen and not rerollSelectorOpen and not forgeOpen and not trailOpen then
 		setReroll(true)
 	end
 end)
 
 Events.SubscribeRemote("wakfu:openForge", function()
-	if not campOpen and not menuOpen and not creatorOpen and not inventoryOpen and not rerollOpen and not forgeOpen and not trailOpen then
+	if not campOpen and not menuOpen and not creatorOpen and not inventoryOpen and not rerollOpen and not rerollSelectorOpen and not forgeOpen and not trailOpen then
 		setForge(true)
 	end
 end)
@@ -423,7 +487,7 @@ hud:Subscribe("wakfu:trailRequest", function()
 	if inventoryOpen then
 		setInventory(false)
 	end
-	if not campOpen and not menuOpen and not creatorOpen and not rerollOpen and not forgeOpen and not trailOpen then
+	if not campOpen and not menuOpen and not creatorOpen and not rerollOpen and not rerollSelectorOpen and not forgeOpen and not trailOpen then
 		setTrail(true)
 	end
 end)
@@ -492,7 +556,7 @@ end)
 
 -- Le visualiseur d'animations ne s'ouvre que si aucun autre écran n'est ouvert, et garde alors tout le clavier.
 AnimViewer.CanOpen = function()
-	return not (campOpen or menuOpen or creatorOpen or inventoryOpen or rerollOpen or forgeOpen or trailOpen)
+	return not (campOpen or menuOpen or creatorOpen or inventoryOpen or rerollOpen or rerollSelectorOpen or forgeOpen or trailOpen)
 end
 
 Input.Subscribe("KeyPress", function(key_name)
@@ -513,6 +577,10 @@ Input.Subscribe("KeyPress", function(key_name)
 		if key_name == "Escape" then
 			setReroll(false)
 		end
+		return false
+	end
+	if rerollSelectorOpen then
+		if key_name == "Escape" then setRerollSelector(false) end
 		return false
 	end
 
@@ -664,5 +732,5 @@ end)
 
 -- Molette de la souris : zoom de la caméra, sauf quand un écran du jeu est ouvert.
 Zoom.Init(function()
-	return campOpen or menuOpen or creatorOpen or inventoryOpen or rerollOpen or forgeOpen or trailOpen or AnimViewer.IsOpen()
+	return campOpen or menuOpen or creatorOpen or inventoryOpen or rerollOpen or rerollSelectorOpen or forgeOpen or trailOpen or AnimViewer.IsOpen()
 end)
