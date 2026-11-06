@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Création de personnage (maquette Figma)</title>
+<!-- Écrans de création reproduits depuis la maquette Figma (pages 102 et 104), avec les images exportées du Figma.
+     Scène de référence 1024 x 576, mise à l'échelle. Pas encore relié au jeu : le Lua utilise Client/UI/index.html. -->
+<style>
+	:root {
+		--bg: #1f1f1f;
+		--line: #3a3a3a;
+		--field: #2b2b2b;
+		--text: #ffffff;
+		--green: #1c5a2e;
+		--green-text: #3fbf5c;
+		--male: #1d9bd7;
+		--male-bg: #163a52;
+		--female: #d63bb0;
+		--female-bg: #4a1a3f;
+	}
+	* { box-sizing: border-box; }
+	html, body { margin: 0; height: 100%; background: #111; }
+	body { display: flex; align-items: center; justify-content: center; overflow: hidden; font-family: "Segoe UI", system-ui, sans-serif; color: var(--text); }
+	#stage {
+		position: relative;
+		width: 1024px;
+		height: 576px;
+		background: var(--bg) url("img/faction-background.png") center / cover no-repeat;
+		overflow: hidden;
+		transform-origin: center center;
+		flex: none;
+	}
+	.abs { position: absolute; }
+	.title { left: 0; right: 0; top: 18px; text-align: center; pointer-events: none; }
+	.title .kicker { font-size: 13px; letter-spacing: 0.12em; color: #cfcfcf; }
+	.title .big { font-size: 46px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; margin-top: 2px; text-shadow: 0 0 6px rgba(255,255,255,0.35); }
+	.discord { left: 818px; top: 14px; width: 186px; height: 26px; padding: 0; border: none; background: none; cursor: pointer; }
+	.discord img, .footer img { display: block; width: 100%; height: auto; }
+	.footer { left: 18px; top: 546px; width: 480px; }
+
+	/* Carte du camp (gauche) : images exportées du Figma */
+	.camp-card { left: 18px; top: 105px; width: 285px; height: 428px; }
+	.camp-card img.card { display: none; width: 100%; height: 100%; }
+	.camp-card img.card.on { display: block; }
+	.camp-btn { left: 36px; top: 480px; width: 250px; height: auto; padding: 0; border: none; background: none; cursor: default; }
+	.camp-btn img { display: none; width: 100%; height: auto; }
+	.camp-btn img.on { display: block; }
+
+	/* Panneau de droite */
+	.panel { left: 534px; top: 125px; width: 413px; }
+	.label { font-size: 12px; font-weight: 600; margin: 0 0 6px; font-family: Georgia, "Times New Roman", serif; }
+	.sep { font-size: 11px; color: #bfbfbf; border-bottom: 1px solid var(--line); margin: 4px 0 8px; padding-bottom: 2px; font-family: Georgia, serif; }
+	.field {
+		background: var(--field); border: none; border-radius: 4px; color: #fff;
+		height: 36px; padding: 0 12px; font: inherit; font-size: 12px; width: 100%;
+	}
+	.field::placeholder { color: #8a8a8a; }
+	.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+	.sexe { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+	.sex { height: 36px; border: none; border-radius: 4px; font: inherit; font-size: 12px; cursor: pointer; }
+	.sex.male { background: var(--male-bg); color: var(--male); }
+	.sex.female { background: var(--female-bg); color: var(--female); }
+	.sex[aria-pressed="false"] { opacity: 0.55; }
+	.slider-box { background: var(--field); border-radius: 4px; height: 36px; position: relative; margin-bottom: 10px; }
+	.slider-box .track { position: absolute; left: 12px; right: 12px; top: 26px; height: 3px; background: #3c3c3c; }
+	.slider-box .fill { position: absolute; left: 12px; top: 26px; height: 3px; background: var(--male); }
+	.slider-box .knob { position: absolute; top: 20px; width: 11px; height: 11px; border-radius: 50%; background: var(--male); transform: translateX(-50%); }
+	.slider-box .val { position: absolute; top: 4px; font-size: 12px; color: var(--male); transform: translateX(-50%); }
+	.slider-box .lo, .slider-box .hi { position: absolute; top: 26px; font-size: 9px; color: #9a9a9a; }
+	.taille-box { height: 52px; }
+	.skins { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; background: var(--field); border-radius: 4px; padding: 8px; height: 56px; }
+	.skin { border: 2px solid transparent; border-radius: 50%; width: 100%; aspect-ratio: 1; padding: 0; cursor: pointer; }
+	.skin[aria-pressed="true"] { border-color: #fff; }
+	.btn-go {
+		display: block; width: 100%; height: 30px; margin-top: 14px; border: none; border-radius: 4px;
+		background: var(--green); color: var(--green-text); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+	}
+	.btn-go:hover { filter: brightness(1.15); }
+
+	/* Onglets de pilosité */
+	.tabs { left: 594px; top: 143px; width: 36px; }
+	.tab { display: block; width: 36px; height: 36px; margin-bottom: 4px; border: none; border-radius: 4px; background: #2a1a1a; color: #fff; font-size: 13px; cursor: pointer; }
+	.tab[aria-pressed="true"], .tab-solo { background: #1c4a55; }
+	.tab-solo { display: block; width: 36px; height: 36px; border: none; border-radius: 4px; color: #fff; font-size: 13px; }
+
+	.content { left: 648px; top: 145px; width: 298px; }
+	.stepper {
+		height: 34px; background: var(--field); border-radius: 4px; display: flex; align-items: center; justify-content: space-between;
+		padding: 0 14px; color: #bdbdbd; font-size: 12px; margin-bottom: 14px;
+	}
+	.stepper button { background: none; border: none; color: #fff; font-size: 16px; cursor: pointer; padding: 0 4px; }
+	.swatch-box { background: var(--field); border-radius: 4px; padding: 10px; height: 150px; overflow: hidden; }
+	.grid-col { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+	.dot { width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent; padding: 0; cursor: pointer; }
+	.dot[aria-pressed="true"] { border-color: #fff; }
+	.content .btn-go { margin-top: 12px; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+	<div class="abs title">
+		<div class="kicker">CRÉATION DE</div>
+		<div class="big">Personnage</div>
+	</div>
+	<button class="abs discord" type="button" aria-label="Rejoindre le serveur Discord"><img src="img/discord-button.png" alt=""></button>
+
+	<!-- Carte du camp -->
+	<div class="abs camp-card">
+		<img class="card on" id="card-demon" src="img/carte-demon.png" alt="Démon">
+		<img class="card" id="card-slayer" src="img/carte-pourfendeur.png" alt="Pourfendeur">
+	</div>
+	<button class="abs camp-btn" type="button" aria-label="Choisir le camp">
+		<img class="on" id="btn-demon" src="img/select-button-demon.png" alt="">
+		<img id="btn-slayer" src="img/select-button.png" alt="">
+	</button>
+
+	<!-- Écran 1 : Identité -->
+	<div class="abs panel" data-screen="0">
+		<div class="row2">
+			<div><div class="label">Prénom</div><input class="field" type="text" maxlength="16" placeholder="Entrez votre prénom..."></div>
+			<div><div class="label">Nom</div><input class="field" type="text" maxlength="16" placeholder="Entrez votre nom..."></div>
+		</div>
+		<div style="height:12px"></div>
+		<div class="label">Sexe</div>
+		<div class="sexe">
+			<button class="sex male" type="button" aria-pressed="true">♂ Homme</button>
+			<button class="sex female" type="button" aria-pressed="false">♀ Femme</button>
+		</div>
+		<div style="height:10px"></div>
+		<div class="label">Âge</div>
+		<div class="slider-box">
+			<div class="track"></div><div class="fill" style="width:36%"></div><div class="knob" style="left:calc(12px + 36%)"></div>
+			<div class="val" style="left:calc(12px + 36%)">1.02</div>
+			<div class="lo" style="left:12px">1</div><div class="hi" style="right:12px">1.2</div>
+		</div>
+		<div class="label">Taille</div>
+		<div class="slider-box taille-box">
+			<div class="track" style="top:40px"></div><div class="fill" style="top:40px;width:36%"></div><div class="knob" style="top:34px;left:calc(12px + 36%)"></div>
+			<div class="val" style="top:8px;left:calc(12px + 36%)">1.02</div>
+			<div class="lo" style="top:40px;left:12px">1</div><div class="hi" style="top:40px;right:12px">1.2</div>
+		</div>
+		<div class="label">Couleur de peau</div>
+		<div class="skins" id="skins"></div>
+		<button class="btn-go" type="button" data-go>CONTINUER ET RETOURNER</button>
+	</div>
+
+	<!-- Écran 2 : Pilosité -->
+	<div class="abs tabs" data-screen="1" style="display:none">
+		<button class="tab" type="button" aria-pressed="true">◉</button>
+		<button class="tab" type="button" aria-pressed="false">◠</button>
+		<button class="tab" type="button" aria-pressed="false">⌒</button>
+		<button class="tab" type="button" aria-pressed="false">▣</button>
+	</div>
+	<div class="abs content" data-screen="1" style="display:none">
+		<div class="sep">Pilosité</div>
+		<div class="label">Forme des yeux</div>
+		<div class="stepper"><button type="button" data-step="eyes" data-dir="-1">‹</button><span id="eyes">12</span><button type="button" data-step="eyes" data-dir="1">›</button></div>
+		<div class="label">Pupilles</div>
+		<div class="stepper"><button type="button" data-step="pupil" data-dir="-1">‹</button><span id="pupil">12</span><button type="button" data-step="pupil" data-dir="1">›</button></div>
+		<div class="label">Couleur des pupilles</div>
+		<div class="swatch-box"><div class="grid-col" id="pupil-colors"></div></div>
+		<button class="btn-go" type="button" data-go>CONTINUER ET RETOURNER</button>
+	</div>
+
+	<!-- Écran 3 : Visage -->
+	<div class="abs tabs" data-screen="2" style="display:none">
+		<button class="tab-solo" type="button">◡</button>
+	</div>
+	<div class="abs content" data-screen="2" style="display:none">
+		<div class="sep">Visage</div>
+		<div class="label">Forme du visage</div>
+		<div class="stepper"><button type="button" data-step="face" data-dir="-1">‹</button><span id="face">12</span><button type="button" data-step="face" data-dir="1">›</button></div>
+		<button class="btn-go" type="button" data-go>CONTINUER ET RETOURNER</button>
+	</div>
+
+	<!-- Écran 4 : Tenue -->
+	<div class="abs tabs" data-screen="3" style="display:none">
+		<button class="tab-solo" type="button">▲</button>
+	</div>
+	<div class="abs content" data-screen="3" style="display:none">
+		<div class="sep">Tenue d'arrivée</div>
+		<div class="label">Tenue</div>
+		<div class="stepper"><button type="button" data-step="outfit" data-dir="-1">‹</button><span id="outfit">12</span><button type="button" data-step="outfit" data-dir="1">›</button></div>
+		<button class="btn-go" type="button" data-go>CONTINUER ET RETOURNER</button>
+	</div>
+
+	<div class="abs footer"><img src="img/discord-help-text.png" alt="Vous avez un souci ? Faites un ticket sur le serveur Discord."></div>
+</div>
+
+<script>
+	const SKIN_COLORS = ["#ffd9a0", "#d9a35f", "#a86b3c", "#6e3f22", "#4a2a18", "#f0b060", "#ece3d8", "#e8c28f", "#ffe0b8"];
+	const PUPIL_COLORS = ["#8a6fb0", "#2ecc71", "#1f2fd0", "#6b1210", "#8e44ad", "#8b5e3c", "#9b59b6", "#c2185b", "#e0b060", "#f1c40f", "#16a085", "#d12aa0", "#d7263d", "#d9b5e8", "#c0392b", "#ff3b6b", "#2aa8c0", "#5d3a7e", "#e6a0c8", "#a02030", "#6aa84f"];
+	const state = { camp: "demon", screen: 0, skin: 0, pupil: 0, eyes: 12, face: 12, outfit: 12, pupilCount: 12 };
+
+	const $ = (id) => document.getElementById(id);
+
+	$("skins").innerHTML = SKIN_COLORS.map((c, i) => `<button class="skin" type="button" data-skin="${i}" style="background:${c}" aria-label="Peau ${i + 1}"></button>`).join("");
+	$("pupil-colors").innerHTML = PUPIL_COLORS.map((c, i) => `<button class="dot" type="button" data-pupil="${i}" style="background:${c}" aria-label="Couleur ${i + 1}"></button>`).join("");
+
+	function render() {
+		const slayer = state.camp === "slayer";
+		$("card-demon").classList.toggle("on", !slayer);
+		$("card-slayer").classList.toggle("on", slayer);
+		$("btn-demon").classList.toggle("on", !slayer);
+		$("btn-slayer").classList.toggle("on", slayer);
+
+		document.querySelectorAll("[data-screen]").forEach((el) => {
+			el.style.display = Number(el.dataset.screen) === state.screen ? "" : "none";
+		});
+		document.querySelectorAll("[data-skin]").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.skin) === state.skin)));
+		document.querySelectorAll("[data-pupil]").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.pupil) === state.pupil)));
+		$("eyes").textContent = state.eyes;
+		$("pupil").textContent = state.pupilCount;
+		$("face").textContent = state.face;
+		$("outfit").textContent = state.outfit;
+	}
+
+	// ?camp=slayer dans l'adresse pour voir la version Pourfendeurs
+	if (new URLSearchParams(location.search).get("camp") === "slayer") state.camp = "slayer";
+
+	document.querySelectorAll(".camp-btn").forEach((b) => b.addEventListener("click", () => { state.camp = state.camp === "demon" ? "slayer" : "demon"; render(); }));
+	document.querySelectorAll("[data-skin]").forEach((b) => b.addEventListener("click", () => { state.skin = Number(b.dataset.skin); render(); }));
+	document.querySelectorAll("[data-pupil]").forEach((b) => b.addEventListener("click", () => { state.pupil = Number(b.dataset.pupil); render(); }));
+	document.querySelectorAll(".sex").forEach((b) => b.addEventListener("click", () => {
+		document.querySelectorAll(".sex").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+	}));
+	document.querySelectorAll("[data-step]").forEach((b) => b.addEventListener("click", () => {
+		const k = b.dataset.step, d = Number(b.dataset.dir);
+		if (k === "eyes") state.eyes = Math.max(1, state.eyes + d);
+		if (k === "pupil") state.pupilCount = Math.max(1, state.pupilCount + d);
+		if (k === "face") state.face = Math.max(1, state.face + d);
+		if (k === "outfit") state.outfit = Math.max(1, state.outfit + d);
+		render();
+	}));
+	document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => { state.screen = (state.screen + 1) % 4; render(); }));
+
+	function fit() {
+		const s = Math.min(window.innerWidth / 1024, window.innerHeight / 576);
+		$("stage").style.transform = `scale(${s})`;
+	}
+	window.addEventListener("resize", fit);
+	fit();
+	render();
+</script>
+</body>
+</html>
