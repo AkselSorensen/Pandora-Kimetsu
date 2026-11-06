@@ -513,7 +513,7 @@ kbd {
 #tile-settings { grid-area: settings; width: 440px; justify-self: start; }
 #tile-premium  { grid-area: premium; width: 297px; height: 494px; align-self: start; }
 #tile-shop     { grid-area: shop; width: 506px; }
-#tile-discord  { grid-area: shop2; width: 423px; justify-self: end; }
+#tile-discord  { grid-area: shop2; width: 399px; justify-self: end; }
 
 .tile-art {
 	position: absolute;
@@ -523,6 +523,7 @@ kbd {
 	object-fit: fill;
 	display: block;
 }
+#tile-discord .tile-art { width: 423px; max-width: none; }
 
 /* Barre inférieure du menu pause : temps de jeu et déconnexion */
 #bottom-bar {
