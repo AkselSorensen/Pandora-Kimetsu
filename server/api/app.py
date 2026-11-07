@@ -15,6 +15,7 @@ import secrets
 import psycopg
 from fastapi import Depends, FastAPI, Header, HTTPException
 from psycopg.rows import dict_row
+from psycopg.types.json import Jsonb
 from pydantic import BaseModel
 
 DATABASE_URL = os.environ["DATABASE_URL"]
@@ -53,9 +54,10 @@ def get_player(steam_id: str, conn=Depends(db)):
             raise HTTPException(status_code=404, detail="joueur inconnu")
 
         cur.execute(
-            "SELECT character_id, name, faction_id, job, hp, max_hp, level, xp, "
-            "reroll_count, skill_points_unspent, is_active "
-            "FROM characters WHERE player_id = %s ORDER BY created_at",
+            "SELECT c.character_id, c.name, c.faction_id, c.job, c.hp, c.max_hp, c.level, c.xp, "
+            "c.reroll_count, c.skill_points_unspent, c.is_active, ca.appearance "
+            "FROM characters c LEFT JOIN character_appearance ca ON ca.character_id = c.character_id "
+            "WHERE c.player_id = %s ORDER BY c.created_at",
             (player["player_id"],),
         )
         characters = cur.fetchall()
@@ -115,6 +117,7 @@ def create_character(steam_id: str, body: CharacterIn, conn=Depends(db)):
 
 
 class StateIn(BaseModel):
+    name: str | None = None
     job: str | None = None
     hp: int | None = None
     max_hp: int | None = None
@@ -138,3 +141,81 @@ def save_state(character_id: str, body: StateIn, conn=Depends(db)):
         if cur.fetchone() is None:
             raise HTTPException(status_code=404, detail="personnage inconnu")
     return {"saved": list(fields.keys())}
+
+
+class AppearanceIn(BaseModel):
+    appearance: dict
+
+
+@app.put("/characters/{character_id}/appearance", dependencies=[Depends(require_key)])
+def save_appearance(character_id: str, body: AppearanceIn, conn=Depends(db)):
+    """Sauvegarde l'apparence du personnage (sexe, couleur, peau, pseudo... au format du jeu)."""
+    with conn.cursor() as cur:
+        cur.execute("SELECT 1 FROM characters WHERE character_id = %s", (character_id,))
+        if cur.fetchone() is None:
+            raise HTTPException(status_code=404, detail="personnage inconnu")
+        cur.execute(
+            "INSERT INTO character_appearance (character_id, appearance, updated_at) "
+            "VALUES (%s, %s, now()) "
+            "ON CONFLICT (character_id) DO UPDATE SET appearance = EXCLUDED.appearance, "
+            "version = character_appearance.version + 1, updated_at = now()",
+            (character_id, Jsonb(body.appearance)),
+        )
+    return {"saved": True}
+
+
+class InvItem(BaseModel):
+    code: str
+    count: int = 1
+    slot: int | None = None        # position dans le sac (NULL si équipé)
+    equip_slot: str | None = None  # emplacement d'équipement (NULL si dans le sac)
+
+
+class InventoryIn(BaseModel):
+    items: list[InvItem]
+
+
+@app.get("/players/{steam_id}/inventory", dependencies=[Depends(require_key)])
+def get_inventory(steam_id: str, conn=Depends(db)):
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT it.code, ii.quantity AS count, ii.slot, ii.equip_slot "
+            "FROM item_instance ii "
+            "JOIN inventory inv ON inv.inventory_id = ii.inventory_id "
+            "JOIN player p ON p.player_id = inv.player_id "
+            "JOIN item it ON it.item_id = ii.item_id "
+            "WHERE p.steam_id = %s ORDER BY ii.instance_id",
+            (steam_id,),
+        )
+        return {"items": cur.fetchall()}
+
+
+@app.put("/players/{steam_id}/inventory", dependencies=[Depends(require_key)])
+def save_inventory(steam_id: str, body: InventoryIn, conn=Depends(db)):
+    """Remplace tout l'inventaire du joueur par celui envoyé (sac et équipement)."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT inv.inventory_id FROM inventory inv "
+            "JOIN player p ON p.player_id = inv.player_id WHERE p.steam_id = %s",
+            (steam_id,),
+        )
+        row = cur.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="joueur inconnu : appeler /login d'abord")
+        inventory_id = row["inventory_id"]
+        cur.execute("DELETE FROM item_instance WHERE inventory_id = %s", (inventory_id,))
+        for entry in body.items:
+            cur.execute(
+                "INSERT INTO item (code, name, category) VALUES (%s, %s, 'unknown') "
+                "ON CONFLICT (code) DO NOTHING",
+                (entry.code, entry.code),
+            )
+            cur.execute("SELECT item_id FROM item WHERE code = %s", (entry.code,))
+            item_id = cur.fetchone()["item_id"]
+            cur.execute(
+                "INSERT INTO item_instance (item_id, inventory_id, quantity, slot, equip_slot, is_equipped) "
+                "VALUES (%s, %s, %s, %s, %s, %s)",
+                (item_id, inventory_id, entry.count, entry.slot, entry.equip_slot,
+                 entry.equip_slot is not None),
+            )
+    return {"saved": len(body.items)}

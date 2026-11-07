@@ -10,6 +10,7 @@ local Items = Package.Require("Items.lua")
 local Npcs = Package.Require("Npcs.lua")
 local Quests = Package.Require("Quests.lua")
 local Ranks = Package.Require("Ranks.lua")
+local Persistence = Package.Require("Persistence.lua") -- sauvegarde via l'API Kimetsu (server/api)
 local Vfx = Package.Require("VfxPlan.lua")
 Package.Require("AnimViewer.lua") -- visualiseur d'animations (outil de mise au point)
 
@@ -48,6 +49,39 @@ local function sendRemote(player, eventName, ...)
 	Events.CallRemote(eventName, player, Reliability.Reliable, ...)
 end
 
+-- Sauvegarde : un changement est écrit en base quelques secondes après, une seule fois (évite les rafales).
+local SAVE_DELAY_MS = 3000
+local SAVE_EVERY_MS = 60000
+
+local function steamOf(player)
+	local ok, id = pcall(function() return player:GetSteamID() end)
+	if ok and id and tostring(id) ~= "" and tostring(id) ~= "0" then
+		return tostring(id)
+	end
+	return nil
+end
+
+local function savePlayer(player)
+	local state = players[player:GetID()]
+	if state and state.loaded then
+		Persistence.Save(state.steam, state, player:GetControlledCharacter())
+	end
+end
+
+local function persistDirty(player)
+	local state = players[player:GetID()]
+	if not state or not state.loaded or state.saveQueued then
+		return
+	end
+	state.saveQueued = true
+	Timer.SetTimeout(function()
+		state.saveQueued = nil
+		if player:IsValid() then
+			savePlayer(player)
+		end
+	end, SAVE_DELAY_MS)
+end
+
 -- Envoie le sac et l'équipement au HUD (slot = position dans le sac, 1 à SlotCount).
 local function sendInventory(player)
 	local state = players[player:GetID()]
@@ -60,6 +94,7 @@ local function sendInventory(player)
 		table.insert(slots, { slot = slot, id = entry.id, count = entry.count })
 	end
 	sendRemote(player, "wakfu:inventory", { slots = slots, equip = inv.equip, weight = Items.Weight(inv) })
+	persistDirty(player)
 end
 
 -- Grade du joueur : celui de l'échelle de son camp (pourfendeur ou démon), à défaut de celle de sa classe, pour son XP.
@@ -499,10 +534,95 @@ end
 
 spawnNpcs()
 
+-- Remet l'état sauvegardé en place : camp, job, nom, XP, apparence, sac et équipement, PV.
+local function restoreFromSave(player, state, data)
+	local saved = data.character
+	if not saved then
+		return
+	end
+	state.characterId = saved.character_id
+	state.camp = Persistence.CampOfFaction[saved.faction_id] or state.camp
+	state.demon = state.camp == "demon" and Demon.New(Config.Demon) or nil
+	if saved.job and Classes.Get(saved.job) then
+		state.class = saved.job
+	end
+	if saved.name and saved.name ~= "" then
+		state.nick = saved.name
+	end
+	state.xp = saved.xp or 0
+	state.level = saved.level or 1
+	local look = saved.appearance
+	if look then
+		state.gender = look.gender or state.gender
+		state.color = look.color or state.color
+		state.skin = look.skin or state.skin
+	end
+
+	local inv = Items.NewInventory()
+	for _, row in ipairs(data.items or {}) do
+		if Items.List[row.code] then
+			if row.equip_slot then
+				inv.equip[row.equip_slot] = row.code
+			elseif row.slot then
+				inv.slots[row.slot] = { id = row.code, count = row.count }
+			else
+				Items.Add(inv, row.code, row.count)
+			end
+		end
+	end
+	state.inventory = inv
+
+	local character = player:GetControlledCharacter()
+	if character and character:IsValid() then
+		applyClass(character, state)
+		if saved.hp and saved.max_hp then
+			pcall(function()
+				character:SetMaxHealth(saved.max_hp)
+				character:SetHealth(math.max(1, math.min(saved.hp, saved.max_hp)))
+			end)
+		end
+	end
+end
+
+-- Charge le personnage du joueur depuis l'API. Si l'API ne répond pas, le joueur reste sans sauvegarde :
+-- rien n'est écrit en base tant que l'état n'a pas été chargé.
+local function loadPlayer(player)
+	local state = players[player:GetID()]
+	if not state or not state.steam then
+		return
+	end
+	Persistence.Login(state.steam, player:GetName(), function(ok)
+		if not ok or not player:IsValid() or players[player:GetID()] ~= state then
+			return
+		end
+		Persistence.Load(state.steam, function(okLoad, data)
+			if not okLoad or not data or not player:IsValid() or players[player:GetID()] ~= state then
+				return
+			end
+			restoreFromSave(player, state, data)
+			state.loaded = true
+			sendState(player)
+			sendInventory(player)
+		end)
+	end)
+end
+
 local function onPlayerSpawn(player)
 	players[player:GetID()] = newState()
+	players[player:GetID()].steam = steamOf(player)
+	players[player:GetID()].player = player
 	spawnPlayer(player)
+	loadPlayer(player)
 end
+
+-- Sauvegarde périodique de tous les joueurs chargés.
+Timer.SetInterval(function()
+	for _, state in pairs(players) do
+		if state.loaded and state.player and state.player:IsValid() then
+			savePlayer(state.player)
+		end
+	end
+end, SAVE_EVERY_MS)
 
 Player.Subscribe("Spawn", onPlayerSpawn)
 
@@ -529,6 +649,7 @@ Player.Subscribe("Destroy", function(player)
 		leaveCreator(player)
 	end
 	interruptDevour(player)
+	savePlayer(player) -- dernière sauvegarde avant de quitter, le personnage existe encore
 	local character = player:GetControlledCharacter()
 	if character then
 		character:Destroy()
@@ -751,6 +872,7 @@ Events.SubscribeRemote("wakfu:chooseClass", function(player, className)
 	if state and type(className) == "string" and Classes.Get(className) and state.camp and Classes.CampOf(className) == state.camp then
 		state.class = className
 		sendState(player)
+		persistDirty(player)
 	end
 end)
 
@@ -785,6 +907,10 @@ Events.SubscribeRemote("wakfu:create", function(player, className, gender, color
 
 	applyClass(character, state)
 	sendState(player)
+	persistDirty(player)
+	if state.characterId then
+		Persistence.SaveAppearance(state)
+	end
 end)
 
 -- Créateur : le personnage monte sur une plateforme bleue haut dans le ciel, loin de tout décor,
@@ -1072,6 +1198,19 @@ local function applyCamp(player, state, camp)
 	end
 	sendState(player)
 	sendInventory(player)
+	-- Premier choix de camp : le personnage est créé en base, puis sauvegardé comme les autres changements.
+	if state.loaded and not state.characterId and state.steam then
+		Persistence.CreateCharacter(state.steam, {
+			name = player:GetName(),
+			faction_id = Persistence.FactionOfCamp[camp],
+			job = state.class,
+		}, function(characterId)
+			if characterId and players[player:GetID()] == state then
+				state.characterId = characterId
+				persistDirty(player)
+			end
+		end)
+	end
 end
 
 Events.SubscribeRemote("wakfu:chooseCamp", function(player, camp)

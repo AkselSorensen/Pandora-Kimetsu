@@ -17,6 +17,7 @@ SCRIPTS = [
     ("client : menu de traînée et touches", "trail_menu_check.py", []),
     ("effets Niagara : plans, repli, client", "vfx_check.py", []),
     ("formes lumineuses : plans et lecture", "fx_mesh_check.py", []),
+    ("sauvegarde : personnage, PV, sac, reconnexion", "persistence_check.py", []),
 ]
 UI = ("HUD dans Edge : DOM et captures", "ui_demon_preview.py", ["test"])
 
