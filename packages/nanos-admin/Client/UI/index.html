@@ -53,6 +53,8 @@
   .dialog.open { display: grid; }
   .box { width: 360px; background: #151923; border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 10px; }
   .box h3 { margin: 0 0 4px; } .box label { color: var(--muted); font-size: 12px; display: grid; gap: 4px; }
+  select, select option { color-scheme: dark; }
+  select option { background: #1a1e27; color: #e8ecf2; }
   .box input, .box select { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; outline: none; }
   .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
   .primary { background: var(--accent); color: #11141c; border-color: var(--accent); font-weight: 700; }
@@ -79,11 +81,11 @@
 <script>
   const TEXTS = {
     en: { brand: "NANOS", players: "Players", bans: "Bans", announce: "Announce", search: "Search a player…", name: "PLAYER", group: "GROUP", hp: "HP", status: "STATUS", actions: "ACTIONS",
-      kick: "Kick", ban: "Ban", mute: "Mute", unmute: "Unmute", freeze: "Freeze", unfreeze: "Unfreeze", god: "God", ungod: "Ungod", slay: "Slay", goto: "Goto", bring: "Bring", sethp: "HP", setgroup: "Group",
+      kick: "Kick", ban: "Ban", mute: "Mute", unmute: "Unmute", freeze: "Freeze", unfreeze: "Unfreeze", god: "God", ungod: "Ungod", slay: "Slay", goto: "Goto", bring: "Bring", sethp: "HP", setgroup: "Group", rerolls: "Rerolls", camp: "Camp", count: "Amount",
       muted: "muted", frozen: "frozen", godm: "god", you: "you", noplayers: "No players", nobans: "No active bans", unban: "Unban", reason: "Reason (optional)", duration: "Duration (30m, 2h, 1d, 0 = permanent)",
       cancel: "Cancel", confirm: "Confirm", message: "Message to everyone", send: "Send", sent: "Done", amount: "Health amount", banby: "by", left: "left", permanent: "permanent", logged: "Signed in as", roles: "Roles", newrole: "+ New role", rolename: "Role name", level: "Level", color: "Color", delrole: "Delete role", perms: "PERMISSIONS", builtin: "built-in", rolehelp: "A role can only target players of a lower level. Changes apply immediately.", created: "Role created", lockedsa: "Superadmin always has every permission.", hint: "Actions need the right rank. You can also use !commands in the chat.", warn: "Warn", warns: "warns", journal: "Journal", reports: "Reports", filter: "Filter by player…", nolog: "Nothing in the journal", noreports: "No reports", reportfrom: "from", closer: "Close", open_: "open", closed_: "closed", proplimit: "Prop limit (-1 = default)", limitnote: "Props and models permissions decide what the role can do in the props menu.", warnreason: "Reason", time: "TIME", who: "WHO", what: "ACTION", },
     fr: { brand: "NANOS", players: "Joueurs", bans: "Bans", announce: "Annonce", search: "Chercher un joueur…", name: "JOUEUR", group: "GROUPE", hp: "PV", status: "ÉTAT", actions: "ACTIONS",
-      kick: "Expulser", ban: "Bannir", mute: "Muet", unmute: "Parole", freeze: "Geler", unfreeze: "Dégeler", god: "God", ungod: "Ungod", slay: "Tuer", goto: "Aller", bring: "Amener", sethp: "PV", setgroup: "Groupe",
+      kick: "Expulser", ban: "Bannir", mute: "Muet", unmute: "Parole", freeze: "Geler", unfreeze: "Dégeler", god: "God", ungod: "Ungod", slay: "Tuer", goto: "Aller", bring: "Amener", sethp: "PV", setgroup: "Groupe", rerolls: "Rerolls", camp: "Camp", count: "Nombre",
       muted: "muet", frozen: "gelé", godm: "god", you: "toi", noplayers: "Aucun joueur", nobans: "Aucun ban actif", unban: "Débannir", reason: "Raison (facultatif)", duration: "Durée (30m, 2h, 1d, 0 = définitif)",
       cancel: "Annuler", confirm: "Valider", message: "Message pour tout le monde", send: "Envoyer", sent: "Fait", amount: "Points de vie", banby: "par", left: "reste", permanent: "définitif", logged: "Connecté en", roles: "Rôles", newrole: "+ Nouveau rôle", rolename: "Nom du rôle", level: "Niveau", color: "Couleur", delrole: "Supprimer le rôle", perms: "PERMISSIONS", builtin: "de base", rolehelp: "Un rôle ne peut viser que les joueurs de niveau inférieur. Les changements sont immédiats.", created: "Rôle créé", lockedsa: "Le superadmin a toujours toutes les permissions.", hint: "Les actions demandent le bon grade. Tu peux aussi utiliser les !commandes dans le chat.", warn: "Avertir", warns: "avert.", journal: "Journal", reports: "Signalements", filter: "Filtrer par joueur…", nolog: "Journal vide", noreports: "Aucun signalement", reportfrom: "de", closer: "Clore", open_: "ouvert", closed_: "clos", proplimit: "Limite de props (-1 = défaut)", limitnote: "Les permissions props et models décident de ce que le rôle peut faire dans le menu props.", warnreason: "Raison", time: "HEURE", who: "QUI", what: "ACTION", }
   };
@@ -162,6 +164,8 @@
           btn(t("bring"), "bring", () => run("bring " + id)),
           btn(t("sethp"), "hp", () => dialog(t("sethp") + " " + p.name, [{ label: t("amount"), value: "100" }], v => run("hp " + id + " " + (v[0] || "100")))),
           btn(t("setgroup"), "setgroup", () => dialog(t("setgroup") + " " + p.name, [{ label: t("group"), options: data.groups.filter(g => data.group === "superadmin" || g.rank < data.rank).map(g => g.name) }], v => run("setgroup " + id + " " + v[0]))),
+          btn(t("rerolls"), "rerolls", () => dialog(t("rerolls") + " " + p.name, [{ label: t("count"), value: "1" }], v => run("rerolls " + id + " " + (v[0] || "1")))),
+          btn(t("camp"), "camp", () => dialog(t("camp") + " " + p.name, [{ label: t("camp"), options: ["slayer", "demon"] }], v => run("camp " + id + " " + (v[0] || "slayer")))),
         ].forEach(b => b && wrap.appendChild(b));
         ac.appendChild(wrap); tr.appendChild(ac); body.appendChild(tr);
       });

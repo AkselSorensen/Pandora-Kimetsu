@@ -14,6 +14,7 @@ import secrets
 
 import psycopg
 from fastapi import Depends, FastAPI, Header, HTTPException
+from pydantic import Field
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 from pydantic import BaseModel
@@ -45,7 +46,7 @@ def get_player(steam_id: str, conn=Depends(db)):
     """Renvoie le joueur et ses personnages, à partir de son SteamID."""
     with conn.cursor() as cur:
         cur.execute(
-            "SELECT player_id, steam_id, display_name, is_banned, last_login "
+            "SELECT player_id, steam_id, display_name, is_banned, last_login, playtime_seconds "
             "FROM player WHERE steam_id = %s",
             (steam_id,),
         )
@@ -55,7 +56,7 @@ def get_player(steam_id: str, conn=Depends(db)):
 
         cur.execute(
             "SELECT c.character_id, c.name, c.faction_id, c.job, c.hp, c.max_hp, c.level, c.xp, "
-            "c.reroll_count, c.skill_points_unspent, c.is_active, ca.appearance "
+            "c.reroll_count, c.skill_points_unspent, c.is_active, c.game_state, ca.appearance "
             "FROM characters c LEFT JOIN character_appearance ca ON ca.character_id = c.character_id "
             "WHERE c.player_id = %s ORDER BY c.created_at",
             (player["player_id"],),
@@ -118,6 +119,7 @@ def create_character(steam_id: str, body: CharacterIn, conn=Depends(db)):
 
 class StateIn(BaseModel):
     name: str | None = None
+    game: dict | None = None
     job: str | None = None
     hp: int | None = None
     max_hp: int | None = None
@@ -129,18 +131,23 @@ class StateIn(BaseModel):
 def save_state(character_id: str, body: StateIn, conn=Depends(db)):
     """Sauvegarde l'état d'un personnage : job, points de vie, niveau, expérience.
     Seuls les champs envoyés sont modifiés."""
-    fields = {k: v for k, v in body.model_dump().items() if v is not None}
-    if not fields:
+    fields = {k: v for k, v in body.model_dump().items() if v is not None and k != "game"}
+    game = body.game
+    if not fields and game is None:
         raise HTTPException(status_code=400, detail="aucun champ à sauvegarder")
-    assignments = ", ".join(f"{name} = %s" for name in fields)
+    assignments = [f"{name} = %s" for name in fields]
+    values = list(fields.values())
+    if game is not None:
+        assignments.append("game_state = %s")
+        values.append(Jsonb(game))
     with conn.cursor() as cur:
         cur.execute(
-            f"UPDATE characters SET {assignments} WHERE character_id = %s RETURNING character_id",
-            (*fields.values(), character_id),
+            "UPDATE characters SET " + ", ".join(assignments) + " WHERE character_id = %s RETURNING character_id",
+            (*values, character_id),
         )
         if cur.fetchone() is None:
             raise HTTPException(status_code=404, detail="personnage inconnu")
-    return {"saved": list(fields.keys())}
+    return {"saved": list(fields.keys()) + (["game"] if game is not None else [])}
 
 
 class AppearanceIn(BaseModel):
@@ -162,6 +169,25 @@ def save_appearance(character_id: str, body: AppearanceIn, conn=Depends(db)):
             (character_id, Jsonb(body.appearance)),
         )
     return {"saved": True}
+
+
+class PlaytimeIn(BaseModel):
+    seconds: int = Field(ge=0, le=86400)  # temps écoulé depuis la dernière sauvegarde
+
+
+@app.put("/players/{steam_id}/playtime", dependencies=[Depends(require_key)])
+def add_playtime(steam_id: str, body: PlaytimeIn, conn=Depends(db)):
+    """Ajoute du temps de jeu au total du joueur."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE player SET playtime_seconds = playtime_seconds + %s WHERE steam_id = %s "
+            "RETURNING playtime_seconds",
+            (body.seconds, steam_id),
+        )
+        row = cur.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="joueur inconnu : appeler /login d'abord")
+    return {"playtime_seconds": row["playtime_seconds"]}
 
 
 class InvItem(BaseModel):

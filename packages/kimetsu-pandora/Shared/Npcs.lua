@@ -55,7 +55,30 @@ Npcs.List = {
 		quests = {},
 		services = { "forge" },
 	},
+	{
+		id = "selection_reroll",
+		name = "Sélection re-roll",
+		-- Cette entrée est créée depuis le menu Props : sa position est celle choisie par l'administrateur.
+		position = { x = 0, y = 0, z = 100 },
+		manual = true,
+		mesh = "pandora-demonslayer::SK_yushiro",
+		dialogue = "Choisis le type de re-roll que tu souhaites consulter.",
+		quests = {},
+		services = { "rerollselector" },
+	},
 }
+
+-- PNJ créés manuellement depuis le menu Props, indexés par leur entité réelle.
+local manualEntities = {}
+
+function Npcs.RegisterEntity(npcId, entity)
+	local npc = Npcs.Get(npcId)
+	if npc and entity then manualEntities[entity] = npc end
+end
+
+function Npcs.UnregisterEntity(entity)
+	manualEntities[entity] = nil
+end
 
 -- Civils du Domaine (civil = true) : des villageois sans service ni quête. Un démon peut les dévorer (touche Config.Demon.devourKey) ;
 -- ils reviennent après Config.Demon.devour.civilRespawn secondes.
@@ -117,9 +140,21 @@ function Npcs.Nearest(position)
 	local best, bestDistance = nil, nil
 	local limit = Npcs.InteractDistance * Npcs.InteractDistance
 	for _, npc in ipairs(Npcs.List) do
-		local distance = Combat.DistanceSquared(position, npc.position)
-		if distance <= limit and (bestDistance == nil or distance < bestDistance) then
-			best, bestDistance = npc, distance
+		if not npc.manual then
+			local distance = Combat.DistanceSquared(position, npc.position)
+			if distance <= limit and (bestDistance == nil or distance < bestDistance) then
+				best, bestDistance = npc, distance
+			end
+		end
+	end
+	for entity, npc in pairs(manualEntities) do
+		if entity:IsValid() then
+			local location = entity:GetLocation()
+			local dynamicPosition = { x = location.X, y = location.Y, z = location.Z }
+			local distance = Combat.DistanceSquared(position, dynamicPosition)
+			if distance <= limit and (bestDistance == nil or distance < bestDistance) then
+				best, bestDistance = npc, distance
+			end
 		end
 	end
 	return best

@@ -1148,13 +1148,32 @@ Events.Subscribe("wakfu:devourStop", stopDevour);
 // (il ne sera cumulé qu'avec la sauvegarde des joueurs, tâche B1).
 const welcomeSince = Date.now();
 
+// Temps de jeu total (serveur) : valeur reçue, plus le temps écoulé depuis sa réception.
+let playtimeAt = Date.now();
+Events.Subscribe("wakfu:state", () => { playtimeAt = Date.now(); });
+
+function formatSessionTime() {
+	const total = hud.state && typeof hud.state.playtime === "number"
+		? hud.state.playtime + Math.floor((Date.now() - playtimeAt) / 1000)
+		: Math.floor((Date.now() - welcomeSince) / 1000);
+	const minutes = Math.floor(total / 60);
+	return minutes >= 60 ? Math.floor(minutes / 60) + "h " + (minutes % 60) + "m" : minutes + "m";
+}
+
+function updateMenuPlaytime() {
+	const value = $("playtime-value");
+	if (value) value.textContent = formatSessionTime();
+}
+
+updateMenuPlaytime();
+setInterval(updateMenuPlaytime, 30000);
+
 function welcomeFill() {
 	const state = hud.state || {};
 	$("wl-name").textContent = state.name || "Joueur";
 	$("wl-rank").textContent = state.rank && state.rank.name ? state.rank.name : "-";
 	$("wl-money").textContent = String(state.kamas || 0).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ¥";
-	const minutes = Math.floor((Date.now() - welcomeSince) / 60000);
-	$("wl-time").textContent = minutes >= 60 ? Math.floor(minutes / 60) + "h " + (minutes % 60) + "m" : minutes + "m";
+	$("wl-time").textContent = formatSessionTime();
 }
 
 Events.Subscribe("wakfu:welcomeOpen", (open) => {
@@ -1169,5 +1188,170 @@ Events.Subscribe("wakfu:state", () => {
 document.addEventListener("click", (event) => {
 	if ($("welcome").classList.contains("hidden")) return;
 	if (event.target.closest("#wl-start")) Events.Call("wakfu:welcomeStart");
-	else if (event.target.closest("#wl-character")) Events.Call("wakfu:welcomeCharacter");
+	else if (event.target.closest("#wl-character")) openSelect();
+});
+
+// Sélection de personnage (planche Figma) : un personnage par joueur pour l'instant, les deux autres emplacements sont verrouillés
+// (ils viendront avec la sauvegarde B1 et les emplacements VIP A24). Le bouton du personnage choisi continue l'arrivée :
+// le choix du camp s'il n'est pas fait, sinon le créateur de personnage.
+const SELECT_DISCORD = ""; // texte du bouton Discord de la planche ; vide = le bouton reste masqué (il n'a pas de lien à ouvrir)
+
+function openSelect() {
+	const state = hud.state || {};
+	const camp = state.camp;
+	const rank = state.rank && state.rank.name ? state.rank.name : "Nouveau personnage";
+	const cls = state.class || "";
+	const glyph = camp === "demon" ? "鬼" : camp ? glyphOf(cls) : "?";
+	const color = camp === "demon" ? "#c8323c" : camp ? classColor(cls) : "#8b8580";
+	const lock = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>`;
+	const slots = [
+		`<div class="sl-card on" style="--sl-color:${color}">
+			<div class="sl-art"></div>
+			<div class="sl-name">${escapeHtml(state.name || "Joueur")}</div>
+			<div class="sl-rank">${escapeHtml(rank)}</div>
+			<button type="button" class="sl-pick">${camp ? "SELECTIONNEZ" : "CRÉER"}</button>
+		</div>`,
+	];
+	for (let i = 2; i <= 3; i++) {
+		slots.push(`<div class="sl-card locked">
+			<div class="sl-art">${lock}</div>
+			<div class="sl-name">EMPLACEMENT ${i}</div>
+			<button type="button" class="sl-pick" disabled>[Conditions]</button>
+		</div>`);
+	}
+	$("sl-slots").innerHTML = slots.join("");
+	$("sl-discord").classList.toggle("hidden", !SELECT_DISCORD);
+	if (SELECT_DISCORD) $("sl-discord").lastChild.textContent = SELECT_DISCORD;
+	$("select").classList.remove("hidden");
+	$("welcome").classList.add("hidden"); // le personnage 3D est rendu par le jeu derrière cet écran : le fond de bienvenue le cacherait
+	Events.Call("wakfu:selectOpen", true);
+}
+
+function closeSelect(backToWelcome) {
+	$("select").classList.add("hidden");
+	Events.Call("wakfu:selectOpen", false);
+	if (backToWelcome) $("welcome").classList.remove("hidden");
+}
+
+document.addEventListener("click", (event) => {
+	if ($("select").classList.contains("hidden")) return;
+	if (event.target.closest("#sl-back")) closeSelect(true);
+	else if (event.target.closest(".sl-card.on .sl-pick")) {
+		closeSelect(false);
+		Events.Call("wakfu:welcomeCharacter");
+	}
+});
+
+Events.Subscribe("wakfu:welcomeOpen", (open) => {
+	if (!open && !$("select").classList.contains("hidden")) closeSelect(false);
+});
+
+// Le panneau re-roll permet de sélectionner visuellement une catégorie ; les effets seront raccordés ensuite.
+Events.Subscribe("wakfu:rerollSelectorOpen", (open) => {
+	$("reroll-selector").classList.toggle("hidden", !open);
+	if (open) document.querySelectorAll(".rs-card").forEach((card) => card.classList.remove("selected"));
+});
+
+document.addEventListener("click", (event) => {
+	if ($("reroll-selector").classList.contains("hidden")) return;
+	if (event.target.closest("#rs-close") || event.target.closest("#rs-back")) return Events.Call("wakfu:rerollSelectorClose");
+	const card = event.target.closest(".rs-card");
+	if (card) {
+		document.querySelectorAll(".rs-card").forEach((item) => item.classList.toggle("selected", item === card));
+	}
+});
+
+document.addEventListener("keydown", (event) => {
+	if (!$("reroll-selector").classList.contains("hidden") && event.key === "Escape") Events.Call("wakfu:rerollSelectorClose");
+});
+
+// Reroll de capacité : roulette visuelle, le tirage réel reste validé par le serveur.
+const ABILITY_RARITIES = [
+	["common", "COMMUN", "92%", "#aeb4ba"],
+	["rare", "RARE", "7%", "#168de2"],
+	["epic", "ÉPIQUE", "0,9%", "#9b45e8"],
+	["mythic", "MYTHIQUE", "0,1%", "#e52d38"],
+	["pandorium", "PANDORIUM", "à venir", "#111"],
+];
+let abilityOpen = false;
+let abilityRolling = false;
+
+function abilityOpenNow() { return !$("ability-reroll").classList.contains("hidden"); }
+function renderAbility(keepReel = false, winningClass = null) {
+	const state = hud.state || {};
+	const current = state.class || "";
+	const def = hud.classes[current] || {};
+	$("ar-avatar").textContent = def.glyph || current.charAt(0) || "?";
+	$("ar-name").textContent = state.name || "Joueur";
+	$("ar-level").textContent = state.rank && state.rank.name ? state.rank.name : "—";
+	$("ar-time").textContent = state.playtime || "—";
+	$("ar-money").textContent = String(state.kamas || 0).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ¥";
+	$("ar-count").textContent = state.abilityRerolls || 0;
+	if ($("ar-header-count")) $("ar-header-count").textContent = state.abilityRerolls || 0;
+	$("ar-class").textContent = def.name || current || "—";
+	$("ar-rarity-list").innerHTML = ABILITY_RARITIES.map(([id, label, chance, color]) => `<div class="ar-rarity rarity-${id}" style="--rarity:${color}"><b>${label}</b><small>${chance}</small><span>Pitié : ${state.abilityPity && state.abilityPity[id] || 0}</span></div>`).join("");
+	const pity = state.abilityPity || {};
+	const pityCaps = { kibutsuji: 2000, kamado: 1250, tsugikuni: 1000, rengoku: 250, tomioka: 150 };
+	document.querySelectorAll(".ar-pity-overlay [data-pity]").forEach((node) => {
+		const id = node.dataset.pity;
+		node.textContent = pityCaps[id] ? `${pity[id] || 0}/${pityCaps[id]}` : "";
+	});
+	const names = Object.keys(hud.classes || {}).filter((name) => name !== current);
+	const reel = [];
+	const reelLength = keepReel ? 38 : 18;
+	const winningIndex = keepReel ? 34 : -1;
+	for (let i = 0; i < reelLength; i++) reel.push(i === winningIndex ? winningClass : (names[i % Math.max(1, names.length)] || current || "?"));
+	const track = $("ar-reel-track");
+	track.classList.remove("rolling");
+	track.style.removeProperty("--roll-end");
+	track.style.transform = "translateX(0)";
+	track.innerHTML = reel.map((name) => `<div class="ar-reel-card"><b>${escapeHtml((hud.classes[name] || {}).glyph || "?")}</b><span>${escapeHtml((hud.classes[name] || {}).name || name)}</span></div>`).join("");
+	if (keepReel && winningClass) {
+		const winner = track.children[winningIndex];
+		const viewport = track.parentElement.clientWidth;
+		const finalX = Math.round(viewport / 2 - (winner.offsetLeft + winner.offsetWidth / 2));
+		track.style.setProperty("--roll-end", `${finalX}px`);
+		void track.offsetWidth;
+		track.classList.add("rolling");
+		setTimeout(() => {
+			track.classList.remove("rolling");
+			track.style.transform = `translateX(${finalX}px)`;
+			const rarity = ABILITY_RARITIES.find(([id]) => id === (window.__abilityRarity || "common")) || ABILITY_RARITIES[0];
+			$("ar-result").innerHTML = `Nouvelle classe : ${escapeHtml((hud.classes[winningClass] || {}).name || winningClass)} <span class="ar-result-rarity" style="color:${rarity[3]}">(${rarity[1]})</span>`;
+			abilityRolling = false;
+			$("ar-roll").disabled = false;
+		}, 18000);
+	}
+}
+
+function openAbilityReroll() {
+ Events.Call("wakfu:openAbilityPreview");
+}
+
+document.addEventListener("click", (event) => {
+	if (!$("reroll-selector").classList.contains("hidden") && event.target.closest('[data-reroll-choice="capacite"]')) return openAbilityReroll();
+	if (!abilityOpenNow()) return;
+	if (event.target.closest("#ar-back")) { abilityOpen = false; $("ability-reroll").classList.add("hidden"); $("reroll-selector").classList.remove("hidden"); return; }
+	if (event.target.closest("#ar-close")) { abilityOpen = false; $("ability-reroll").classList.add("hidden"); return Events.Call("wakfu:rerollSelectorClose"); }
+	if (event.target.closest("#ar-roll") && !abilityRolling) { abilityRolling = true; $("ar-roll").disabled = true; $("ar-result").textContent = "La roulette tourne…"; Events.Call("wakfu:abilityReroll"); }
+});
+
+Events.Subscribe("wakfu:abilityRerolled", (result) => {
+	$("ar-result").textContent = "La roulette tourne…";
+	window.__abilityRarity = result.rarity || "common";
+	// Le résultat arrive avant l'état complet : on applique tout de suite le solde et les pitiés reçus.
+	if (hud.state) {
+		if (typeof result.rerolls === "number") hud.state.abilityRerolls = result.rerolls;
+		if (result.pity) hud.state.abilityPity = result.pity;
+		if (typeof result.kamas === "number") hud.state.kamas = result.kamas;
+	}
+	renderAbility(true, result.class);
+});
+
+document.addEventListener("keydown", (event) => {
+	if (abilityOpenNow() && event.key === "Escape") {
+		$("ability-reroll").classList.add("hidden");
+		abilityOpen = false;
+		Events.Call("wakfu:rerollSelectorClose");
+	}
 });

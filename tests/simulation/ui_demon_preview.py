@@ -85,6 +85,7 @@ window.addEventListener("load", () => {
 	fire("wakfu:health", JSON.stringify({ hp: 1220, maxHp: 1330 }));
 	if (scene === "camp") { fire("wakfu:state", JSON.stringify(NOCAMP)); fire("wakfu:campOpen", true); click('.camp-card[data-camp="demon"]'); }
 	else if (scene === "welcome") { fire("wakfu:state", JSON.stringify(DEMON)); fire("wakfu:welcomeOpen", true); }
+	else if (scene === "select") { fire("wakfu:state", JSON.stringify(DEMON)); fire("wakfu:welcomeOpen", true); click("#wl-character"); }
 	else if (scene === "hud-demon") { fire("wakfu:state", JSON.stringify(DEMON)); fire("wakfu:toast", "Villageois dévoré : chair +40, âmes +4 · palier « Chasseur de nuit »"); }
 	else if (scene === "hud-hungry") { fire("wakfu:state", JSON.stringify(DEMON)); fire("wakfu:demon", JSON.stringify(HUNGRY)); }
 	else if (scene === "devour") { fire("wakfu:state", JSON.stringify(DEMON)); fire("wakfu:devourStart", JSON.stringify({ name: "Villageois", seconds: 30, gain: { flesh: 40, souls: 4, heal: 15, xp: 15 } })); }
@@ -94,16 +95,14 @@ window.addEventListener("load", () => {
 		// Ecran de camp : deux cartes, bouton inactif, selection, confirmation
 		fire("wakfu:state", JSON.stringify(NOCAMP)); fire("wakfu:campOpen", true);
 		ok(visible("camp") && document.querySelectorAll(".camp-card").length === 2, "l'ecran affiche 2 cartes");
-		ok($$("#camp-confirm").disabled, "le bouton est inactif sans selection");
-		ok($$('.camp-card[data-camp="slayer"] h3').textContent === "Pourfendeur" && $$('.camp-card[data-camp="demon"] h3').textContent === "Démon", "noms des camps");
-		ok(document.querySelectorAll('.camp-card[data-camp="demon"] li').length === 5, "5 points pour le demon");
+		ok($$('.camp-card[data-camp="slayer"] h3').textContent === "POURFENDEURS" && $$('.camp-card[data-camp="demon"] h3').textContent === "DEMON", "noms des camps");
+		ok(document.querySelectorAll(".camp-pick").length === 2 && $$('.camp-card[data-camp="demon"] .camp-pick').textContent === "Sélectionner", "deux boutons Sélectionner");
 		click('.camp-card[data-camp="demon"]');
 		ok($$('.camp-card[data-camp="demon"]').classList.contains("selected") && !$$('.camp-card[data-camp="slayer"]').classList.contains("selected"), "la carte choisie est marquee");
-		ok(!$$("#camp-confirm").disabled && $$("#camp-confirm").textContent === "Devenir Démon", "le bouton s'active : " + $$("#camp-confirm").textContent);
-		ok(!!$$('.camp-card[data-camp="demon"] .camp-badge') && !$$('.camp-card[data-camp="slayer"] .camp-badge'), "le badge Sélectionné est sur la seule carte choisie");
-		ok($$("#camp-confirm").dataset.camp === "demon" && !!$$("#camp-note") && $$('.camp-card[data-camp="demon"] .kanji').textContent === "鬼", "bouton teinté du camp, note boutique, kanji du démon");
-		click('.camp-card[data-camp="slayer"]'); ok($$("#camp-confirm").textContent === "Devenir Pourfendeur", "on peut changer d'avis avant de confirmer");
-		click("#camp-confirm"); ok(window.calls.some((c) => c[0] === "wakfu:chooseCamp" && c[1] === "slayer"), "la confirmation envoie le camp");
+		ok($$('.camp-card[data-camp="demon"] .camp-pick').textContent === "Confirmer" && $$('.camp-card[data-camp="demon"] .kanji').textContent === "鬼", "le bouton devient Confirmer, kanji du camp");
+		ok(!window.calls.some((c) => c[0] === "wakfu:chooseCamp"), "un seul clic n'envoie rien");
+		click('.camp-card[data-camp="slayer"] .camp-pick'); ok($$('.camp-card[data-camp="slayer"] .camp-pick').textContent === "Confirmer", "on peut changer d'avis avant de confirmer");
+		click('.camp-card[data-camp="slayer"] .camp-pick'); ok(window.calls.some((c) => c[0] === "wakfu:chooseCamp" && c[1] === "slayer"), "le second clic envoie le camp");
 		fire("wakfu:campOpen", false); ok(!visible("camp"), "l'ecran se ferme");
 		// Pourfendeur : aucun panneau de demon, aide sans H
 		fire("wakfu:state", JSON.stringify(SLAYER));

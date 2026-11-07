@@ -46,6 +46,8 @@ local function BuildCatalog()
     end
     -- Équipement tridimensionnel (package odm-gear) : équipé depuis l'onglet Arme
     items[#items + 1] = '{"id":"odm-gear::ODM","n":"ODM Gear - Equipement tridimensionnel","c":"odm-gear","g":"Equipement","k":"Arme","t":"","e":0}'
+    -- Entités spéciales du mode Kimetsu RP, placées manuellement par l'administrateur.
+    items[#items + 1] = '{"id":"kimetsu-pandora::selection_reroll","n":"Sélection re-roll (Yushiro)","c":"kimetsu-pandora","g":"Entités","k":"Entité","t":"","e":0}'
     return "[" .. table.concat(items, ",") .. "]"
 end
 

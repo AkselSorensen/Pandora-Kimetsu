@@ -115,6 +115,29 @@ Events.SubscribeRemote("PropsMenu:Spawn", function(player, kind, asset)
 
     local perm = Perms[SteamKey(player)]
 
+    -- PNJ du mode Kimetsu RP : une entité Character qui reste à l'endroit choisi par l'administrateur.
+    if kind == "entity" and asset == "kimetsu-pandora::selection_reroll" then
+        if perm and not perm.props then Deny(player, "your role cannot spawn entities.") return end
+        local list = owned[player] or {}
+        owned[player] = list
+        local limit = (perm and perm.limit >= 0) and perm.limit or Config.MaxPropsPerPlayer
+        if #list >= limit then Deny(player, "limit reached (" .. limit .. " objects).") return end
+        local origin = pawn:GetLocation()
+        local forward = ForwardFromRotation(pawn:GetRotation())
+        local location = Vector(origin.X + forward.X * Config.SpawnDistance, origin.Y + forward.Y * Config.SpawnDistance, origin.Z + Config.SpawnHeight)
+        local entity = Character(location, Rotator(0, pawn:GetRotation().Yaw + 180, 0), "pandora-demonslayer::SK_yushiro")
+        if entity then
+            entity:SetInvulnerable(true)
+            entity:SetValue("propsEntity", true, true)
+            table.insert(list, entity)
+            owner_of[entity] = player
+            Events.Call("PropsMenu:EntitySpawned", entity, "selection_reroll")
+            AdminLog(player, "spawned entity " .. asset)
+            RecordHistory(player, kind, asset)
+        end
+        return
+    end
+
     -- ODM Gear (package odm-gear) : on l'équipe au lieu de faire apparaître une arme
     if kind == "weapon" and asset == "odm-gear::ODM" then
         Events.Call("ODM:Equip", player)

@@ -17,7 +17,8 @@ CREATE TABLE player (
     email         VARCHAR(255),
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     last_login    TIMESTAMPTZ,
-    is_banned     BOOLEAN NOT NULL DEFAULT FALSE
+    is_banned     BOOLEAN NOT NULL DEFAULT FALSE,
+    playtime_seconds BIGINT NOT NULL DEFAULT 0  -- temps de jeu total, cumulé à chaque sauvegarde
 );
 
 CREATE TABLE admin_role (
@@ -95,6 +96,7 @@ CREATE TABLE characters (
     skill_points_unspent  INTEGER NOT NULL DEFAULT 0,
     is_active             BOOLEAN NOT NULL DEFAULT TRUE,
     job                   VARCHAR(32),            -- classe / souffle choisi
+    game_state            JSONB,                  -- kamas, rerolls, quêtes, réglages (voir Persistence.lua)
     hp                    INTEGER,                -- points de vie actuels
     max_hp                INTEGER,                -- points de vie maximum
     created_at            TIMESTAMPTZ NOT NULL DEFAULT now()

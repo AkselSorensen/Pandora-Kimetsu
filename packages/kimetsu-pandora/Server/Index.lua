@@ -10,6 +10,7 @@ local Items = Package.Require("Items.lua")
 local Npcs = Package.Require("Npcs.lua")
 local Quests = Package.Require("Quests.lua")
 local Ranks = Package.Require("Ranks.lua")
+local Persistence = Package.Require("Persistence.lua") -- sauvegarde via l'API Kimetsu (server/api)
 local Vfx = Package.Require("VfxPlan.lua")
 Package.Require("AnimViewer.lua") -- visualiseur d'animations (outil de mise au point)
 
@@ -18,6 +19,7 @@ Package.Require("AnimViewer.lua") -- visualiseur d'animations (outil de mise au 
 -- camp = "slayer" ou "demon" (nil tant que le joueur n'a pas choisi) ; demon = état du système du démon (Shared/Demon.lua), seulement pour un démon
 -- stats = bonus issus des rerolls : { maxHp, damagePct, speed }
 local players = {}
+local pendingSpawns = {}
 -- Plateformes du créateur de personnage, par joueur.
 local creatorStages = {}
 local leaveCreator -- défini plus bas, avec le reste du créateur
@@ -41,11 +43,44 @@ local function newState()
 	end
 	Items.Add(inventory, "onigiri", 3)
 	Items.Add(inventory, "fiole", 1)
-	return { class = Classes.Default, gender = Config.Genders[1], color = 1, skin = nil, nick = nil, cooldowns = {}, kamas = Config.StartingYens or 0, xp = 0, quests = {}, stats = {}, inventory = inventory }
+	return { class = Classes.Default, gender = Config.Genders[1], color = 1, skin = nil, nick = nil, cooldowns = {}, kamas = Config.StartingYens or 0, xp = 0, quests = {}, stats = {}, abilityRerolls = 0, abilityPity = {}, inventory = inventory }
 end
 
 local function sendRemote(player, eventName, ...)
 	Events.CallRemote(eventName, player, Reliability.Reliable, ...)
+end
+
+-- Sauvegarde : un changement est écrit en base quelques secondes après, une seule fois (évite les rafales).
+local SAVE_DELAY_MS = 3000
+local SAVE_EVERY_MS = 60000
+
+local function steamOf(player)
+	local ok, id = pcall(function() return player:GetSteamID() end)
+	if ok and id and tostring(id) ~= "" and tostring(id) ~= "0" then
+		return tostring(id)
+	end
+	return nil
+end
+
+local function savePlayer(player)
+	local state = players[player:GetID()]
+	if state and state.loaded then
+		Persistence.Save(state.steam, state, player:GetControlledCharacter())
+	end
+end
+
+local function persistDirty(player)
+	local state = players[player:GetID()]
+	if not state or not state.loaded or state.saveQueued then
+		return
+	end
+	state.saveQueued = true
+	Timer.SetTimeout(function()
+		state.saveQueued = nil
+		if player:IsValid() then
+			savePlayer(player)
+		end
+	end, SAVE_DELAY_MS)
 end
 
 -- Envoie le sac et l'équipement au HUD (slot = position dans le sac, 1 à SlotCount).
@@ -60,6 +95,7 @@ local function sendInventory(player)
 		table.insert(slots, { slot = slot, id = entry.id, count = entry.count })
 	end
 	sendRemote(player, "wakfu:inventory", { slots = slots, equip = inv.equip, weight = Items.Weight(inv) })
+	persistDirty(player)
 end
 
 -- Grade du joueur : celui de l'échelle de son camp (pourfendeur ou démon), à défaut de celle de sa classe, pour son XP.
@@ -82,11 +118,19 @@ local function sendDemon(player)
 end
 
 -- Envoie au client ce que le HUD affiche : classe, grade, yens, bonus et quêtes.
+-- Temps de jeu total du joueur (secondes) : celui de la base, plus la session en cours. nil tant que l'état n'est pas chargé.
+local function playtimeTotal(state)
+	if not state.loaded then
+		return nil
+	end
+	return (state.playtimeBase or 0) + math.max(0, os.time() - (state.playtimeMark or os.time()))
+end
+
 local function sendState(player)
 	local state = players[player:GetID()]
 	if state then
 		sendInventory(player)
-		sendRemote(player, "wakfu:state", { name = state.nick or player:GetName(), gender = state.gender, color = state.color, skin = state.skin, class = state.class, camp = state.camp, demon = demonView(state), trail = state.trail or "auto", trailSize = state.trailSize or Config.Vfx.trail.defaultSize, kamas = state.kamas, xp = state.xp, rank = rankOf(state), stats = state.stats, quests = state.quests })
+		sendRemote(player, "wakfu:state", { name = state.nick or player:GetName(), gender = state.gender, color = state.color, skin = state.skin, class = state.class, camp = state.camp, demon = demonView(state), trail = state.trail or "auto", trailSize = state.trailSize or Config.Vfx.trail.defaultSize, kamas = state.kamas, xp = state.xp, rank = rankOf(state), stats = state.stats, quests = state.quests, abilityRerolls = state.abilityRerolls or 0, abilityPity = state.abilityPity or {}, playtime = playtimeTotal(state) })
 	end
 end
 
@@ -428,6 +472,19 @@ local function spawnPlayer(player)
 	end
 
 	local character = player:GetControlledCharacter()
+	if not character then
+		local id = player:GetID()
+		pendingSpawns[id] = (pendingSpawns[id] or 0) + 1
+		if pendingSpawns[id] <= 20 then
+			Timer.SetTimeout(function()
+				if players[id] then spawnPlayer(player) end
+			end, 250)
+			return
+		end
+		pendingSpawns[id] = nil
+	else
+		pendingSpawns[player:GetID()] = nil
+	end
 	if Config.Corpses.enabled and character and character:IsValid() and character:IsDead() and (state.camp ~= "demon" or Config.Corpses.demonsLeaveBody) then
 		leaveCorpse(player, character, state)
 		character = nil
@@ -481,6 +538,9 @@ local civilBodies = {}
 -- Les PNJ du Domaine prennent corps dans le monde : un personnage immobile et un nom flottant.
 local function spawnNpcs()
 	for _, npc in ipairs(Npcs.List) do
+		if npc.manual then
+			goto continue
+		end
 		local location = Vector(npc.position.x, npc.position.y, npc.position.z)
 		-- Ils regardent vers le centre du Domaine, là où apparaissent les joueurs.
 		local character = Character(location, Rotator(0, npc.yaw or 180, 0), npc.mesh)
@@ -494,24 +554,169 @@ local function spawnNpcs()
 		if npc.civil then
 			civilBodies[npc.id] = { character = character, label = label }
 		end
+		::continue::
 	end
 end
 
+Events.Subscribe("PropsMenu:EntitySpawned", function(entity, npcId)
+	if not entity or not npcId then return end
+	local npc = Npcs.Get(npcId)
+	if not npc or not npc.manual then return end
+	entity:SetInvulnerable(true)
+	entity:SetValue("npcId", npcId, true)
+	Npcs.RegisterEntity(npcId, entity)
+	local label = TextRender(entity:GetLocation() + Vector(0, 0, 125), Rotator(0, 0, 0), npc.name, 22, Color(1, 0.75, 0.1), TextRenderRenderingType.UnlitCameraAligned)
+	Character.Subscribe("Destroy", function(character)
+		if character == entity then
+			Npcs.UnregisterEntity(character)
+			if label and label:IsValid() then label:Destroy() end
+		end
+	end)
+end)
+
 spawnNpcs()
+
+-- Remet l'état sauvegardé en place : camp, job, nom, XP, apparence, sac et équipement, PV.
+local function restoreFromSave(player, state, data)
+	local saved = data.character
+	if not saved then
+		return
+	end
+	state.characterId = saved.character_id
+	state.camp = Persistence.CampOfFaction[saved.faction_id] or state.camp
+	state.demon = state.camp == "demon" and Demon.New(Config.Demon) or nil
+	if saved.job and Classes.Get(saved.job) then
+		state.class = saved.job
+	end
+	if saved.name and saved.name ~= "" then
+		state.nick = saved.name
+	end
+	state.xp = saved.xp or 0
+	state.playtimeBase = data.playtime or 0
+	local game = saved.game or {}
+	state.kamas = game.kamas or state.kamas
+	state.stats = game.stats or {}
+	state.abilityRerolls = game.abilityRerolls or 0
+	state.abilityPity = game.abilityPity or {}
+	state.quests = game.quests or {}
+	state.trail = game.trail
+	state.trailSize = game.trailSize
+	state.level = saved.level or 1
+	local look = saved.appearance
+	if look then
+		state.gender = look.gender or state.gender
+		state.color = look.color or state.color
+		state.skin = look.skin or state.skin
+	end
+
+	local inv = Items.NewInventory()
+	for _, row in ipairs(data.items or {}) do
+		if Items.List[row.code] then
+			if row.equip_slot then
+				inv.equip[row.equip_slot] = row.code
+			elseif row.slot then
+				inv.slots[row.slot] = { id = row.code, count = row.count }
+			else
+				Items.Add(inv, row.code, row.count)
+			end
+		end
+	end
+	state.inventory = inv
+
+	local character = player:GetControlledCharacter()
+	if character and character:IsValid() then
+		applyClass(character, state)
+		if saved.hp and saved.max_hp then
+			pcall(function()
+				character:SetMaxHealth(saved.max_hp)
+				character:SetHealth(math.max(1, math.min(saved.hp, saved.max_hp)))
+			end)
+		end
+	end
+end
+
+-- Charge le personnage du joueur depuis l'API. Si l'API ne répond pas, le joueur reste sans sauvegarde :
+-- rien n'est écrit en base tant que l'état n'a pas été chargé.
+local function loadPlayer(player)
+	local state = players[player:GetID()]
+	if not state then
+		return
+	end
+	-- Sans sauvegarde disponible, le joueur joue quand même : on ouvre l'écran de bienvenue sans enregistrement.
+	local function giveUp(reason)
+		if not player:IsValid() or players[player:GetID()] ~= state then
+			return
+		end
+		Console.Warn("[kimetsu-api] " .. reason .. " : jeu sans sauvegarde pour " .. player:GetName())
+		if state.welcomePending then
+			state.welcomePending = nil
+			sendState(player)
+			sendRemote(player, "wakfu:openWelcome")
+			pcall(function() Chat.SendMessage(player, "Sauvegarde indisponible : ta progression ne sera pas enregistrée") end)
+		end
+	end
+	if not state.steam or not Persistence.Enabled() then
+		return giveUp("pas de sauvegarde configurée")
+	end
+	Persistence.Login(state.steam, player:GetName(), function(ok)
+		if not ok then
+			return giveUp("connexion à l'API impossible")
+		end
+		if not player:IsValid() or players[player:GetID()] ~= state then
+			return
+		end
+		Persistence.Load(state.steam, function(okLoad, data)
+			if not okLoad or not data then
+				return giveUp("chargement impossible")
+			end
+			if not player:IsValid() or players[player:GetID()] ~= state then
+				return
+			end
+			restoreFromSave(player, state, data)
+			state.loaded = true
+			state.playtimeMark = os.time() -- début du comptage du temps de jeu
+			sendState(player)
+			sendInventory(player)
+			if state.welcomePending then
+				state.welcomePending = nil
+				sendRemote(player, "wakfu:openWelcome")
+			end
+		end)
+	end)
+end
 
 local function onPlayerSpawn(player)
 	players[player:GetID()] = newState()
+	players[player:GetID()].steam = steamOf(player)
+	players[player:GetID()].player = player
 	spawnPlayer(player)
+	loadPlayer(player)
 end
+
+-- Sauvegarde périodique de tous les joueurs chargés.
+Timer.SetInterval(function()
+	for _, state in pairs(players) do
+		if state.loaded and state.player and state.player:IsValid() then
+			savePlayer(state.player)
+		end
+	end
+end, SAVE_EVERY_MS)
 
 Player.Subscribe("Spawn", onPlayerSpawn)
 
 -- Le client a fini de charger : il peut maintenant recevoir l'état pour son HUD. Un joueur qui n'a pas encore choisi son camp voit l'écran de choix.
 Player.Subscribe("Ready", function(player)
-	sendState(player)
 	local state = players[player:GetID()]
-	if state then
+	print("DBG ready state=" .. tostring(state) .. " loaded=" .. tostring(state and state.loaded))
+	if not state then
+		return
+	end
+	sendState(player)
+	-- L'écran de bienvenue attend la sauvegarde : un joueur déjà enregistré ne revoit pas le choix du camp.
+	if state.loaded or not Persistence.Enabled() then
 		sendRemote(player, "wakfu:openWelcome") -- l'écran de bienvenue ouvre ensuite le choix du camp s'il n'est pas fait
+	else
+		state.welcomePending = true
 	end
 end)
 
@@ -529,6 +734,7 @@ Player.Subscribe("Destroy", function(player)
 		leaveCreator(player)
 	end
 	interruptDevour(player)
+	savePlayer(player) -- dernière sauvegarde avant de quitter, le personnage existe encore
 	local character = player:GetControlledCharacter()
 	if character then
 		character:Destroy()
@@ -674,6 +880,12 @@ Events.SubscribeRemote("wakfu:interact", function(player)
 		return
 	end
 
+	-- Le PNJ Yushiro ouvre le panneau de sélection des trois re-rolls.
+	if Npcs.HasService(npc, "rerollselector") then
+		sendRemote(player, "wakfu:openRerollSelector")
+		return
+	end
+
 	-- Le forgeron ouvre directement la forge des lames Nichirin.
 	if Npcs.HasService(npc, "forge") then
 		sendRemote(player, "wakfu:openForge")
@@ -744,6 +956,49 @@ Events.SubscribeRemote("wakfu:reroll", function(player)
 	sendRemote(player, "wakfu:rerolled", state.stats, state.kamas)
 end)
 
+-- Reroll de capacité : une nouvelle classe remplace la voie actuelle, sans toucher au camp, au grade ou à l'équipement.
+Events.SubscribeRemote("wakfu:abilityReroll", function(player)
+	local state = players[player:GetID()]
+	local character = player:GetControlledCharacter()
+	if not state or not character or not state.camp then return sendRemote(player, "wakfu:abilityRerollFailed", "unavailable") end
+	local npc = Npcs.Nearest(toPosition(character:GetLocation()))
+	if not npc or not Npcs.HasService(npc, "rerollselector") then return sendRemote(player, "wakfu:abilityRerollFailed", "unavailable") end
+	if (state.abilityRerolls or 0) < 1 then
+		sendRemote(player, "wakfu:abilityRerollFailed", "no_reroll")
+		return
+	end
+	local remaining = Economy.Spend(state.kamas, Economy.AbilityReroll.cost)
+	if not remaining then
+		sendRemote(player, "wakfu:abilityRerollFailed", "not_enough_kamas")
+		return
+	end
+	local pool = {}
+	for name in pairs(Classes.List) do
+		if name ~= state.class and Classes.CampOf(name) == state.camp then table.insert(pool, name) end
+	end
+	if #pool == 0 then return sendRemote(player, "wakfu:abilityRerollFailed", "unavailable") end
+	state.abilityPity = state.abilityPity or {}
+	-- Une pitié qui a atteint son seuil garantit sa capacité (si elle est disponible dans le camp), sinon tirage au hasard.
+	local forced = Economy.PityGuarantee(state.abilityPity)
+	local selected
+	if forced and Classes.Get(forced) and Classes.CampOf(forced) == state.camp and forced ~= state.class then
+		selected = forced
+	else
+		selected = pool[math.random(#pool)]
+	end
+	local rarity = Classes.Get(selected).rarity or "common"
+	local won = Economy.PityCaps[selected] and selected or nil
+	state.kamas = remaining
+	state.abilityRerolls = (state.abilityRerolls or 0) - 1 -- un reroll disponible est consommé
+	Economy.UpdatePity(state.abilityPity, won)
+	state.class = selected
+	applyClass(character, state)
+	sendRemote(player, "wakfu:abilityRerolled", { class = selected, rarity = rarity, rerolls = state.abilityRerolls, pity = state.abilityPity, kamas = state.kamas })
+	sendState(player)
+	sendInventory(player)
+	notice(player, "Nouvelle capacité : " .. Classes.Get(selected).name)
+end)
+
 -- Choix de classe, effectif à la prochaine réapparition.
 Events.SubscribeRemote("wakfu:chooseClass", function(player, className)
 	local state = players[player:GetID()]
@@ -751,6 +1006,7 @@ Events.SubscribeRemote("wakfu:chooseClass", function(player, className)
 	if state and type(className) == "string" and Classes.Get(className) and state.camp and Classes.CampOf(className) == state.camp then
 		state.class = className
 		sendState(player)
+		persistDirty(player)
 	end
 end)
 
@@ -785,6 +1041,10 @@ Events.SubscribeRemote("wakfu:create", function(player, className, gender, color
 
 	applyClass(character, state)
 	sendState(player)
+	persistDirty(player)
+	if state.characterId then
+		Persistence.SaveAppearance(state)
+	end
 end)
 
 -- Créateur : le personnage monte sur une plateforme bleue haut dans le ciel, loin de tout décor,
@@ -1063,6 +1323,7 @@ end)
 local function applyCamp(player, state, camp)
 	local def = Classes.Camps[camp]
 	state.camp = camp
+	state.abilityRerolls = 1 -- un reroll offert à la création du personnage
 	state.class = def.defaultClass
 	state.demon = camp == "demon" and Demon.New(Config.Demon) or nil
 	state.cycledWeapon = nil
@@ -1072,6 +1333,19 @@ local function applyCamp(player, state, camp)
 	end
 	sendState(player)
 	sendInventory(player)
+	-- Premier choix de camp : le personnage est créé en base, puis sauvegardé comme les autres changements.
+	if state.loaded and not state.characterId and state.steam then
+		Persistence.CreateCharacter(state.steam, {
+			name = player:GetName(),
+			faction_id = Persistence.FactionOfCamp[camp],
+			job = state.class,
+		}, function(characterId)
+			if characterId and players[player:GetID()] == state then
+				state.characterId = characterId
+				persistDirty(player)
+			end
+		end)
+	end
 end
 
 Events.SubscribeRemote("wakfu:chooseCamp", function(player, camp)
@@ -1309,4 +1583,34 @@ Events.Subscribe("Wakfu:ResetCamp", function(player)
 	end
 	sendState(player)
 	sendRemote(player, "wakfu:openCamp")
+end)
+
+-- Commandes admin (nanos-admin/Server/KimetsuCommands.lua) : rerolls et changement de camp.
+Events.Subscribe("Kimetsu:Admin:GiveRerolls", function(player, amount)
+	local state = players[player:GetID()]
+	if not state or not state.loaded or type(amount) ~= "number" then
+		return
+	end
+	state.abilityRerolls = math.max(0, (state.abilityRerolls or 0) + amount)
+	persistDirty(player)
+	sendState(player)
+end)
+
+-- Changer de camp : la classe revient à la voie par défaut du nouveau camp ; le personnage garde son nom, son apparence et son équipement.
+Events.Subscribe("Kimetsu:Admin:SetCamp", function(player, camp)
+	local state = players[player:GetID()]
+	if not state or not state.loaded or not Classes.Camps[camp] or state.camp == camp then
+		return
+	end
+	state.camp = camp
+	state.class = Classes.Camps[camp].defaultClass
+	state.demon = camp == "demon" and Demon.New(Config.Demon) or nil
+	state.cycledWeapon = nil
+	local character = player:GetControlledCharacter()
+	if character and character:IsValid() then
+		applyClass(character, state)
+	end
+	persistDirty(player)
+	sendState(player)
+	sendInventory(player)
 end)
