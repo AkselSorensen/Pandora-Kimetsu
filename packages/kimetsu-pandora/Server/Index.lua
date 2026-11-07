@@ -777,7 +777,55 @@ Character.Subscribe("TakeDamage", function(character)
 end)
 
 -- Mort d'un joueur : le tueur avance ses quêtes, la victime réapparaît après un délai.
+-- Passants de test : PNJ qui se baladent, ont des PV, meurent et laissent un cadavre que le démon peut dévorer.
+local wanderers = {} -- id du personnage -> { home = point d'origine, character = personnage }
+
+local function wandererAt(home)
+	local character = Character(home, Rotator(0, math.random(0, 359), 0), Config.Wanderers.mesh)
+	character:SetMaxHealth(Config.Wanderers.hp)
+	character:SetHealth(Config.Wanderers.hp)
+	character:SetValue("wanderer", true, true)
+	wanderers[character:GetID()] = { home = home, character = character }
+	return character
+end
+
+local function spawnWanderers()
+	for _ = 1, Config.Wanderers.count do
+		local point = Config.SpawnPoints[math.random(#Config.SpawnPoints)]
+		wandererAt(Vector(point.x + math.random(-800, 800), point.y + math.random(-800, 800), point.z))
+	end
+end
+
+-- Les passants se baladent autour de leur point d'origine.
+Timer.SetInterval(function()
+	for _, w in pairs(wanderers) do
+		if w.character:IsValid() and not w.character:IsDead() then
+			local r = Config.Wanderers.radius
+			local target = w.home + Vector(math.random(-r, r), math.random(-r, r), 0)
+			pcall(function() w.character:MoveTo(target, 150) end)
+		end
+	end
+end, Config.Wanderers.moveSeconds * 1000)
+
+-- Mort d'un passant : son cadavre reste au sol (mangeable comme les autres), puis un nouveau passant revient à son point d'origine.
+local function wandererDied(character)
+	local id = character:GetID()
+	local w = wanderers[id]
+	if not w then
+		return false
+	end
+	wanderers[id] = nil
+	corpses[id] = { character = character, label = nil, name = Config.Wanderers.name, eaten = false }
+	character:SetValue("corpse", true, true)
+	Timer.SetTimeout(function() removeCorpse(id) end, Config.Corpses.lifetime * 1000)
+	Timer.SetTimeout(function() wandererAt(w.home) end, Config.Wanderers.respawnSeconds * 1000)
+	return true
+end
+
 Character.Subscribe("Death", function(character, _, _, _, _, instigator)
+	if wandererDied(character) then
+		return
+	end
 	local victim = character:GetPlayer()
 	if not victim then
 		return
@@ -1738,3 +1786,5 @@ Events.Subscribe("Kimetsu:Admin:SetLune", function(player, index)
 	persistDirty(player)
 	checkDemonGrades()
 end)
+
+spawnWanderers()

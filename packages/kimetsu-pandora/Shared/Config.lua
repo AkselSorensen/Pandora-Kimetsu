@@ -183,6 +183,9 @@ Config.Demon = {
 
 -- Cadavres : un joueur qui meurt laisse son corps au sol pendant lifetime secondes et revient au Domaine dans un nouveau corps. Un démon
 -- peut dévorer le corps (Config.Demon.sources.corpse). Un démon qui meurt part en cendres : son corps ne reste que si demonsLeaveBody.
+-- Passants de test : PNJ qui se baladent dans le Domaine, ont des PV, meurent (cadavre mangeable) et reviennent.
+Config.Wanderers = { count = 4, hp = 300, radius = 1500, moveSeconds = 12, respawnSeconds = 60, mesh = "nanos-world::SK_Male", name = "Passant" }
+
 Config.Corpses = {
 	enabled = true,
 	lifetime = 180,
