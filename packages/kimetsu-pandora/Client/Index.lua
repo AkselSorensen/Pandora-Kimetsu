@@ -778,14 +778,20 @@ Zoom.Init(function()
 	return campOpen or menuOpen or creatorOpen or inventoryOpen or rerollOpen or rerollSelectorOpen or forgeOpen or trailOpen or AnimViewer.IsOpen()
 end)
 
--- Cycle jour / nuit : le ciel suit l'heure du serveur (30 min de jour, 30 min de nuit).
-local skyReady = false
-Events.SubscribeRemote("Kimetsu:Time", function(time_of_day)
-	if not skyReady then
-		pcall(function() Sky.Spawn(true) end)
-		skyReady = true
-	end
-	local hours = math.floor(time_of_day / 100)
-	local minutes = math.floor(math.fmod(time_of_day, 100) * 60 / 100)
-	pcall(function() Sky.SetTimeOfDay(hours, minutes, 2) end)
-end)
+
+-- Cycle jour / nuit : le serveur garde l'heure. Le ciel n'est pas modifié (il écrasait l'éclairage et le brouillard de la map).
+-- Ombre : le client mesure s'il y a quelque chose au-dessus du personnage, et l'envoie au serveur.
+local function isShadedAbove()
+	local player = Client.GetLocalPlayer()
+	local character = player and player:GetControlledCharacter()
+	if not character or not character:IsValid() then return false end
+	local location = character:GetLocation()
+	local ok, result = pcall(Trace.LineSingle, location + Vector(0, 0, 90), location + Vector(0, 0, 4000),
+		CollisionChannel.WorldStatic | CollisionChannel.WorldDynamic | CollisionChannel.PhysicsBody | CollisionChannel.Vehicle,
+		TraceMode.TraceOnlyVisibility)
+	return ok and result and result.Success == true
+end
+
+Timer.SetInterval(function()
+	Events.CallRemote("Kimetsu:Shade", Reliability.Reliable, isShadedAbove())
+end, 2000)

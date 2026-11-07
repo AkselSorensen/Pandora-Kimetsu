@@ -1621,13 +1621,13 @@ end)
 
 
 -- Cycle jour / nuit : l'heure est diffusée, et les démons changent de force quand la nuit tombe ou se lève.
-local function shadedAbove(character)
-	local location = character:GetLocation()
-	local ok, result = pcall(Trace.LineSingle, location + Vector(0, 0, 90), location + Vector(0, 0, 4000),
-		CollisionChannel.WorldStatic | CollisionChannel.WorldDynamic | CollisionChannel.PhysicsBody | CollisionChannel.Vehicle,
-		TraceMode.TraceOnlyVisibility)
-	return ok and result and result.Success == true
-end
+-- L'ombre est mesurée par le client du démon (Trace n'existe pas côté serveur) et envoyée ici.
+Events.SubscribeRemote("Kimetsu:Shade", function(player, shaded)
+	local state = players[player:GetID()]
+	if state and state.camp == "demon" then
+		state.shaded = shaded == true
+	end
+end)
 
 Timer.SetInterval(function()
 	local changed = DayNight.Advance(DayNight.TICK_SECONDS)
@@ -1652,7 +1652,7 @@ Timer.SetInterval(function()
 		local player = state.player
 		if state.camp == "demon" and player and player:IsValid() then
 			local character = player:GetControlledCharacter()
-			if character and character:IsValid() and not character:IsDead() and not shadedAbove(character) then
+			if character and character:IsValid() and not character:IsDead() and not state.shaded then
 				character:ApplyDamage(DayNight.Burn.damage, "", DamageType.Unknown, Vector(0, 0, 0), nil)
 				Particle(character:GetLocation() + Vector(0, 0, 80), Rotator(), "nanos-world::P_Fire", true)
 			end
