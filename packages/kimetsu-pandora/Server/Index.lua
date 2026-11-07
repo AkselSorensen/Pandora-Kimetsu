@@ -1477,7 +1477,7 @@ local function nearestPrey(position, range)
 end
 
 local function mealLimitNotice(player, state, cap)
-	notice(player, "Limite de repas du jour atteinte (" .. state.demon.meals .. "/" .. cap .. ") : monte en grade pour en dévorer plus")
+	notice(player, "Limite de repas de l'heure atteinte (" .. state.demon.meals .. "/" .. cap .. ") : monte en grade pour en dévorer plus")
 end
 
 local function finishDevour(player, prey)

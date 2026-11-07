@@ -168,7 +168,8 @@ Config.Demon = {
 	-- Repas par jour : un démon ne dévore qu'un nombre limité de proies humaines (cadavres et civils : les sources listées dans kinds) par jour.
 	-- Le maximum monte avec le grade : perRank × numéro du grade (5 au premier grade, 10 au deuxième...), ou la liste caps (numéro du grade ->
 	-- maximum) pour fixer des valeurs à la main. dayLength = durée d'un jour en secondes réelles (86400 = 24 h).
-	meals = { dayLength = 86400, perRank = 5, caps = nil, kinds = { corpse = true, civil = true } },
+	-- Repas par heure selon le grade démon : 3 au premier rang, +1 à chaque rang (rang 13 : 15).
+	meals = { dayLength = 3600, perRank = 5, caps = { [1] = 3, [2] = 4, [3] = 5, [4] = 6, [5] = 7, [6] = 8, [7] = 9, [8] = 10, [9] = 11, [10] = 12, [11] = 13, [12] = 14, [13] = 15 }, kinds = { corpse = true, civil = true } },
 	-- Sources de puissance. heal = fraction des PV max rendue sur le coup. corpse = le corps d'un joueur mort (voir Config.Corpses) : il reste
 	-- au sol et ne coûte rien à la victime, qui est déjà revenue au Domaine ; un civil disparaît le temps de son retour ; la chasse (A7)
 	-- ajoutera ses dépouilles.
