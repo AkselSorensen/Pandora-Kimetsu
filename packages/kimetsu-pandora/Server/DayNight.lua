@@ -27,4 +27,9 @@ function DayNight.Advance(seconds)
 	return wasNight ~= DayNight.IsNight()
 end
 
+-- Force le jour (12h00) ou la nuit (minuit) ; le cycle reprend ensuite depuis cette heure.
+function DayNight.SetMode(mode)
+	DayNight.Time = (mode == "night") and 0 or 1200
+end
+
 return DayNight

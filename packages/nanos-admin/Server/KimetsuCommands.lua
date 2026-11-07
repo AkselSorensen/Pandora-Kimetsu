@@ -36,3 +36,13 @@ Admin.RegisterCommand({ log = true, name = "camp", group = "admin", usage = "<pl
     end
     say(caller, "Camp " .. camp .. " pour " .. #targets .. " joueur(s)")
 end })
+
+Admin.RegisterCommand({ log = true, name = "time", group = "admin", usage = "<day|night>",
+    help = "met le jour ou la nuit sur le serveur (le cycle reprend ensuite)", fn = function(caller, args)
+    local mode = args[1]
+    if mode ~= "day" and mode ~= "night" then
+        return say(caller, "Usage : !time <day|night>")
+    end
+    Events.Call("Kimetsu:Admin:SetTime", mode)
+    say(caller, "Il fait " .. (mode == "night" and "nuit" or "jour") .. " sur le serveur")
+end })

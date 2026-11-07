@@ -1659,3 +1659,18 @@ Timer.SetInterval(function()
 		end
 	end
 end, DayNight.Burn.interval * 1000)
+
+-- Commande admin !time (nanos-admin) : change l'heure et met à jour les démons.
+Events.Subscribe("Kimetsu:Admin:SetTime", function(mode)
+	DayNight.SetMode(mode)
+	Events.BroadcastRemote("Kimetsu:Time", Reliability.Reliable, DayNight.Time)
+	for _, state in pairs(players) do
+		local player = state.player
+		if state.loaded and state.camp == "demon" and player and player:IsValid() then
+			local character = player:GetControlledCharacter()
+			if character and character:IsValid() and not character:IsDead() then
+				applyStats(character, state, false)
+			end
+		end
+	end
+end)
