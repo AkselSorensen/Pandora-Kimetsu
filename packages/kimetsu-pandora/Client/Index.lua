@@ -800,7 +800,8 @@ end, 2000)
 local skyReady = false
 Events.SubscribeRemote("Kimetsu:Time", function(time_of_day)
 	if not skyReady then
-		pcall(function() Sky.Spawn(true) end)
+		-- false : on ne remplace pas le ciel de la map (et son éclairage), on règle seulement son heure
+		pcall(function() Sky.Spawn(false) end)
 		skyReady = true
 	end
 	local hours = math.floor(time_of_day / 100)
