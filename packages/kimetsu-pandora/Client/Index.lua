@@ -777,3 +777,15 @@ end)
 Zoom.Init(function()
 	return campOpen or menuOpen or creatorOpen or inventoryOpen or rerollOpen or rerollSelectorOpen or forgeOpen or trailOpen or AnimViewer.IsOpen()
 end)
+
+-- Cycle jour / nuit : le ciel suit l'heure du serveur (30 min de jour, 30 min de nuit).
+local skyReady = false
+Events.SubscribeRemote("Kimetsu:Time", function(time_of_day)
+	if not skyReady then
+		pcall(function() Sky.Spawn(true) end)
+		skyReady = true
+	end
+	local hours = math.floor(time_of_day / 100)
+	local minutes = math.floor(math.fmod(time_of_day, 100) * 60 / 100)
+	pcall(function() Sky.SetTimeOfDay(hours, minutes, 2) end)
+end)

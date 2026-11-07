@@ -10,7 +10,8 @@ local Items = Package.Require("Items.lua")
 local Npcs = Package.Require("Npcs.lua")
 local Quests = Package.Require("Quests.lua")
 local Ranks = Package.Require("Ranks.lua")
-local Persistence = Package.Require("Persistence.lua") -- sauvegarde via l'API Kimetsu (server/api)
+local Persistence = Package.Require("Persistence.lua")
+local DayNight = Package.Require("DayNight.lua") -- cycle jour / nuit -- sauvegarde via l'API Kimetsu (server/api)
 local Vfx = Package.Require("VfxPlan.lua")
 Package.Require("AnimViewer.lua") -- visualiseur d'animations (outil de mise au point)
 
@@ -139,7 +140,8 @@ local function applyStats(character, state, heal)
 	local class = Classes.Get(state.class)
 	local gear = Items.GearStats(state.inventory)
 	local demonHp = state.demon and Demon.Bonuses(Config.Demon, state.demon).hp or 0
-	local maxHp = math.floor((class.hp + rankOf(state).hp + demonHp + (state.stats.maxHp or 0)) * (1 + gear.endurance / 100))
+	local nightHp = (state.camp == "demon" and DayNight.IsNight()) and (1 + DayNight.DemonNight.hp / 100) or 1
+	local maxHp = math.floor((class.hp + rankOf(state).hp + demonHp + (state.stats.maxHp or 0)) * (1 + gear.endurance / 100) * nightHp)
 	local ratio = character:GetMaxHealth() > 0 and character:GetHealth() / character:GetMaxHealth() or 1
 	character:SetMaxHealth(maxHp)
 	character:SetHealth(heal and maxHp or math.max(1, math.floor(maxHp * ratio)))
@@ -712,6 +714,7 @@ Player.Subscribe("Ready", function(player)
 		return
 	end
 	sendState(player)
+	Events.CallRemote("Kimetsu:Time", player, Reliability.Reliable, DayNight.Time)
 	-- L'écran de bienvenue attend la sauvegarde : un joueur déjà enregistré ne revoit pas le choix du camp.
 	if state.loaded or not Persistence.Enabled() then
 		sendRemote(player, "wakfu:openWelcome") -- l'écran de bienvenue ouvre ensuite le choix du camp s'il n'est pas fait
@@ -837,7 +840,8 @@ Events.SubscribeRemote("wakfu:castIndex", function(player, index)
 
 	local origin = toPosition(character:GetLocation())
 	local demonPct = state.demon and Demon.Bonuses(Config.Demon, state.demon).damagePct or 0
-	local damage = Combat.Damage(spell, (state.stats.damagePct or 0) + Items.GearStats(state.inventory).force + demonPct)
+	local nightPct = (state.camp == "demon" and DayNight.IsNight()) and DayNight.DemonNight.damage or 0
+	local damage = Combat.Damage(spell, (state.stats.damagePct or 0) + Items.GearStats(state.inventory).force + demonPct + nightPct)
 	for _, target in pairs(Player.GetPairs()) do
 		local targetCharacter = target:GetControlledCharacter()
 		local targetState = players[target:GetID()]
@@ -1614,3 +1618,44 @@ Events.Subscribe("Kimetsu:Admin:SetCamp", function(player, camp)
 	sendState(player)
 	sendInventory(player)
 end)
+
+
+-- Cycle jour / nuit : l'heure est diffusée, et les démons changent de force quand la nuit tombe ou se lève.
+local function shadedAbove(character)
+	local location = character:GetLocation()
+	local ok, result = pcall(Trace.LineSingle, location + Vector(0, 0, 90), location + Vector(0, 0, 4000),
+		CollisionChannel.WorldStatic | CollisionChannel.WorldDynamic | CollisionChannel.PhysicsBody | CollisionChannel.Vehicle,
+		TraceMode.TraceOnlyVisibility)
+	return ok and result and result.Success == true
+end
+
+Timer.SetInterval(function()
+	local changed = DayNight.Advance(DayNight.TICK_SECONDS)
+	Events.BroadcastRemote("Kimetsu:Time", Reliability.Reliable, DayNight.Time)
+	if changed then
+		for _, state in pairs(players) do
+			local player = state.player
+			if state.loaded and state.camp == "demon" and player and player:IsValid() then
+				local character = player:GetControlledCharacter()
+				if character and character:IsValid() and not character:IsDead() then
+					applyStats(character, state, false)
+				end
+			end
+		end
+	end
+end, DayNight.TICK_SECONDS * 1000)
+
+-- Démons au soleil : brûlure avec flammes, sauf à l'abri (quelque chose au-dessus de la tête).
+Timer.SetInterval(function()
+	if DayNight.IsNight() then return end
+	for _, state in pairs(players) do
+		local player = state.player
+		if state.camp == "demon" and player and player:IsValid() then
+			local character = player:GetControlledCharacter()
+			if character and character:IsValid() and not character:IsDead() and not shadedAbove(character) then
+				character:ApplyDamage(DayNight.Burn.damage, "", DamageType.Unknown, Vector(0, 0, 0), nil)
+				Particle(character:GetLocation() + Vector(0, 0, 80), Rotator(), "nanos-world::P_Fire", true)
+			end
+		end
+	end
+end, DayNight.Burn.interval * 1000)
