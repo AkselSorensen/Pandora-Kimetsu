@@ -35,6 +35,7 @@
     ]
     # compatible maps - maps to be highlighted when starting a new game through main menu
     compatible_maps = [
+                            "snktest1",
 
     ]
 

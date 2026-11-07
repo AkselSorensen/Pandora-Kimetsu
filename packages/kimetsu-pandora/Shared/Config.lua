@@ -6,7 +6,7 @@ Config.Zone = "Domaine Ubuyashiki"
 
 -- Points d'apparition au Domaine (x, y, z en centimètres).
 Config.SpawnPoints = {
-	{ x = -29540, y = 340, z = 502 },
+	{ x = -29540, y = 340, z = 502 }, -- PlayerStart de snktest1 (Unreal)
 }
 
 Config.RespawnDelay = 5 -- secondes avant réapparition après la mort
