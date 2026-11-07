@@ -1306,3 +1306,6 @@ html.demon #spellbar { bottom: 46px; } /* laisse la place à la mention « Palie
 
 /* Rendu capacité aligné sur ability-reroll-preview */
 #ability-reroll{padding:3vh 3vw;background:rgba(0,0,0,.55);backdrop-filter:none}.ar-panel{width:min(1500px,94vw);max-height:92vh;overflow:auto;padding:1.2em;background:linear-gradient(#0008,#0008),url('img/reroll-background.png') center/cover}.ar-header{margin-bottom:1em}.ar-title-art{width:min(720px,75%);height:auto}.ar-layout{grid-template-columns:260px 300px minmax(420px,1fr);gap:1em;align-items:start}.ar-reel{grid-column:auto}.ar-reel-window{height:240px}.ar-pointer{top:0;bottom:0;left:50%;right:auto;width:3px;height:auto}.ar-reel-window:before,.ar-reel-window:after{top:0;bottom:auto;left:0;right:auto;width:70px;height:100%}.ar-reel-window:after{left:auto;right:0}.ar-header-actions{gap:10px}.ar-header-actions img{width:140px}.ar-profile,.ar-rarities,.ar-reel{align-self:start}
+
+/* Panneau démon (sang, chair, âmes, repas) retiré de l'HUD */
+#demon { display: none !important; }
