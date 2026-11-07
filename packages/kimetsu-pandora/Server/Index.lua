@@ -371,8 +371,12 @@ end)
 -- l'emplacement arme s'il en a une, sinon Config.Weapons.players.
 local function wantedWeapon(state)
 	local cfg = Config.Weapons
-	if not cfg.enabled or state.camp == "demon" then -- un démon se bat avec ses griffes et son sang, pas avec une lame Nichirin
+	if not cfg.enabled then
 		return false
+	end
+	if state.camp == "demon" then -- un démon se bat avec ses griffes, sauf s'il a équipé une lame
+		local blade = state.inventory.equip.weapon
+		return (blade and cfg.list[blade]) and blade or false
 	end
 	if state.cycledWeapon and cfg.list[state.cycledWeapon] then
 		return state.cycledWeapon
