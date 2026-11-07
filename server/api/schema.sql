@@ -170,6 +170,7 @@ CREATE TABLE inventory (
 
 CREATE TABLE item (
     item_id      SERIAL PRIMARY KEY,
+    code         VARCHAR(64) NOT NULL UNIQUE,  -- identifiant du jeu (ex. katana, onigiri)
     name         VARCHAR(64) NOT NULL,
     category     VARCHAR(32) NOT NULL,  -- weapon, blueprint, crate, material, ...
     rarity       VARCHAR(16),
@@ -185,7 +186,8 @@ CREATE TABLE item_instance (
     quantity      INTEGER NOT NULL DEFAULT 1,
     durability    INTEGER,
     is_equipped   BOOLEAN NOT NULL DEFAULT FALSE,
-    slot          INTEGER,
+    slot          INTEGER,                 -- position dans le sac
+    equip_slot    VARCHAR(32),             -- emplacement d équipement (NULL = dans le sac)
     source        VARCHAR(32),
     acquired_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -360,3 +362,15 @@ CREATE TABLE placed_object (
     pos_z        DOUBLE PRECISION,
     rot_yaw      DOUBLE PRECISION
 );
+
+-- Données de référence (catégories fixes du jeu).
+INSERT INTO faction (faction_id, name, description) VALUES
+    (1, 'Pourfendeurs', 'Chasseurs de démons, maîtres du souffle'),
+    (2, 'Démons', 'Créatures qui dévorent les humains')
+ON CONFLICT (faction_id) DO NOTHING;
+
+INSERT INTO currency (currency_id, code) VALUES
+    (1, 'yen'),
+    (2, 'shop_point'),
+    (3, 'faction_token')
+ON CONFLICT (currency_id) DO NOTHING;
