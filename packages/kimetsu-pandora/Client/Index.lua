@@ -30,7 +30,8 @@ end
 local dialog = nil
 
 -- HUD en HTML (Client/UI). Il ignore la souris pour ne pas gêner le jeu.
-local hud = WebUI("Kimetsu HUD", "file://UI/index.html", WidgetVisibility.VisibleNotHitTestable)
+local hud = WebUI("Kimetsu HUD", "file://UI/index-reroll.html", WidgetVisibility.VisibleNotHitTestable)
+local abilityPreview = WebUI("Ability reroll preview", "file://UI/ability-reroll-preview.html", WidgetVisibility.Hidden)
 local hudReady = false
 local pending = {}
 
@@ -425,25 +426,61 @@ end)
 -- Reroll de classe (PNJ Maître des respirations) : écran plein, sans plateforme ; le serveur applique le changement.
 local rerollOpen = false
 local rerollSelectorOpen = false
+local abilityPreviewOpen = false
 
 local function setRerollSelector(open)
-	rerollSelectorOpen = open
-	Input.SetInputEnabled(not open)
-	hud:SetVisibility(open and WidgetVisibility.Visible or WidgetVisibility.VisibleNotHitTestable)
-	Input.SetMouseEnabled(open)
-	if open then hud:SetFocus() else hud:RemoveFocus() end
-	toHud("wakfu:rerollSelectorOpen", open)
+ rerollSelectorOpen = open
+ abilityPreviewOpen = false
+ if open then rerollOpen = false end
+ abilityPreview:SetVisibility(WidgetVisibility.Hidden)
+ abilityPreview:RemoveFocus()
+ hud:SetVisibility(open and WidgetVisibility.Visible or WidgetVisibility.VisibleNotHitTestable)
+ Input.SetInputEnabled(not open)
+ Input.SetMouseEnabled(open)
+ if open then hud:SetFocus() else hud:RemoveFocus() end
+ toHud("wakfu:rerollOpen", false)
+ toHud("wakfu:rerollSelectorOpen", open)
+end
+
+local function closeRerollFlow()
+ rerollOpen = false
+ setRerollSelector(false)
+ toHud("wakfu:rerollOpen", false)
 end
 
 Events.SubscribeRemote("wakfu:openRerollSelector", function()
-	if not campOpen and not menuOpen and not creatorOpen and not inventoryOpen and not rerollOpen and not rerollSelectorOpen and not forgeOpen and not trailOpen then
-		setRerollSelector(true)
-	end
+ if not campOpen and not menuOpen and not creatorOpen and not inventoryOpen and not rerollOpen and not rerollSelectorOpen and not forgeOpen and not trailOpen then
+  setRerollSelector(true)
+ end
 end)
 
-hud:Subscribe("wakfu:rerollSelectorClose", function()
-	setRerollSelector(false)
+hud:Subscribe("wakfu:openAbilityPreview", function()
+ if not rerollSelectorOpen then return end
+ abilityPreviewOpen = true
+ hud:SetVisibility(WidgetVisibility.Hidden)
+ hud:RemoveFocus()
+ abilityPreview:SetVisibility(WidgetVisibility.Visible)
+ Input.SetInputEnabled(false)
+ Input.SetMouseEnabled(true)
+ abilityPreview:SetFocus()
 end)
+
+abilityPreview:Subscribe("wakfu:abilityPreviewBack", function()
+ if rerollSelectorOpen then setRerollSelector(true) end
+end)
+
+abilityPreview:Subscribe("wakfu:abilityPreviewClose", closeRerollFlow)
+
+Events.SubscribeRemote("wakfu:abilityRerolled", function(payload)
+ abilityPreview:CallEvent("wakfu:abilityRerolled", JSON.stringify(payload))
+end)
+Events.SubscribeRemote("wakfu:abilityRerollFailed", function(reason)
+ abilityPreview:CallEvent("wakfu:abilityRerollFailed", reason)
+end)
+abilityPreview:Subscribe("wakfu:abilityReroll", function()
+ Events.CallRemote("wakfu:abilityReroll")
+end)
+hud:Subscribe("wakfu:rerollSelectorClose", closeRerollFlow)
 
 local function setReroll(open)
 	rerollOpen = open
@@ -580,7 +617,13 @@ Input.Subscribe("KeyPress", function(key_name)
 		return false
 	end
 	if rerollSelectorOpen then
-		if key_name == "Escape" then setRerollSelector(false) end
+		if key_name == "Escape" then
+			if abilityPreviewOpen then
+				setRerollSelector(true)
+			else
+				closeRerollFlow()
+			end
+		end
 		return false
 	end
 

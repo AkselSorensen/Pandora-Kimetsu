@@ -18,6 +18,7 @@ Package.Require("AnimViewer.lua") -- visualiseur d'animations (outil de mise au 
 -- camp = "slayer" ou "demon" (nil tant que le joueur n'a pas choisi) ; demon = état du système du démon (Shared/Demon.lua), seulement pour un démon
 -- stats = bonus issus des rerolls : { maxHp, damagePct, speed }
 local players = {}
+local pendingSpawns = {}
 -- Plateformes du créateur de personnage, par joueur.
 local creatorStages = {}
 local leaveCreator -- défini plus bas, avec le reste du créateur
@@ -428,6 +429,19 @@ local function spawnPlayer(player)
 	end
 
 	local character = player:GetControlledCharacter()
+	if not character then
+		local id = player:GetID()
+		pendingSpawns[id] = (pendingSpawns[id] or 0) + 1
+		if pendingSpawns[id] <= 20 then
+			Timer.SetTimeout(function()
+				if players[id] then spawnPlayer(player) end
+			end, 250)
+			return
+		end
+		pendingSpawns[id] = nil
+	else
+		pendingSpawns[player:GetID()] = nil
+	end
 	if Config.Corpses.enabled and character and character:IsValid() and character:IsDead() and (state.camp ~= "demon" or Config.Corpses.demonsLeaveBody) then
 		leaveCorpse(player, character, state)
 		character = nil

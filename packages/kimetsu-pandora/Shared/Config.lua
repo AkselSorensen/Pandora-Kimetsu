@@ -6,9 +6,7 @@ Config.Zone = "Domaine Ubuyashiki"
 
 -- Points d'apparition au Domaine (x, y, z en centimètres).
 Config.SpawnPoints = {
-	{ x = 0, y = 0, z = 100 },
-	{ x = 1500, y = 800, z = 100 },
-	{ x = -1200, y = 600, z = 100 },
+	{ x = -29540, y = 340, z = 502 },
 }
 
 Config.RespawnDelay = 5 -- secondes avant réapparition après la mort

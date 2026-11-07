@@ -1282,6 +1282,12 @@ function renderAbility(keepReel = false, winningClass = null) {
 	$("ar-count").textContent = state.abilityRerolls || 0;
 	$("ar-class").textContent = def.name || current || "—";
 	$("ar-rarity-list").innerHTML = ABILITY_RARITIES.map(([id, label, chance, color]) => `<div class="ar-rarity rarity-${id}" style="--rarity:${color}"><b>${label}</b><small>${chance}</small><span>Pitié : ${state.abilityPity && state.abilityPity[id] || 0}</span></div>`).join("");
+	const pity = state.abilityPity || {};
+	const pityCaps = { kibutsuji: 2000, kamado: 1250, tsugikuni: 1000, rengoku: 250, tomioka: 150 };
+	document.querySelectorAll(".ar-pity-overlay [data-pity]").forEach((node) => {
+		const id = node.dataset.pity;
+		node.textContent = pityCaps[id] ? `${pity[id] || 0}/${pityCaps[id]}` : "";
+	});
 	const names = Object.keys(hud.classes || {}).filter((name) => name !== current);
 	const reel = [];
 	const reelLength = keepReel ? 38 : 18;
@@ -1311,15 +1317,13 @@ function renderAbility(keepReel = false, winningClass = null) {
 }
 
 function openAbilityReroll() {
-	$("reroll-selector").classList.add("hidden");
-	$("ability-reroll").classList.remove("hidden");
-	abilityOpen = true;
-	renderAbility();
+ Events.Call("wakfu:openAbilityPreview");
 }
 
 document.addEventListener("click", (event) => {
 	if (!$("reroll-selector").classList.contains("hidden") && event.target.closest('[data-reroll-choice="capacite"]')) return openAbilityReroll();
 	if (!abilityOpenNow()) return;
+	if (event.target.closest("#ar-back")) { abilityOpen = false; $("ability-reroll").classList.add("hidden"); $("reroll-selector").classList.remove("hidden"); return; }
 	if (event.target.closest("#ar-close")) { abilityOpen = false; $("ability-reroll").classList.add("hidden"); return Events.Call("wakfu:rerollSelectorClose"); }
 	if (event.target.closest("#ar-roll") && !abilityRolling) { abilityRolling = true; $("ar-roll").disabled = true; $("ar-result").textContent = "La roulette tourne…"; Events.Call("wakfu:abilityReroll"); }
 });

@@ -318,11 +318,11 @@
 	<!-- Reroll de capacité : roulette de classes, raretés et informations du joueur. -->
 	<div id="ability-reroll" class="hidden" aria-label="Reroll de capacité">
 		<div class="ar-panel">
-			<header class="ar-header"><div><span class="ar-eyebrow">SÉLECTION RE-ROLL</span><h2>REROLL CAPACITÉ</h2><p>La prochaine voie remplacera votre classe actuelle.</p></div><button id="ar-close" type="button">×</button></header>
+			<header class="ar-header"><img class="ar-title-art" src="img/reroll-title.png" alt="Menu reroll"><div class="ar-header-actions"><button id="ar-close" type="button" aria-label="Fermer"><img src="img/reroll-close.png" alt="Fermer"></button><button id="ar-back" type="button" aria-label="Retour"><img src="img/reroll-back.png" alt="Retour"></button></div></header>
 			<div class="ar-layout">
 				<aside class="ar-profile"><img class="ar-profile-art" src="img/reroll-slot-profile.png" alt="Profil du personnage"><div class="ar-live" aria-hidden="true"><span id="ar-name">—</span><b id="ar-level">—</b><b id="ar-time">—</b><b id="ar-money">—</b><strong id="ar-class">—</strong></div><span class="ar-reroll-count">Rerolls : <b id="ar-count">0</b></span></aside>
-				<section class="ar-rarities"><img class="ar-rarity-art" src="img/reroll-rarity-title.png" alt="Raretés et probabilités"><div id="ar-rarity-list" class="ar-rarity-live"></div></section>
-				<section class="ar-reel"><div class="ar-reel-window"><div class="ar-pointer"></div><div id="ar-reel-track"></div></div><div class="ar-result" id="ar-result">Prêt à tenter votre chance</div><div class="ar-buttons"><img src="img/reroll-buttons.png" alt=""><button id="ar-roll" type="button" aria-label="Reroll"></button><button id="ar-supply" type="button" aria-label="Approvisionner"></button></div></section>
+				<section class="ar-rarities"><img class="ar-rarity-art" src="img/reroll-rarity-title.png" alt="Raretés et probabilités"><div id="ar-rarity-list" class="ar-rarity-live"></div><div class="ar-pity-overlay" aria-label="Compteurs de pitié"><span data-pity="kibutsuji">0/2000</span><span data-pity="kamado">0/1250</span><span data-pity="tsugikuni">0/1000</span><span data-pity="rengoku">0/250</span><span data-pity="tomioka">0/150</span></div></section>
+				<section class="ar-reel"><div class="ar-reel-window"><div class="ar-pointer"></div><div id="ar-reel-track"><div class="ar-reel-card"></div><div class="ar-reel-card"></div><div class="ar-reel-card"></div><div class="ar-reel-card"></div><div class="ar-reel-card"></div></div></div><div class="ar-result" id="ar-result">Prêt à tenter votre chance</div><div class="ar-buttons"><img src="img/reroll-buttons.png" alt=""><button id="ar-roll" type="button" aria-label="Reroll"></button><button id="ar-supply" type="button" aria-label="Approvisionner"></button></div></section>
 			</div>
 		</div>
 	</div>
