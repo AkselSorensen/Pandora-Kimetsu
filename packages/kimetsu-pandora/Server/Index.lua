@@ -596,7 +596,7 @@ local function restoreFromSave(player, state, data)
 	end
 	state.characterId = saved.character_id
 	state.camp = Persistence.CampOfFaction[saved.faction_id] or state.camp
-	state.demon = state.camp == "demon" and Demon.New(Config.Demon) or nil
+	state.demon = state.camp == "demon" and Demon.New(Config.Demon, Demon.StartingSouls(Config.Demon, Classes.Get(state.class).rarity)) or nil
 	if saved.job and Classes.Get(saved.job) then
 		state.class = saved.job
 	end
@@ -611,6 +611,9 @@ local function restoreFromSave(player, state, data)
 	state.playtimeBase = data.playtime or 0
 	if state.demon then
 		state.demon.totalMeals = (saved.game and saved.game.totalMeals) or 0
+		if saved.game and saved.game.souls then
+			state.demon.souls = saved.game.souls
+		end
 	end
 	state.lune = saved.game and saved.game.lune or nil
 	local game = saved.game or {}
@@ -1347,7 +1350,7 @@ local function applyCamp(player, state, camp)
 	state.camp = camp
 	state.abilityRerolls = 1 -- un reroll offert à la création du personnage
 	state.class = def.defaultClass
-	state.demon = camp == "demon" and Demon.New(Config.Demon) or nil
+	state.demon = camp == "demon" and Demon.New(Config.Demon, Demon.StartingSouls(Config.Demon, Classes.Get(state.class).rarity)) or nil
 	state.cycledWeapon = nil
 	local character = player:GetControlledCharacter()
 	if character and character:IsValid() then
@@ -1544,7 +1547,7 @@ Events.SubscribeRemote("wakfu:devour", function(player)
 	devouring[id] = run
 	-- Le HUD montre le gain attendu (jauges hachurées, pastille) : chair, âmes, PV rendus en % des PV max, XP.
 	local source = cfg.sources[prey.kind]
-	sendRemote(player, "wakfu:devourStart", prey.name, cfg.devour.seconds, { flesh = source.flesh, souls = source.souls, heal = math.floor(source.heal * 100 + 0.5), xp = source.xp or 0 })
+	sendRemote(player, "wakfu:devourStart", prey.name, cfg.devour.seconds, { flesh = source.flesh, souls = math.floor((source.souls[1] + source.souls[2]) / 2), heal = math.floor(source.heal * 100 + 0.5), xp = source.xp or 0 })
 	eatingPose(character, true)
 	run.timer = Timer.SetInterval(function()
 		if not player:IsValid() then
@@ -1626,7 +1629,7 @@ Events.Subscribe("Kimetsu:Admin:SetCamp", function(player, camp)
 	end
 	state.camp = camp
 	state.class = Classes.Camps[camp].defaultClass
-	state.demon = camp == "demon" and Demon.New(Config.Demon) or nil
+	state.demon = camp == "demon" and Demon.New(Config.Demon, Demon.StartingSouls(Config.Demon, Classes.Get(state.class).rarity)) or nil
 	state.cycledWeapon = nil
 	local character = player:GetControlledCharacter()
 	if character and character:IsValid() then

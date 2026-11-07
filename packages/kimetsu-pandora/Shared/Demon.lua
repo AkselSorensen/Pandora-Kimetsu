@@ -12,9 +12,15 @@ local function settings(cfg)
 end
 
 -- État d'un démon qui vient de naître : plein de sang, sans chair ni âmes, pas de combat récent.
-function Demon.New(cfg)
+-- Âmes de départ selon la rareté du pouvoir : cfg.souls.start × son facteur (1 si la rareté est inconnue).
+function Demon.StartingSouls(cfg, rarity)
 	cfg = settings(cfg)
-	return { blood = cfg.blood.max, flesh = 0, souls = 0, sinceFed = 0, sinceCombat = cfg.combatSeconds, meals = 0, dayElapsed = 0 }
+	return math.floor(cfg.souls.start * (cfg.souls.rarityFactor[rarity or "common"] or 1))
+end
+
+function Demon.New(cfg, startSouls)
+	cfg = settings(cfg)
+	return { blood = cfg.blood.max, flesh = 0, souls = startSouls or 0, sinceFed = 0, sinceCombat = cfg.combatSeconds, meals = 0, dayElapsed = 0 }
 end
 
 -- Nombre maximal de repas (proies humaines : cadavres et civils) par jour pour un grade : cfg.meals.caps[grade] si la liste le donne, sinon
@@ -101,14 +107,15 @@ function Demon.Consume(cfg, demon, kind)
 	end
 	local before = Demon.Tier(cfg, demon.souls)
 	demon.flesh = math.min(cfg.flesh.max, demon.flesh + source.flesh)
-	demon.souls = math.min(cfg.souls.max, demon.souls + source.souls)
+	local gained = type(source.souls) == "table" and math.random(source.souls[1], source.souls[2]) or (source.souls or 0)
+	demon.souls = math.min(cfg.souls.max, demon.souls + gained)
 	demon.sinceFed = 0
 	if cfg.meals.kinds[kind] then
 		demon.meals = demon.meals + 1
 		demon.totalMeals = (demon.totalMeals or 0) + 1 -- compteur à vie (grades démon)
 	end
 	local after = Demon.Tier(cfg, demon.souls)
-	return { flesh = source.flesh, souls = source.souls, heal = source.heal, xp = source.xp or 0, tier = after, tierUp = after > before }
+	return { flesh = source.flesh, souls = gained, heal = source.heal, xp = source.xp or 0, tier = after, tierUp = after > before }
 end
 
 -- Fait avancer le temps de dt secondes : le sang remonte, la chair se vide, la faim ronge la puissance et la régénération passive soigne.
@@ -128,15 +135,7 @@ function Demon.Tick(cfg, demon, dt, opts)
 	demon.flesh = math.max(0, demon.flesh - cfg.flesh.decayPerSecond * dt)
 
 	-- Faim : trop longtemps sans repas, la puissance retombe d'un palier (au seuil du palier précédent), puis le délai repart.
-	local hunger
-	if demon.sinceFed >= cfg.souls.hungerSeconds then
-		demon.sinceFed = 0
-		local tier = Demon.Tier(cfg, demon.souls)
-		if tier > 1 then
-			demon.souls = cfg.tiers[tier - 1].souls
-			hunger = { from = tier, to = tier - 1 }
-		end
-	end
+	local hunger = nil -- plus de baisse par la faim : les âmes s'accumulent
 
 	-- Régénération passive, seulement hors combat et hors soleil. La chair l'amplifie, la faim l'étouffe.
 	local heal = 0

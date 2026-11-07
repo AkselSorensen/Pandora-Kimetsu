@@ -154,14 +154,15 @@ Config.Demon = {
 	-- Chair : jauge qui nourrit la régénération et se vide avec le temps.
 	flesh = { max = 100, decayPerSecond = 0.4 },
 	-- Âmes : puissance durable, par paliers. Sans repas pendant hungerSeconds, la puissance retombe d'un palier.
-	souls = { max = 120, hungerSeconds = 240 },
+	-- Âmes : départ à `start` (× le facteur de la rareté du pouvoir), plafond `max`. Elles ne baissent plus avec la faim.
+	souls = { start = 300, max = 5000, rarityFactor = { common = 1, rare = 1.5, epic = 2, mythic = 3, pandorium = 4 } },
 	-- Paliers de puissance : seuil d'âmes, bonus de PV max, de dégâts (%) et de régénération (fraction des PV max par seconde).
 	tiers = {
 		{ name = "Errant affamé", souls = 0, hp = 0, damagePct = 0, regen = 0 },
-		{ name = "Chasseur de nuit", souls = 10, hp = 80, damagePct = 6, regen = 0.003 },
-		{ name = "Prédateur", souls = 30, hp = 180, damagePct = 12, regen = 0.006 },
-		{ name = "Seigneur de sang", souls = 60, hp = 300, damagePct = 20, regen = 0.009 },
-		{ name = "Lune de sang", souls = 100, hp = 450, damagePct = 30, regen = 0.012 },
+		{ name = "Chasseur de nuit", souls = 500, hp = 80, damagePct = 6, regen = 0.003 },
+		{ name = "Prédateur", souls = 1000, hp = 180, damagePct = 12, regen = 0.006 },
+		{ name = "Seigneur de sang", souls = 1800, hp = 300, damagePct = 20, regen = 0.009 },
+		{ name = "Lune de sang", souls = 2800, hp = 450, damagePct = 30, regen = 0.012 },
 	},
 	-- Techniques verrouillées : numéro de la technique -> palier requis.
 	unlock = { [4] = 4 },
@@ -174,9 +175,9 @@ Config.Demon = {
 	-- au sol et ne coûte rien à la victime, qui est déjà revenue au Domaine ; un civil disparaît le temps de son retour ; la chasse (A7)
 	-- ajoutera ses dépouilles.
 	sources = {
-		corpse = { flesh = 50, souls = 6, heal = 0.2, xp = 20 },
-		civil = { flesh = 40, souls = 4, heal = 0.15, xp = 15 },
-		hunt = { flesh = 15, souls = 2, heal = 0.05, xp = 8 },
+		corpse = { flesh = 50, souls = { 8, 15 }, heal = 0.2, xp = 20 }, -- âmes : un tirage entre les deux bornes
+		civil = { flesh = 40, souls = { 5, 10 }, heal = 0.15, xp = 15 },
+		hunt = { flesh = 15, souls = { 2, 4 }, heal = 0.05, xp = 8 },
 	},
 }
 
