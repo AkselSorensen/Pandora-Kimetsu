@@ -155,7 +155,7 @@ Config.Demon = {
 	flesh = { max = 100, decayPerSecond = 0.4 },
 	-- Âmes : puissance durable, par paliers. Sans repas pendant hungerSeconds, la puissance retombe d'un palier.
 	-- Âmes : départ à `start` (× le facteur de la rareté du pouvoir), plafond `max`. Elles ne baissent plus avec la faim.
-	souls = { start = 300, max = 5000, rarityFactor = { common = 1, rare = 1.5, epic = 2, mythic = 3, pandorium = 4 } },
+	souls = { start = 300, max = 5000, rarityFactor = Package.Require("Rarities.lua").Factors },
 	-- Paliers de puissance : seuil d'âmes, bonus de PV max, de dégâts (%) et de régénération (fraction des PV max par seconde).
 	tiers = {
 		{ name = "Errant affamé", souls = 0, hp = 0, damagePct = 0, regen = 0 },
