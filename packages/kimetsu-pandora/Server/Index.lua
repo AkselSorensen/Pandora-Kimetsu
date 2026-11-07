@@ -590,6 +590,10 @@ local function restoreFromSave(player, state, data)
 	if saved.job and Classes.Get(saved.job) then
 		state.class = saved.job
 	end
+	-- La voie doit appartenir au camp : sinon on prend la voie de départ de ce camp.
+	if state.camp and Classes.CampOf(state.class) ~= state.camp then
+		state.class = Classes.Camps[state.camp].defaultClass
+	end
 	if saved.name and saved.name ~= "" then
 		state.nick = saved.name
 	end

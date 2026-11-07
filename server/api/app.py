@@ -119,6 +119,7 @@ def create_character(steam_id: str, body: CharacterIn, conn=Depends(db)):
 
 class StateIn(BaseModel):
     name: str | None = None
+    faction_id: int | None = None
     game: dict | None = None
     job: str | None = None
     hp: int | None = None

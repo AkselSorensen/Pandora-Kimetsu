@@ -108,6 +108,7 @@ function Persistence.SaveCharacter(state, character)
 	Persistence.Request("PUT", "/characters/" .. state.characterId .. "/state", {
 		name = state.nick,
 		job = state.class,
+		faction_id = Persistence.FactionOfCamp[state.camp],
 		hp = hp,
 		max_hp = maxHp,
 		level = state.level or 1,
