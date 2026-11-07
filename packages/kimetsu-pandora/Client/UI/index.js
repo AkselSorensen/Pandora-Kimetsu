@@ -1148,8 +1148,15 @@ Events.Subscribe("wakfu:devourStop", stopDevour);
 // (il ne sera cumulé qu'avec la sauvegarde des joueurs, tâche B1).
 const welcomeSince = Date.now();
 
+// Temps de jeu total (serveur) : valeur reçue, plus le temps écoulé depuis sa réception.
+let playtimeAt = Date.now();
+Events.Subscribe("wakfu:state", () => { playtimeAt = Date.now(); });
+
 function formatSessionTime() {
-	const minutes = Math.floor((Date.now() - welcomeSince) / 60000);
+	const total = hud.state && typeof hud.state.playtime === "number"
+		? hud.state.playtime + Math.floor((Date.now() - playtimeAt) / 1000)
+		: Math.floor((Date.now() - welcomeSince) / 1000);
+	const minutes = Math.floor(total / 60);
 	return minutes >= 60 ? Math.floor(minutes / 60) + "h " + (minutes % 60) + "m" : minutes + "m";
 }
 
@@ -1280,6 +1287,7 @@ function renderAbility(keepReel = false, winningClass = null) {
 	$("ar-time").textContent = state.playtime || "—";
 	$("ar-money").textContent = String(state.kamas || 0).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ¥";
 	$("ar-count").textContent = state.abilityRerolls || 0;
+	if ($("ar-header-count")) $("ar-header-count").textContent = state.abilityRerolls || 0;
 	$("ar-class").textContent = def.name || current || "—";
 	$("ar-rarity-list").innerHTML = ABILITY_RARITIES.map(([id, label, chance, color]) => `<div class="ar-rarity rarity-${id}" style="--rarity:${color}"><b>${label}</b><small>${chance}</small><span>Pitié : ${state.abilityPity && state.abilityPity[id] || 0}</span></div>`).join("");
 	const pity = state.abilityPity || {};
@@ -1331,6 +1339,12 @@ document.addEventListener("click", (event) => {
 Events.Subscribe("wakfu:abilityRerolled", (result) => {
 	$("ar-result").textContent = "La roulette tourne…";
 	window.__abilityRarity = result.rarity || "common";
+	// Le résultat arrive avant l'état complet : on applique tout de suite le solde et les pitiés reçus.
+	if (hud.state) {
+		if (typeof result.rerolls === "number") hud.state.abilityRerolls = result.rerolls;
+		if (result.pity) hud.state.abilityPity = result.pity;
+		if (typeof result.kamas === "number") hud.state.kamas = result.kamas;
+	}
 	renderAbility(true, result.class);
 });
 

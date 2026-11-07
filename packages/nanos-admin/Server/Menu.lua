@@ -1,7 +1,7 @@
 -- Data and actions for the admin menu (!menu). The menu only sends command lines,
 -- and Admin.Run checks the rank exactly like for a chat command.
 
-local ACTIONS = { "kick", "mute", "unmute", "freeze", "unfreeze", "goto", "bring", "send", "slay", "hp", "god", "ungod", "ban", "unban", "announce", "setgroup", "role", "warn", "unwarn", "closereport", "log", "reports" }
+local ACTIONS = { "kick", "mute", "unmute", "freeze", "unfreeze", "goto", "bring", "send", "slay", "hp", "god", "ungod", "ban", "unban", "announce", "setgroup", "role", "warn", "unwarn", "closereport", "log", "reports", "rerolls", "camp" }
 
 local function menuData(player)
     local players = {}

@@ -576,7 +576,7 @@ end)
 
 -- Échap est bloqué (retour false) pour que le menu natif de Nanos ne s'ouvre pas à côté du nôtre.
 local function isMenuKey(key_name)
-	return key_name == "Escape" or key_name == "F10"
+	return key_name == "Escape" -- F10 reste libre : le menu admin (nanos-admin) l'utilise
 end
 
 Input.Subscribe("KeyDown", function(key_name)

@@ -4,6 +4,7 @@ Package.Require("Groups.lua")
 Package.Require("Commands.lua")
 Package.Require("Builtin.lua")
 Package.Require("Extras.lua")
+Package.Require("KimetsuCommands.lua") -- commandes Kimetsu Pandora (rerolls, camp)
 Package.Require("Menu.lua")
 
 Console.Log("[nanos-admin] loaded, type 'admin help' in the console or !help in the chat")

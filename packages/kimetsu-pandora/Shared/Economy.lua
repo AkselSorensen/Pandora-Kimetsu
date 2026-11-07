@@ -41,4 +41,32 @@ function Economy.Reward(kamas, amount)
 	return kamas + amount
 end
 
+-- Pitié du reroll de capacité : une pitié par capacité de la liste (celles de l'interface). Chaque reroll :
+-- la capacité obtenue repart à zéro, toutes les autres gagnent +1. Une pitié qui atteint son seuil garantit sa capacité.
+Economy.PityOrder = { "kibutsuji", "kamado", "tsugikuni", "rengoku", "tomioka" }
+Economy.PityCaps = { kibutsuji = 2000, kamado = 1250, tsugikuni = 1000, rengoku = 250, tomioka = 150 }
+
+-- Capacité garantie au prochain reroll (la première dont la pitié a atteint son seuil), sinon nil.
+function Economy.PityGuarantee(pity)
+	pity = pity or {}
+	for _, name in ipairs(Economy.PityOrder) do
+		if (pity[name] or 0) >= Economy.PityCaps[name] then
+			return name
+		end
+	end
+	return nil
+end
+
+-- Après un reroll : `won` est la capacité pitiable obtenue (ou nil si ce n'en est pas une).
+function Economy.UpdatePity(pity, won)
+	for _, name in ipairs(Economy.PityOrder) do
+		if name == won then
+			pity[name] = 0
+		else
+			pity[name] = (pity[name] or 0) + 1
+		end
+	end
+	return pity
+end
+
 return Economy
