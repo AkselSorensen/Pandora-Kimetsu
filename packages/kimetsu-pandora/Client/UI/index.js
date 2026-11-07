@@ -62,7 +62,8 @@ const RING_LENGTH = 2 * Math.PI * 16.5;
 function renderRank() {
 	const rank = hud.state && hud.state.rank;
 	const xp = (hud.state && hud.state.xp) || 0;
-	$("rank-name").textContent = rank ? " · " + rank.name : "";
+	const souls = hud.state && hud.state.demon && typeof hud.state.demon.souls === "number" ? " · " + hud.state.demon.souls + " âmes" : "";
+	$("rank-name").textContent = (rank ? " · " + rank.name : "") + souls;
 	$("level-value").textContent = rank ? rank.index : 1;
 	const progress = rank && rank.nextXp ? Math.max(0, Math.min(1, (xp - rank.xp) / (rank.nextXp - rank.xp))) : 1;
 	document.querySelector("#level .arc").setAttribute("stroke-dasharray", `${(RING_LENGTH * progress).toFixed(1)} ${RING_LENGTH.toFixed(1)}`);
