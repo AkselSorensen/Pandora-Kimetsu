@@ -795,3 +795,15 @@ end
 Timer.SetInterval(function()
 	Events.CallRemote("Kimetsu:Shade", Reliability.Reliable, isShadedAbove())
 end, 2000)
+
+-- Ciel : suit l'heure du serveur (jour et nuit).
+local skyReady = false
+Events.SubscribeRemote("Kimetsu:Time", function(time_of_day)
+	if not skyReady then
+		pcall(function() Sky.Spawn(true) end)
+		skyReady = true
+	end
+	local hours = math.floor(time_of_day / 100)
+	local minutes = math.floor(math.fmod(time_of_day, 100) * 60 / 100)
+	pcall(function() Sky.SetTimeOfDay(hours, minutes, 2) end)
+end)

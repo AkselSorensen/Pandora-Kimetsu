@@ -1658,7 +1658,10 @@ Timer.SetInterval(function()
 			local character = player:GetControlledCharacter()
 			if character and character:IsValid() and not character:IsDead() and not state.shaded then
 				character:ApplyDamage(DayNight.Burn.damage, "", DamageType.Unknown, Vector(0, 0, 0), nil)
-				Particle(character:GetLocation() + Vector(0, 0, 80), Rotator(), "nanos-world::P_Fire", true)
+				local flame = Particle(character:GetLocation() + Vector(0, 0, 80), Rotator(), "nanos-world::P_Fire", false)
+				Timer.SetTimeout(function()
+					pcall(function() flame:Destroy() end)
+				end, DayNight.Burn.interval * 1000 + 500)
 			end
 		end
 	end
