@@ -115,6 +115,8 @@ function Persistence.SaveCharacter(state, character)
 		xp = state.xp or 0,
 		game = {
 			kamas = state.kamas,
+			totalMeals = state.demon and state.demon.totalMeals or nil,
+			lune = state.lune,
 			stats = state.stats,
 			abilityRerolls = state.abilityRerolls,
 			abilityPity = state.abilityPity,

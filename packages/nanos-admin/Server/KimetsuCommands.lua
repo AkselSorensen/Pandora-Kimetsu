@@ -46,3 +46,17 @@ Admin.RegisterCommand({ log = true, name = "time", group = "admin", usage = "<da
     Events.Call("Kimetsu:Admin:SetTime", mode)
     say(caller, "Il fait " .. (mode == "night" and "nuit" or "jour") .. " sur le serveur")
 end })
+
+Admin.RegisterCommand({ log = true, name = "lune", group = "admin", usage = "<player> <index|0>",
+    help = "attribue une Lune à un démon (index 7 à 13 : 7 = Lune Inférieure Six, 13 = Lune Supérieure Une ; 0 = retirer)", fn = function(caller, args)
+    local index = math.floor(tonumber(args[2]) or -1)
+    if index ~= 0 and (index < 7 or index > 13) then
+        return say(caller, "Usage : !lune <joueur> <7-13 ou 0>")
+    end
+    local targets, err = Admin.FindTargets(caller, args[1], { multiple = true })
+    if not targets then return say(caller, err or "Joueur introuvable") end
+    for _, p in ipairs(targets) do
+        Events.Call("Kimetsu:Admin:SetLune", p, index)
+    end
+    say(caller, "Lune " .. (index == 0 and "retirée" or ("n°" .. index .. " attribuée")) .. " pour " .. #targets .. " joueur(s)")
+end })

@@ -105,6 +105,7 @@ function Demon.Consume(cfg, demon, kind)
 	demon.sinceFed = 0
 	if cfg.meals.kinds[kind] then
 		demon.meals = demon.meals + 1
+		demon.totalMeals = (demon.totalMeals or 0) + 1 -- compteur à vie (grades démon)
 	end
 	local after = Demon.Tier(cfg, demon.souls)
 	return { flesh = source.flesh, souls = source.souls, heal = source.heal, xp = source.xp or 0, tier = after, tierUp = after > before }

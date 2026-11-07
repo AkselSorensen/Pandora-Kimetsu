@@ -100,7 +100,17 @@ local function sendInventory(player)
 end
 
 -- Grade du joueur : celui de l'échelle de son camp (pourfendeur ou démon), à défaut de celle de sa classe, pour son XP.
+local playtimeTotal -- défini plus bas, avec le temps de jeu
+
+-- Grade : un démon suit ses corps mangés et son temps de jeu (ou la Lune attribuée par un admin) ; les autres suivent l'XP.
 local function rankOf(state)
+	if state.camp == "demon" then
+		if state.lune then
+			return Ranks.At("demon", state.lune)
+		end
+		local meals = state.demon and state.demon.totalMeals or 0
+		return Ranks.At("demon", Ranks.DemonAutoIndex(meals, playtimeTotal(state) or 0))
+	end
 	local camp = state.camp and Classes.Camps[state.camp]
 	return Ranks.Get(camp and camp.ladder or Classes.Get(state.class).ladder, state.xp)
 end
@@ -120,7 +130,7 @@ end
 
 -- Envoie au client ce que le HUD affiche : classe, grade, yens, bonus et quêtes.
 -- Temps de jeu total du joueur (secondes) : celui de la base, plus la session en cours. nil tant que l'état n'est pas chargé.
-local function playtimeTotal(state)
+playtimeTotal = function(state)
 	if not state.loaded then
 		return nil
 	end
@@ -599,6 +609,10 @@ local function restoreFromSave(player, state, data)
 	end
 	state.xp = saved.xp or 0
 	state.playtimeBase = data.playtime or 0
+	if state.demon then
+		state.demon.totalMeals = (saved.game and saved.game.totalMeals) or 0
+	end
+	state.lune = saved.game and saved.game.lune or nil
 	local game = saved.game or {}
 	state.kamas = game.kamas or state.kamas
 	state.stats = game.stats or {}
@@ -1680,4 +1694,44 @@ Events.Subscribe("Kimetsu:Admin:SetTime", function(mode)
 			end
 		end
 	end
+end)
+
+-- Grade démon : la montée est automatique (corps mangés et temps de jeu), contrôlée toutes les 30 secondes.
+local function checkDemonGrades()
+	for _, state in pairs(players) do
+		local player = state.player
+		if state.loaded and state.camp == "demon" and player and player:IsValid() then
+			local grade = rankOf(state)
+			if state.gradeIndex ~= grade.index then
+				local old = state.gradeIndex
+				state.gradeIndex = grade.index
+				local character = player:GetControlledCharacter()
+				if character and character:IsValid() and not character:IsDead() then
+					applyStats(character, state, false)
+				end
+				sendState(player)
+				if old then
+					pcall(function() Chat.SendMessage(player, "Nouveau grade : " .. grade.name) end)
+				end
+			end
+		end
+	end
+end
+Timer.SetInterval(checkDemonGrades, 30000)
+
+-- Commande admin !lune (nanos-admin) : attribue une Lune (index dans l'échelle démon) ; 0 la retire.
+Events.Subscribe("Kimetsu:Admin:SetLune", function(player, index)
+	local state = players[player:GetID()]
+	if not state or not state.loaded or state.camp ~= "demon" then return end
+	local steps = Ranks.Ladders.demon
+	if index == 0 then
+		state.lune = nil
+	elseif type(index) == "number" and steps[index] and steps[index].manual then
+		state.lune = index
+	else
+		return
+	end
+	state.gradeIndex = nil
+	persistDirty(player)
+	checkDemonGrades()
 end)
