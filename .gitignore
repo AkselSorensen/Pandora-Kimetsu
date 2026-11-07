@@ -42,3 +42,6 @@ Thumbs.db
 
 # Sauvegardes locales
 *.bak-*
+
+# Clé secrète de l'API (copie de ServerConfig.example.lua)
+packages/kimetsu-pandora/Server/ServerConfig.lua
