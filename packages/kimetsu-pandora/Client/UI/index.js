@@ -1257,3 +1257,83 @@ document.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
 	if (!$("reroll-selector").classList.contains("hidden") && event.key === "Escape") Events.Call("wakfu:rerollSelectorClose");
 });
+
+// Reroll de capacité : roulette visuelle, le tirage réel reste validé par le serveur.
+const ABILITY_RARITIES = [
+	["common", "COMMUN", "92%", "#aeb4ba"],
+	["rare", "RARE", "7%", "#168de2"],
+	["epic", "ÉPIQUE", "0,9%", "#9b45e8"],
+	["mythic", "MYTHIQUE", "0,1%", "#e52d38"],
+	["pandorium", "PANDORIUM", "à venir", "#111"],
+];
+let abilityOpen = false;
+let abilityRolling = false;
+
+function abilityOpenNow() { return !$("ability-reroll").classList.contains("hidden"); }
+function renderAbility(keepReel = false, winningClass = null) {
+	const state = hud.state || {};
+	const current = state.class || "";
+	const def = hud.classes[current] || {};
+	$("ar-avatar").textContent = def.glyph || current.charAt(0) || "?";
+	$("ar-name").textContent = state.name || "Joueur";
+	$("ar-level").textContent = state.rank && state.rank.name ? state.rank.name : "—";
+	$("ar-time").textContent = state.playtime || "—";
+	$("ar-money").textContent = String(state.kamas || 0).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ¥";
+	$("ar-count").textContent = state.abilityRerolls || 0;
+	$("ar-class").textContent = def.name || current || "—";
+	$("ar-rarity-list").innerHTML = ABILITY_RARITIES.map(([id, label, chance, color]) => `<div class="ar-rarity rarity-${id}" style="--rarity:${color}"><b>${label}</b><small>${chance}</small><span>Pitié : ${state.abilityPity && state.abilityPity[id] || 0}</span></div>`).join("");
+	const names = Object.keys(hud.classes || {}).filter((name) => name !== current);
+	const reel = [];
+	const reelLength = keepReel ? 38 : 18;
+	const winningIndex = keepReel ? 34 : -1;
+	for (let i = 0; i < reelLength; i++) reel.push(i === winningIndex ? winningClass : (names[i % Math.max(1, names.length)] || current || "?"));
+	const track = $("ar-reel-track");
+	track.classList.remove("rolling");
+	track.style.removeProperty("--roll-end");
+	track.style.transform = "translateX(0)";
+	track.innerHTML = reel.map((name) => `<div class="ar-reel-card"><b>${escapeHtml((hud.classes[name] || {}).glyph || "?")}</b><span>${escapeHtml((hud.classes[name] || {}).name || name)}</span></div>`).join("");
+	if (keepReel && winningClass) {
+		const winner = track.children[winningIndex];
+		const viewport = track.parentElement.clientWidth;
+		const finalX = Math.round(viewport / 2 - (winner.offsetLeft + winner.offsetWidth / 2));
+		track.style.setProperty("--roll-end", `${finalX}px`);
+		void track.offsetWidth;
+		track.classList.add("rolling");
+		setTimeout(() => {
+			track.classList.remove("rolling");
+			track.style.transform = `translateX(${finalX}px)`;
+			const rarity = ABILITY_RARITIES.find(([id]) => id === (window.__abilityRarity || "common")) || ABILITY_RARITIES[0];
+			$("ar-result").innerHTML = `Nouvelle classe : ${escapeHtml((hud.classes[winningClass] || {}).name || winningClass)} <span class="ar-result-rarity" style="color:${rarity[3]}">(${rarity[1]})</span>`;
+			abilityRolling = false;
+			$("ar-roll").disabled = false;
+		}, 18000);
+	}
+}
+
+function openAbilityReroll() {
+	$("reroll-selector").classList.add("hidden");
+	$("ability-reroll").classList.remove("hidden");
+	abilityOpen = true;
+	renderAbility();
+}
+
+document.addEventListener("click", (event) => {
+	if (!$("reroll-selector").classList.contains("hidden") && event.target.closest('[data-reroll-choice="capacite"]')) return openAbilityReroll();
+	if (!abilityOpenNow()) return;
+	if (event.target.closest("#ar-close")) { abilityOpen = false; $("ability-reroll").classList.add("hidden"); return Events.Call("wakfu:rerollSelectorClose"); }
+	if (event.target.closest("#ar-roll") && !abilityRolling) { abilityRolling = true; $("ar-roll").disabled = true; $("ar-result").textContent = "La roulette tourne…"; Events.Call("wakfu:abilityReroll"); }
+});
+
+Events.Subscribe("wakfu:abilityRerolled", (result) => {
+	$("ar-result").textContent = "La roulette tourne…";
+	window.__abilityRarity = result.rarity || "common";
+	renderAbility(true, result.class);
+});
+
+document.addEventListener("keydown", (event) => {
+	if (abilityOpenNow() && event.key === "Escape") {
+		$("ability-reroll").classList.add("hidden");
+		abilityOpen = false;
+		Events.Call("wakfu:rerollSelectorClose");
+	}
+});

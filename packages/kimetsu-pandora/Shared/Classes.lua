@@ -182,6 +182,8 @@ Classes.Camps = {
 		color = "#2f8fd0",
 		ladder = "slayer",
 		defaultClass = "Eau",
+		cardTitle = "POURFENDEURS", -- textes exacts de la carte de l'écran de choix de faction (planche Figma)
+		cardText = "Les pourfendeurs sont des chasseurs de démons membre de l'Armée des pourfendeurs de démons.",
 		blurb = "Tu rejoins le Corps des Pourfendeurs de démons : une lame Nichirin, un souffle à maîtriser et la nuit à tenir jusqu'à l'aube.",
 		points = {
 			"Techniques de respiration (souffles)",
@@ -196,6 +198,8 @@ Classes.Camps = {
 		color = "#c8323c",
 		ladder = "demon",
 		defaultClass = "Demon",
+		cardTitle = "DEMON",
+		cardText = "Les Démons sont des êtres nés des ténèbres, dotés d'une force surnaturelle et d'une longévité quasi immortelle.",
 		blurb = "La nuit t'appartient. Ta chair se recoud d'elle-même, tes griffes et ton sang frappent, et chaque humain dévoré te rend plus fort, jusqu'aux Lunes.",
 		points = {
 			"Régénération passive hors combat",

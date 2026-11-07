@@ -41,7 +41,7 @@ local function newState()
 	end
 	Items.Add(inventory, "onigiri", 3)
 	Items.Add(inventory, "fiole", 1)
-	return { class = Classes.Default, gender = Config.Genders[1], color = 1, skin = nil, nick = nil, cooldowns = {}, kamas = Config.StartingYens or 0, xp = 0, quests = {}, stats = {}, inventory = inventory }
+	return { class = Classes.Default, gender = Config.Genders[1], color = 1, skin = nil, nick = nil, cooldowns = {}, kamas = Config.StartingYens or 0, xp = 0, quests = {}, stats = {}, abilityRerolls = 0, abilityPity = {}, inventory = inventory }
 end
 
 local function sendRemote(player, eventName, ...)
@@ -86,7 +86,7 @@ local function sendState(player)
 	local state = players[player:GetID()]
 	if state then
 		sendInventory(player)
-		sendRemote(player, "wakfu:state", { name = state.nick or player:GetName(), gender = state.gender, color = state.color, skin = state.skin, class = state.class, camp = state.camp, demon = demonView(state), trail = state.trail or "auto", trailSize = state.trailSize or Config.Vfx.trail.defaultSize, kamas = state.kamas, xp = state.xp, rank = rankOf(state), stats = state.stats, quests = state.quests })
+		sendRemote(player, "wakfu:state", { name = state.nick or player:GetName(), gender = state.gender, color = state.color, skin = state.skin, class = state.class, camp = state.camp, demon = demonView(state), trail = state.trail or "auto", trailSize = state.trailSize or Config.Vfx.trail.defaultSize, kamas = state.kamas, xp = state.xp, rank = rankOf(state), stats = state.stats, quests = state.quests, abilityRerolls = state.abilityRerolls or 0, abilityPity = state.abilityPity or {} })
 	end
 end
 
@@ -768,6 +768,36 @@ Events.SubscribeRemote("wakfu:reroll", function(player)
 	state.stats = Economy.RollStats(math.random)
 	spawnPlayer(player)
 	sendRemote(player, "wakfu:rerolled", state.stats, state.kamas)
+end)
+
+-- Reroll de capacité : une nouvelle classe remplace la voie actuelle, sans toucher au camp, au grade ou à l'équipement.
+Events.SubscribeRemote("wakfu:abilityReroll", function(player)
+	local state = players[player:GetID()]
+	local character = player:GetControlledCharacter()
+	if not state or not character or not state.camp then return end
+	local npc = Npcs.Nearest(toPosition(character:GetLocation()))
+	if not npc or not Npcs.HasService(npc, "rerollselector") then return end
+	local remaining = Economy.Spend(state.kamas, Economy.AbilityReroll.cost)
+	if not remaining then
+		sendRemote(player, "wakfu:abilityRerollFailed", "not_enough_kamas")
+		return
+	end
+	local pool = {}
+	for name in pairs(Classes.List) do
+		if name ~= state.class and Classes.CampOf(name) == state.camp then table.insert(pool, name) end
+	end
+	if #pool == 0 then return end
+	state.kamas = remaining
+	state.abilityRerolls = (state.abilityRerolls or 0) + 1
+	state.abilityPity = state.abilityPity or {}
+	state.abilityPity.common = (state.abilityPity.common or 0) + 1
+	local selected = pool[math.random(#pool)]
+	state.class = selected
+	applyClass(character, state)
+	sendRemote(player, "wakfu:abilityRerolled", { class = selected, rarity = (Classes.Get(selected).rarity or "common"), rerolls = state.abilityRerolls, pity = state.abilityPity, kamas = state.kamas })
+	sendState(player)
+	sendInventory(player)
+	notice(player, "Nouvelle capacité : " .. Classes.Get(selected).name)
 end)
 
 -- Choix de classe, effectif à la prochaine réapparition.

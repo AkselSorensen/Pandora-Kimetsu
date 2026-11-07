@@ -314,5 +314,17 @@
 		<p class="rs-note">La sélection est visuelle pour le moment.</p>
 	</div>
 	</div>
+
+	<!-- Reroll de capacité : roulette de classes, raretés et informations du joueur. -->
+	<div id="ability-reroll" class="hidden" aria-label="Reroll de capacité">
+		<div class="ar-panel">
+			<header class="ar-header"><div><span class="ar-eyebrow">SÉLECTION RE-ROLL</span><h2>REROLL CAPACITÉ</h2><p>La prochaine voie remplacera votre classe actuelle.</p></div><button id="ar-close" type="button">×</button></header>
+			<div class="ar-layout">
+				<aside class="ar-profile"><img class="ar-profile-art" src="img/reroll-slot-profile.png" alt="Profil du personnage"><div class="ar-live" aria-hidden="true"><span id="ar-name">—</span><b id="ar-level">—</b><b id="ar-time">—</b><b id="ar-money">—</b><strong id="ar-class">—</strong></div><span class="ar-reroll-count">Rerolls : <b id="ar-count">0</b></span></aside>
+				<section class="ar-rarities"><img class="ar-rarity-art" src="img/reroll-rarity-title.png" alt="Raretés et probabilités"><div id="ar-rarity-list" class="ar-rarity-live"></div></section>
+				<section class="ar-reel"><div class="ar-reel-window"><div class="ar-pointer"></div><div id="ar-reel-track"></div></div><div class="ar-result" id="ar-result">Prêt à tenter votre chance</div><div class="ar-buttons"><img src="img/reroll-buttons.png" alt=""><button id="ar-roll" type="button" aria-label="Reroll"></button><button id="ar-supply" type="button" aria-label="Approvisionner"></button></div></section>
+			</div>
+		</div>
+	</div>
 </body>
 </html>

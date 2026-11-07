@@ -5,6 +5,13 @@ local Economy = {}
 
 Economy.RerollCost = 50
 
+-- Reroll de capacité : les classes seront affectées à une rareté définitive plus tard.
+Economy.AbilityReroll = {
+	cost = 50,
+	rarityWeights = { common = 92, rare = 7, epic = 0.9, mythic = 0.1, pandorium = 0 },
+	pity = { rare = 20, epic = 80, mythic = 250, pandorium = 2000 },
+}
+
 -- Plages de bonus possibles à chaque reroll (en pourcentage ou en points).
 Economy.RerollRanges = {
 	maxHp = { min = 0, max = 200 },
